@@ -15,7 +15,7 @@ print(res)
 # 批量（向量化）
 out = msis.calc_many(
     day=doy(2020, 7, 18),
-    utsec=seconds_of_day(12),
+    utsec=seconds_of_day(12, 0, 0),
     alt_km=[50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
     lat_deg=39.9, lon_deg=116.4, f107a=150.0, f107=150.0,
     out_numpy=False,  # True 则返回 dict of numpy arrays

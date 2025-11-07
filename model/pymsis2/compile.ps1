@@ -1,4 +1,4 @@
-<# build_nrlmsis2.ps1（稳健版）
+﻿<# build_nrlmsis2.ps1（稳健版）
    - 解决 .mod 路径与编译顺序
    - 稳定的样例/程序单元剔除（文件名模式 + program 语法探测）
 #>

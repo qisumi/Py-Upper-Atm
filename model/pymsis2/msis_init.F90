@@ -44,7 +44,7 @@
 !!! MSISINIT: Initialization of MSIS parameters, switches, and options.
 !
 !     PREREQUISITES:
-!       MSIS binary parameter file (msis2.0.parm)
+!       MSIS binary parameter file (msis2data/msis2.0.parm)
 !
 !     CALLING SEQUENCE:
 !       CALL MSISINIT([OPTIONAL ARGUMENTS])
@@ -53,7 +53,7 @@
 !       parmpath        File path pointing to the MSIS parameter file.
 !                         Default: Null string (current directory)
 !       parmfile        Name of MSIS parameter file.
-!                         Default: 'msis2.0.parm'
+!                         Default: 'msis2data/msis2.0.parm'
 !       iun             File unit number for reading parameter file.
 !                         Default: 67
 !       switch_gfn      Logical array of 512 swtiches for individual terms. For
@@ -215,7 +215,7 @@ contains
     if (present(parmfile)) then
       parmfile1 = parmfile
     else
-      parmfile1 = 'msis2.0.parm'
+      parmfile1 = 'msis2data/msis2.0.parm'
     endif
 
     ! Initialize model parameter space

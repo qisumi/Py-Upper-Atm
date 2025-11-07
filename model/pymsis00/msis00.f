@@ -210,7 +210,9 @@ C         Only calculate nodes if input changed
      $  *TN2(4)*TN2(4)/(PMA(1,3)*PAVGM(3))**2
         TN3(1)=TN2(4)
        ENDIF
-       IF(ALT.GE.ZN3(1)) GOTO 6
+C Including ZN3(1) in the jump condition creates a model coverage gap at that exact altitude
+C       IF(ALT.GE.ZN3(1)) GOTO 6  
+       IF(ALT.GT.ZN3(1)) GOTO 6
 C
 C       LOWER STRATOSPHERE AND TROPOSPHERE [below ZN3(1)]
 C         Temperature at nodes and gradients at end nodes
@@ -963,7 +965,7 @@ C-----------------------------------------------------------------------
 C       CALCULATE G(L) FUNCTION 
 C       Upper Thermosphere Parameters
       REAL LAT, LONG
-      DIMENSION P(1),SV(25),AP(1)
+      DIMENSION P(150),SV(25),AP(7)
       COMMON/TTEST/TINF,GB,ROUT,T(15)
       COMMON/CSW/SW(25),ISW,SWC(25)
       COMMON/LPOLY/PLG(9,4),CTLOC,STLOC,C2TLOC,S2TLOC,C3TLOC,S3TLOC,
@@ -1217,7 +1219,7 @@ C      VERSION OF GLOBE FOR LOWER ATMOSPHERE 10/26/99
       COMMON/LPOLY/PLG(9,4),CTLOC,STLOC,C2TLOC,S2TLOC,C3TLOC,S3TLOC,
      $ IYR,DAY,DF,DFA,APD,APDF,APT(4),LONG
       COMMON/CSW/SW(25),ISW,SWC(25)
-      DIMENSION P(1),T(14)
+      DIMENSION P(150),T(14)
       SAVE
       DATA DR/1.72142E-2/,DGTR/1.74533E-2/,PSET/2./
       DATA DAYL/-1./,P32,P18,P14,P39/4*-1000./
@@ -1662,6 +1664,10 @@ C          MSISE-00 01-FEB-02
      $ PS1(50),PS2(50),PU1(50),PU2(50),PV1(50),PV2(50),
      $ PW1(50),PW2(50),PX1(50),PX2(50),PY1(50),PY2(50),
      $ PZ1(50),PZ2(50),PAA1(50),PAA2(50)
+c CCMC 2011/03/23 Lutz Rastaetter declare some types
+      CHARACTER*4       NAME,ISTIME,ISDATE
+      INTEGER IMR
+c end CCMC
       COMMON/LOWER7/PTM(10),PDM(10,8)
       COMMON/MAVG7/PAVGM(10)
       COMMON/DATIM7/ISDATE(3),ISTIME(2),NAME(2)
@@ -2432,120 +2438,4 @@ C         MIDDLE ATMOSPHERE AVERAGES
       DATA PAVGM/
      M  2.61000E+02, 2.64000E+02, 2.29000E+02, 2.17000E+02, 2.17000E+02,
      M  2.23000E+02, 2.86760E+02,-2.93940E+00, 2.50000E+00, 0.00000E+00/
-      END
-
-
-C      TEST DRIVER FOR GTD7 (ATMOSPHERIC MODEL)
-      DIMENSION D(9,16),T(2,16),SW(25),APH(7)
-      DIMENSION IDAY(15),UT(15),ALT(15),XLAT(15),XLONG(15),XLST(15),
-     & F107A(15),F107(15),AP(15)    
-      COMMON/GTS3C/DL(16)
-      COMMON/DATIME/ISDATE(3),ISTIME(2),NAME(2)
-      DATA IDAY/172,81,13*172/
-      DATA UT/29000.,29000.,75000.,12*29000./
-      DATA ALT/400.,400.,1000.,100.,6*400.,0,10.,30.,50.,70./
-      DATA XLAT/4*60.,0.,10*60./
-      DATA XLONG/5*-70.,0.,9*-70./
-      DATA XLST/6*16.,4.,8*16./
-      DATA F107A/7*150.,70.,7*150./
-      DATA F107/8*150.,180.,6*150./
-      DATA AP/9*4.,40.,5*4./
-      DATA APH/7*100./,SW/8*1.,-1.,16*1./
-      DO I=1,15
-         CALL GTD7(IDAY(I),UT(I),ALT(I),XLAT(I),XLONG(I),XLST(I),
-     &             F107A(I),F107(I),AP(I),48,D(1,I),T(1,I))
-         WRITE(6,100) (D(J,I),J=1,9),T(1,I),T(2,I),DL
-      ENDDO
-      CALL TSELEC(SW)
-      I=16
-      CALL GTD7(IDAY(1),UT(1),ALT(1),XLAT(1),XLONG(1),XLST(1),
-     &             F107A(1),F107(1),APH,48,D(1,I),T(1,I))
-      WRITE(6,100) (D(J,I),J=1,9),T(1,I),T(2,I),DL
-      CALL GTD7(IDAY(1),UT(1),ALT(4),XLAT(1),XLONG(1),XLST(1),
-     &             F107A(1),F107(1),APH,48,D(1,I),T(1,I))
-      WRITE(6,100) (D(J,I),J=1,9),T(1,I),T(2,I),DL
-      WRITE(6,300) NAME,ISDATE,ISTIME
-      WRITE(6,200) (IDAY(I),I=1,5)
-      WRITE(6,201) (UT(I),I=1,5)
-      WRITE(6,202) (ALT(I),I=1,5)
-      WRITE(6,203) (XLAT(I),I=1,5)
-      WRITE(6,204) (XLONG(I),I=1,5)
-      WRITE(6,205) (XLST(I),I=1,5)
-      WRITE(6,206) (F107A(I),I=1,5)
-      WRITE(6,207) (F107(I),I=1,5)
-      WRITE(6,208) (AP(I),I=1,5)
-      WRITE(6,210) (T(1,I),I=1,5)
-      WRITE(6,211) (T(2,I),I=1,5)
-      WRITE(6,212) (D(1,I),I=1,5)
-      WRITE(6,213) (D(2,I),I=1,5)
-      WRITE(6,214) (D(3,I),I=1,5)
-      WRITE(6,215) (D(4,I),I=1,5)
-      WRITE(6,216) (D(5,I),I=1,5)
-      WRITE(6,217) (D(7,I),I=1,5)
-      WRITE(6,219) (D(8,I),I=1,5)
-      WRITE(6,220) (D(9,I),I=1,5)
-      WRITE(6,218) (D(6,I),I=1,5)
-      WRITE(6,200) (IDAY(I),I=6,10)
-      WRITE(6,201) (UT(I),I=6,10)
-      WRITE(6,202) (ALT(I),I=6,10)
-      WRITE(6,203) (XLAT(I),I=6,10)
-      WRITE(6,204) (XLONG(I),I=6,10)
-      WRITE(6,205) (XLST(I),I=6,10)
-      WRITE(6,206) (F107A(I),I=6,10)
-      WRITE(6,207) (F107(I),I=6,10)
-      WRITE(6,208) (AP(I),I=6,10)
-      WRITE(6,210) (T(1,I),I=6,10)
-      WRITE(6,211) (T(2,I),I=6,10)
-      WRITE(6,212) (D(1,I),I=6,10)
-      WRITE(6,213) (D(2,I),I=6,10)
-      WRITE(6,214) (D(3,I),I=6,10)
-      WRITE(6,215) (D(4,I),I=6,10)
-      WRITE(6,216) (D(5,I),I=6,10)
-      WRITE(6,217) (D(7,I),I=6,10)
-      WRITE(6,219) (D(8,I),I=6,10)
-      WRITE(6,220) (D(9,I),I=6,10)
-      WRITE(6,218) (D(6,I),I=6,10)
-      WRITE(6,200) (IDAY(I),I=11,15)
-      WRITE(6,201) (UT(I),I=11,15)
-      WRITE(6,202) (ALT(I),I=11,15)
-      WRITE(6,203) (XLAT(I),I=11,15)
-      WRITE(6,204) (XLONG(I),I=11,15)
-      WRITE(6,205) (XLST(I),I=11,15)
-      WRITE(6,206) (F107A(I),I=11,15)
-      WRITE(6,207) (F107(I),I=11,15)
-      WRITE(6,208) (AP(I),I=11,15)
-      WRITE(6,210) (T(1,I),I=11,15)
-      WRITE(6,211) (T(2,I),I=11,15)
-      WRITE(6,212) (D(1,I),I=11,15)
-      WRITE(6,213) (D(2,I),I=11,15)
-      WRITE(6,214) (D(3,I),I=11,15)
-      WRITE(6,215) (D(4,I),I=11,15)
-      WRITE(6,216) (D(5,I),I=11,15)
-      WRITE(6,217) (D(7,I),I=11,15)
-      WRITE(6,219) (D(8,I),I=11,15)
-      WRITE(6,220) (D(9,I),I=11,15)
-      WRITE(6,218) (D(6,I),I=11,15)
-  100 FORMAT(1X,1P8E9.2/4X,1PE9.2,2E10.3/4X,8E9.2/4X,8E9.2/)
-  200 FORMAT(//' DAY  ',5I12)
-  201 FORMAT(' UT   ',5F12.0)
-  202 FORMAT(' ALT  ',5F12.0)
-  203 FORMAT(' LAT  ',5F12.0)
-  204 FORMAT(' LONG ',5F12.0)
-  205 FORMAT(' LST  ',5F12.0)
-  206 FORMAT(' F107A',5F12.0)
-  207 FORMAT(' F107 ',5F12.0)
-  208 FORMAT(' AP   ',5F12.0)
-  210 FORMAT(/' TINF ',5F12.2)
-  211 FORMAT(' TG   ',5F12.2)
-  212 FORMAT(' HE   ',1P5E12.3)
-  213 FORMAT(' O    ',1P5E12.3)
-  214 FORMAT(' N2   ',1P5E12.3)
-  215 FORMAT(' O2   ',1P5E12.3)
-  216 FORMAT(' AR   ',1P5E12.3)
-  217 FORMAT(' H    ',1P5E12.3)
-  219 FORMAT(' N    ',1P5E12.3)
-  220 FORMAT(' ANM O',1P5E12.3)
-  218 FORMAT(' RHO  ',1P5E12.3)
-  300 FORMAT(1X,2A4,2X,3A4,2X,2A4)
-      STOP
       END

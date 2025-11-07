@@ -237,7 +237,7 @@ module qwm
     logical                    :: content(5) = .true.          ! Season/Waves/Tides
     logical                    :: component(0:1) = .true.      ! Compute zonal/meridional
 
-    character(128)             :: qwmdefault = 'hwm123114.bin'
+    character(128)             :: qwmdefault = 'hwm14data/hwm123114.bin'
     logical                    :: qwminit = .true.
 
     real(8)                    :: wavefactor(4) = 1.0
@@ -267,7 +267,7 @@ module dwm
     real(8), parameter         :: dtor=pi/180.d0
 
     logical                    :: dwminit = .true.
-    character(128), parameter  :: dwmdefault = 'dwm07b104i.dat'
+    character(128), parameter  :: dwmdefault = 'hwm14data/dwm07b104i.dat'
 
 end module dwm
 
@@ -1168,7 +1168,7 @@ contains
         use hwm
         implicit none
 
-        character(128), parameter   :: datafile='gd2qd.dat'
+        character(128), parameter   :: datafile='hwm14data/gd2qd.dat'
         integer(4)                  :: iterm, n
         integer(4)                  :: j
 
@@ -1448,6 +1448,11 @@ subroutine findandopen(datafile,unitid)
             if (havefile) open(unit=unitid, &
                 file='../Meta/'//trim(datafile),status='old',form='unformatted')
         endif
+        if (.not. havefile) then
+            inquire(file='hwm14data/'//trim(datafile),exist=havefile)
+            if (havefile) open(unit=unitid, &
+                file='hwm14data/'//trim(datafile),status='old',form='unformatted')
+        endif
     else
         inquire(file=trim(datafile),exist=havefile)
         if (havefile) open(unit=unitid,file=trim(datafile),status='old',access='stream')
@@ -1461,6 +1466,11 @@ subroutine findandopen(datafile,unitid)
             inquire(file='../Meta/'//trim(datafile),exist=havefile)
             if (havefile) open(unit=unitid, &
                 file='../Meta/'//trim(datafile),status='old',access='stream')
+        endif
+        if (.not. havefile) then
+            inquire(file='hwm14data/'//trim(datafile),exist=havefile)
+            if (havefile) open(unit=unitid, &
+                file='hwm14data/'//trim(datafile),status='old',access='stream')
         endif
     endif
 
