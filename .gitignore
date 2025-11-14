@@ -5,6 +5,7 @@
 *.obj
 *.so
 *.dylib
+*.pdf
 
 # Python缓存
 __pycache__/
@@ -58,3 +59,6 @@ dist/
 # 其他可能的生成文件
 *.f90~
 *.mod
+
+# 打包文件
+*.zip
