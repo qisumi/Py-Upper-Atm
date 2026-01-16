@@ -7,23 +7,51 @@ from .temp_density_model import (
     TempDensityModel,
     TempDensityResult,
     convert_date_to_day,
-    calculate_seconds_of_day
+    calculate_seconds_of_day,
 )
 
 from .wind_model import (
     WindModel,
+    WindResult,
     calculate_wind_at_point,
-    calculate_wind_batch
+    calculate_wind_batch,
+)
+
+from .xarray_output import (
+    temp_density_results_to_xarray,
+    wind_results_to_xarray,
+)
+
+from .space_weather import (
+    SpaceWeatherIndices,
+    get_indices,
+)
+
+from .cache import (
+    CachedModel,
+    CachedWindModel,
+)
+
+from .parallel import (
+    parallel_map,
+    parallel_batch_compute,
 )
 
 __all__ = [
-    # 温度密度模型相关
     "TempDensityModel",
     "TempDensityResult",
     "convert_date_to_day",
     "calculate_seconds_of_day",
-    # 风场模型相关
     "WindModel",
+    "WindResult",
     "calculate_wind_at_point",
-    "calculate_wind_batch"
+    "calculate_wind_batch",
+    "temp_density_results_to_xarray",
+    "wind_results_to_xarray",
+    "SpaceWeatherIndices",
+    "get_indices",
+    "CachedModel",
+    "CachedWindModel",
+    "parallel_map",
+    "parallel_batch_compute",
 ]
