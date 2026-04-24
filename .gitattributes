@@ -1,25 +1,42 @@
-# Git LFS 配置文件
+# Default text normalization
+* text=auto
 
-# 配置大型数据文件使用Git LFS管理
-*.dat filter=lfs diff=lfs merge=lfs -text
-*.bin filter=lfs diff=lfs merge=lfs -text
-*.parm filter=lfs diff=lfs merge=lfs -text
+# Source and documentation files
+*.py text eol=lf
+*.pyi text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+*.ps1 text eol=crlf
 
-# 确保二进制文件不会被Git自动转换行尾
+# Fortran sources
+*.f text eol=lf
+*.for text eol=lf
+*.f90 text eol=lf
+*.F90 text eol=lf
+
+# Unified model data is managed by Git LFS.
+data/** filter=lfs diff=lfs merge=lfs -text
+
+# Native binaries and binary assets should not be line-normalized.
 *.dll binary
 *.a binary
 *.o binary
 *.obj binary
 *.so binary
 *.dylib binary
-
-# 确保Fortran和Python文件的行尾处理正确
-*.f text eol=lf
-*.f90 text eol=lf
-*.F90 text eol=lf
-*.py text eol=lf
-
-# 配置文本文件的行尾处理
-*.txt text eol=lf
-*.md text eol=lf
-*.ps1 text eol=crlf
+*.lib binary
+*.exp binary
+*.pdb binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.zip binary
+*.tar binary
+*.tgz binary
+*.gz binary

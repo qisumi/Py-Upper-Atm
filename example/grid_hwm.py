@@ -13,6 +13,7 @@ except Exception:
     tqdm = None
 
 ROOT = Path(__file__).resolve().parents[1]
+MODEL_DATA = ROOT / "data"
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
@@ -42,7 +43,7 @@ def compute_region_hwm(
     out_numpy: bool = False,
 ) -> List[Dict[str, Any]]:
     if hwm_model is None:
-        hwm_model = HWM14()
+        hwm_model = HWM14(data_dir=MODEL_DATA, auto_download=False)
 
     lats = np.linspace(float(lat0), float(lat1), max(1, int(lat_steps)))
     lons = np.linspace(float(lon0), float(lon1), max(1, int(lon_steps)))

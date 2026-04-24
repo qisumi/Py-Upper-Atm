@@ -19,7 +19,14 @@ __all__ = ["Model"]
 class Model:
     """NRLMSISE-00 ctypes wrapper."""
 
-    def __init__(self, dll_path: Optional[Union[str, Path]] = None) -> None:
+    def __init__(
+        self,
+        dll_path: Optional[Union[str, Path]] = None,
+        *,
+        data_dir: Optional[Union[str, Path]] = None,
+        auto_download: bool = True,
+    ) -> None:
+        del data_dir, auto_download
         if dll_path is None:
             dll_path = Path(__file__).resolve().parent / "msis00.dll"
         self._dll_path = Path(dll_path)

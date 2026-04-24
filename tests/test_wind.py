@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pytest
+
+ROOT = Path(__file__).resolve().parents[1]
+MODEL_DATA = ROOT / "data"
 
 
 class TestHWM14:
@@ -43,6 +48,26 @@ class TestHWM14:
 
         assert result["meridional_wind_ms"].shape == (3,)
         assert result["zonal_wind_ms"].shape == (3,)
+
+    @pytest.mark.requires_dll
+    def test_calculate_from_non_repo_working_directory(
+        self, monkeypatch, tmp_path, sample_iyd, default_geo_params, default_solar_params
+    ):
+        from model import HWM14
+
+        monkeypatch.chdir(tmp_path)
+        model = HWM14(data_dir=MODEL_DATA, auto_download=False)
+        result = model.calculate(
+            iyd=sample_iyd,
+            sec=45000.0,
+            alt_km=default_geo_params["alt_km"],
+            glat_deg=default_geo_params["lat_deg"],
+            glon_deg=default_geo_params["lon_deg"],
+            stl_hours=12.0,
+            **default_solar_params,
+        )
+
+        assert isinstance(result["meridional_wind_ms"], float)
 
     @pytest.mark.requires_dll
     def test_invalid_ap2_raises_error(self, hwm14_model, sample_iyd):

@@ -20,7 +20,14 @@ __all__ = ["Model"]
 class Model:
     """HWM93 ctypes wrapper."""
 
-    def __init__(self, dll_path: Optional[Union[str, Path]] = None) -> None:
+    def __init__(
+        self,
+        dll_path: Optional[Union[str, Path]] = None,
+        *,
+        data_dir: Optional[Union[str, Path]] = None,
+        auto_download: bool = True,
+    ) -> None:
+        del data_dir, auto_download
         base = Path(__file__).resolve().parent
         if dll_path is None:
             dll_name = "hwm93.dll" if os.name == "nt" else "libhwm93.so"

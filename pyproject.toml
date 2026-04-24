@@ -42,6 +42,13 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 include = ["model*", "utils*"]
 
+[tool.setuptools.package-data]
+utils = ["model_data_manifest.json"]
+"model.pymsis2" = ["build/*.dll", "build/*.so", "build/*.dylib"]
+"model.pymsis00" = ["*.dll", "*.so", "*.dylib"]
+"model.pyhwm14" = ["*.dll", "*.so", "*.dylib"]
+"model.pyhwm93" = ["*.dll", "*.so", "*.dylib"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

@@ -78,6 +78,13 @@ wind = hwm.calculate(
 print(wind["meridional_wind_ms"], wind["zonal_wind_ms"])
 ```
 
+MSIS2 and HWM14 need external model data. By default UpperAtmPy resolves
+`.upperatmpy` under the current project directory and downloads missing files
+from the project-maintained release manifest on first model instantiation. For offline use, pass
+`data_dir=...` or set `UPPERATMPY_DATA_DIR` to a data root containing the legacy
+`msis2data/` and `hwm14data/` subdirectories. In the source tree, that root is
+`data/`.
+
 ## API
 
 Top-level `model` exports only:
@@ -135,7 +142,9 @@ UpperAtmPy/
 │       └── xarray_output.py
 ├── example/
 ├── tests/
-├── hwm14data/
+├── data/
+│   ├── hwm14data/
+│   └── msis2data/
 └── quick_run.py
 ```
 

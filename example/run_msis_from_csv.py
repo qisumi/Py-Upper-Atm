@@ -73,7 +73,7 @@ def main(chunk_size: int = 1000, f107a: float = 150.0, f107: float = 150.0):
 	if not level_map:
 		print("警告：未加载到 level->height 映射，请检查", LEVEL_MAP)
 
-	msis = MSIS2()  # 使用默认 DLL 路径与单精度
+	msis = MSIS2(data_dir=Path(__file__).resolve().parents[1] / "data", auto_download=False)
 
 	with INPUT_CSV.open("r", encoding="utf-8") as infh, OUTPUT_CSV.open("w", encoding="utf-8", newline='') as outfh:
 		reader = csv.DictReader(infh)

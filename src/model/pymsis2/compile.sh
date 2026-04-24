@@ -108,11 +108,12 @@ echo "Linking shared library..."
     -static-libgcc -static-libgfortran -static-libquadmath
 
 # 8) 参数文件
-parm="$Root/msis2.0.parm"
+RepoRoot="$(cd "$Root/../../.." && pwd)"
+parm="$RepoRoot/data/msis2data/msis2.0.parm"
 if [ -f "$parm" ]; then
     cp "$parm" "$OutDir/msis2.0.parm"
 else
-    echo "警告: 未找到 msis2.0.parm。运行时需保证它与共享库同目录或在工作目录可读。" >&2
+    echo "警告: 未找到 data/msis2data/msis2.0.parm。运行时需通过数据管理器、UPPERATMPY_DATA_DIR 或 data_dir 指定。" >&2
 fi
 
 echo ""

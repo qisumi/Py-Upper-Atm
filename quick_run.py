@@ -12,6 +12,7 @@ import sys
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent
+MODEL_DATA = ROOT / "data"
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
@@ -23,7 +24,7 @@ from utils.time import doy, seconds_of_day
 def run_msis2_example() -> None:
     print("\n=== NRLMSIS-2.0 温度密度示例 ===")
     try:
-        model = MSIS2(precision="single")
+        model = MSIS2(precision="single", data_dir=MODEL_DATA, auto_download=False)
         result = model.calculate(
             day=doy(2023, 1, 1),
             utsec=seconds_of_day(12, 0, 0),
@@ -87,7 +88,7 @@ def run_msis00_example() -> None:
 def run_hwm14_example() -> None:
     print("\n=== HWM14 风场示例 ===")
     try:
-        model = HWM14()
+        model = HWM14(data_dir=MODEL_DATA, auto_download=False)
         result = model.calculate(
             iyd=2023001,
             sec=43200.0,

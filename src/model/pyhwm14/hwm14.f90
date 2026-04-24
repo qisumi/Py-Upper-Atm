@@ -19,6 +19,12 @@
 !!!
 !!!
 !!!================================================================================
+module upperatmpy_hwm14_data
+    implicit none
+    character(512) :: data_root = ''
+end module upperatmpy_hwm14_data
+
+!!!================================================================================
 !!! Input arguments:
 !!!        iyd - year and day as yyddd
 !!!        sec - ut(sec)
@@ -1425,6 +1431,7 @@ end function latwgt2
 
 subroutine findandopen(datafile,unitid)
 
+    use upperatmpy_hwm14_data, only: data_root
     implicit none
 
     character(128)      :: datafile
@@ -1437,6 +1444,13 @@ subroutine findandopen(datafile,unitid)
     if (i .eq. 0) then
         inquire(file=trim(datafile),exist=havefile)
         if (havefile) open(unit=unitid,file=trim(datafile),status='old',form='unformatted')
+        if (.not. havefile) then
+            if (len_trim(data_root) .gt. 0) then
+                inquire(file=trim(data_root)//'/'//trim(datafile),exist=havefile)
+                if (havefile) open(unit=unitid, &
+                    file=trim(data_root)//'/'//trim(datafile),status='old',form='unformatted')
+            endif
+        endif
         if (.not. havefile) then
             call get_environment_variable('HWMPATH',hwmpath)
             inquire(file=trim(hwmpath)//'/'//trim(datafile),exist=havefile)
@@ -1456,6 +1470,13 @@ subroutine findandopen(datafile,unitid)
     else
         inquire(file=trim(datafile),exist=havefile)
         if (havefile) open(unit=unitid,file=trim(datafile),status='old',access='stream')
+        if (.not. havefile) then
+            if (len_trim(data_root) .gt. 0) then
+                inquire(file=trim(data_root)//'/'//trim(datafile),exist=havefile)
+                if (havefile) open(unit=unitid, &
+                    file=trim(data_root)//'/'//trim(datafile),status='old',access='stream')
+            endif
+        endif
         if (.not. havefile) then
             call get_environment_variable('HWMPATH',hwmpath)
             inquire(file=trim(hwmpath)//'/'//trim(datafile),exist=havefile)

@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Optional, Sequence, Union
 
 import numpy as np
+from utils.model_data import DATA_ENV_VAR, ensure_model_data
 
 __all__ = ["Model"]
 
@@ -32,10 +33,19 @@ class Model:
         precision: str = "single",
         add_mingw_bin: bool = False,
         extra_dll_dirs: Optional[Sequence[Union[str, Path]]] = None,
+        data_dir: Optional[Union[str, Path]] = None,
+        auto_download: bool = True,
     ) -> None:
         self._precision = precision.lower().strip()
         if self._precision not in ("single", "double"):
             raise ValueError("precision must be 'single' or 'double'")
+
+        self._data_root = ensure_model_data(
+            "msis2",
+            data_dir=data_dir,
+            auto_download=auto_download,
+        )
+        os.environ[DATA_ENV_VAR] = str(self._data_root)
 
         if dll_path is None:
             dll_path = Path(__file__).resolve().parent / "build" / "nrlmsis2.dll"
@@ -54,6 +64,7 @@ class Model:
                         os.add_dll_directory(str(resolved))
 
         self._dll = C.CDLL(str(self._dll_path))
+        self._set_data_root()
         self._FT = C.c_double if self._precision == "double" else C.c_float
 
         try:
@@ -76,6 +87,16 @@ class Model:
             C.POINTER(FT),
         ]
         self._msiscalc.restype = None
+
+    def _set_data_root(self) -> None:
+        try:
+            set_data_root = getattr(self._dll, "msis_set_data_root")
+        except AttributeError:
+            return
+
+        set_data_root.argtypes = [C.c_char_p]
+        set_data_root.restype = None
+        set_data_root(os.fsencode(self._data_root))
 
     def calculate(
         self,

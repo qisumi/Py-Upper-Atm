@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+MODEL_DATA = ROOT / "data"
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
@@ -12,7 +13,7 @@ from model import MSIS2
 from utils.time import doy, seconds_of_day
 
 
-model = MSIS2(precision="single")
+model = MSIS2(precision="single", data_dir=MODEL_DATA, auto_download=False)
 
 result = model.calculate(
     day=doy(2020, 7, 18),

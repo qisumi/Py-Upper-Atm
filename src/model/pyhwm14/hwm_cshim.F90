@@ -8,9 +8,21 @@
 ! Types are 32‑bit to match the original hwm14.f90 (integer(4), real(4)).
 !
 module hwm14_cshim
-  use, intrinsic :: iso_c_binding, only: c_int, c_float
+  use, intrinsic :: iso_c_binding, only: c_char, c_float, c_int, c_null_char
+  use upperatmpy_hwm14_data, only: data_root
   implicit none
 contains
+  subroutine hwm14_set_data_root(path) bind(C, name="hwm14_set_data_root")
+    character(kind=c_char), intent(in) :: path(*)
+    integer :: i
+
+    data_root = ''
+    do i = 1, len(data_root)
+      if (path(i) == c_null_char) exit
+      data_root(i:i) = achar(iachar(path(i)))
+    enddo
+  end subroutine hwm14_set_data_root
+
   subroutine hwm14_eval(iyd,sec,alt,glat,glon,stl,f107a,f107,ap,w_out) bind(C, name="hwm14_eval")
     ! C‑callable wrapper with a stable symbol name.
     integer(c_int),  value      :: iyd

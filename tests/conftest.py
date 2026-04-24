@@ -6,6 +6,7 @@ import sys
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+MODEL_DATA = ROOT / "data"
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
@@ -38,7 +39,7 @@ def msis2_model():
     try:
         from model import MSIS2
 
-        return MSIS2(precision="single")
+        return MSIS2(precision="single", data_dir=MODEL_DATA, auto_download=False)
     except Exception as exc:
         pytest.skip(f"NRLMSIS-2.0 DLL not available: {exc}")
 
@@ -48,7 +49,7 @@ def msis00_model():
     try:
         from model import MSIS00
 
-        return MSIS00()
+        return MSIS00(data_dir=MODEL_DATA, auto_download=False)
     except Exception as exc:
         pytest.skip(f"MSIS-00 DLL not available: {exc}")
 
@@ -58,7 +59,7 @@ def hwm14_model():
     try:
         from model import HWM14
 
-        return HWM14()
+        return HWM14(data_dir=MODEL_DATA, auto_download=False)
     except Exception as exc:
         pytest.skip(f"HWM14 DLL not available: {exc}")
 
@@ -68,7 +69,7 @@ def hwm93_model():
     try:
         from model import HWM93
 
-        return HWM93()
+        return HWM93(data_dir=MODEL_DATA, auto_download=False)
     except Exception as exc:
         pytest.skip(f"HWM93 DLL not available: {exc}")
 

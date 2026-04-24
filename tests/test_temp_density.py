@@ -2,14 +2,19 @@ from __future__ import annotations
 
 import importlib
 import sys
+from pathlib import Path
 
 import numpy as np
 import pytest
+
+ROOT = Path(__file__).resolve().parents[1]
+MODEL_DATA = ROOT / "data"
 
 
 class TestModelPackage:
     def test_import_model_is_lazy(self):
         sys.modules.pop("model", None)
+        sys.modules.pop("utils.model_data", None)
         for module_name in list(sys.modules):
             if module_name.startswith("model.py"):
                 sys.modules.pop(module_name, None)
@@ -21,6 +26,7 @@ class TestModelPackage:
         assert "model.pymsis00" not in sys.modules
         assert "model.pyhwm14" not in sys.modules
         assert "model.pyhwm93" not in sys.modules
+        assert "utils.model_data" not in sys.modules
 
     def test_old_top_level_exports_are_removed(self):
         with pytest.raises(ImportError):
@@ -57,6 +63,23 @@ class TestMSIS2:
         assert result["densities"].shape == (10,)
         assert 100 < result["T_local_K"] < 500
         assert 500 < result["T_exo_K"] < 2000
+
+    @pytest.mark.requires_dll
+    def test_calculate_from_non_repo_working_directory(
+        self, monkeypatch, tmp_path, default_geo_params, default_solar_params
+    ):
+        from model import MSIS2
+
+        monkeypatch.chdir(tmp_path)
+        model = MSIS2(precision="single", data_dir=MODEL_DATA, auto_download=False)
+        result = model.calculate(
+            day=196.0,
+            utsec=45000.0,
+            **default_geo_params,
+            **default_solar_params,
+        )
+
+        assert result["densities"].shape == (10,)
 
     @pytest.mark.requires_dll
     def test_calculate_batch(self, msis2_model, default_solar_params):

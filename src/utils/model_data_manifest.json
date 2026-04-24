@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "files": [
+    {
+      "model": "msis2",
+      "version": "nrlmsis2-2.0",
+      "path": "msis2data/msis2.0.parm",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v1/msis2.0.parm",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/msis2data/msis2.0.parm",
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/msis2data/msis2.0.parm"
+      ],
+      "sha256": "cf612796af04f473fc9b1445460c30aa497cdc9c991d3507190893577c124602",
+      "size": 536576
+    },
+    {
+      "model": "hwm14",
+      "version": "hwm14",
+      "path": "hwm14data/hwm123114.bin",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v1/hwm123114.bin",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/hwm14data/hwm123114.bin",
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/hwm14data/hwm123114.bin"
+      ],
+      "sha256": "6e445f8337c7efc815b7ff7f9f967d8a9a16b469d93df9c46e54930553beb906",
+      "size": 193608
+    },
+    {
+      "model": "hwm14",
+      "version": "hwm14",
+      "path": "hwm14data/dwm07b104i.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v1/dwm07b104i.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/hwm14data/dwm07b104i.dat",
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/hwm14data/dwm07b104i.dat"
+      ],
+      "sha256": "f2b8eff002d55b0f6d49d202c73b7a9cb6685f2c6bb57f1291a2adc7aa07cf4f",
+      "size": 4848
+    },
+    {
+      "model": "hwm14",
+      "version": "hwm14",
+      "path": "hwm14data/gd2qd.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v1/gd2qd.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/hwm14data/gd2qd.dat",
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/hwm14data/gd2qd.dat"
+      ],
+      "sha256": "6bb1f2384e30b409240ee92c32726ed2a3d73eb550c05e0969d1178032319804",
+      "size": 1500
+    }
+  ]
+}

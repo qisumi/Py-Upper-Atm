@@ -80,11 +80,12 @@ Write-Host "Linking DLL..."
   -static-libgcc -static-libgfortran -static-libquadmath
 
 # 7) 参数文件
-$parm = Join-Path $Root "msis2.0.parm"
+$RepoRoot = (Resolve-Path (Join-Path $Root "..\..\..")).Path
+$parm = Join-Path $RepoRoot "data\msis2data\msis2.0.parm"
 if (Test-Path $parm) {
   Copy-Item $parm -Destination (Join-Path $OutDir "msis2.0.parm") -Force
 } else {
-  Write-Warning "未找到 msis2.0.parm。运行时需保证它与 DLL 同目录或在工作目录可读。"
+  Write-Warning "未找到 data\msis2data\msis2.0.parm。运行时需通过数据管理器、UPPERATMPY_DATA_DIR 或 data_dir 指定。"
 }
 
 Write-Host "`n✅ 成功："

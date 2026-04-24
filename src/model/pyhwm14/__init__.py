@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
+from utils.model_data import HWM14_ENV_VAR, ensure_model_data
 
 __all__ = ["Model"]
 
@@ -20,9 +21,20 @@ __all__ = ["Model"]
 class Model:
     """HWM14 ctypes wrapper."""
 
-    def __init__(self, dll_path: Optional[Union[str, Path]] = None) -> None:
+    def __init__(
+        self,
+        dll_path: Optional[Union[str, Path]] = None,
+        *,
+        data_dir: Optional[Union[str, Path]] = None,
+        auto_download: bool = True,
+    ) -> None:
         base = Path(__file__).resolve().parent
-        _set_default_hwmpath(base)
+        self._data_root = ensure_model_data(
+            "hwm14",
+            data_dir=data_dir,
+            auto_download=auto_download,
+        )
+        os.environ[HWM14_ENV_VAR] = str(self._data_root)
 
         if dll_path is None:
             dll_name = "hwm14.dll" if os.name == "nt" else "libhwm14.so"
@@ -33,9 +45,20 @@ class Model:
             os.add_dll_directory(str(self._dll_path.parent))
 
         self._dll = C.cdll.LoadLibrary(str(self._dll_path))
+        self._set_data_root()
         self._hwm = self._dll.hwm14_eval
         self._hwm.restype = None
         self._hwm.argtypes = _HWM_ARGTYPES
+
+    def _set_data_root(self) -> None:
+        try:
+            set_data_root = self._dll.hwm14_set_data_root
+        except AttributeError:
+            return
+
+        set_data_root.argtypes = [C.c_char_p]
+        set_data_root.restype = None
+        set_data_root(os.fsencode(self._data_root))
 
     def calculate(
         self,
@@ -164,16 +187,6 @@ def _normalize_ap2(ap2, count: int) -> np.ndarray:
         raise ValueError("2D ap2 input row count must be 1 or broadcast sample count")
 
     raise ValueError("ap2 dimension error")
-
-
-def _set_default_hwmpath(base: Path) -> None:
-    if "HWMPATH" in os.environ:
-        return
-
-    for candidate in (base / "data", base.parents[2] / "hwm14data"):
-        if candidate.exists():
-            os.environ["HWMPATH"] = str(candidate)
-            return
 
 
 _C_INT = C.c_int

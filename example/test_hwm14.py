@@ -7,6 +7,7 @@ import sys
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
+MODEL_DATA = ROOT / "data"
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
@@ -62,7 +63,7 @@ def test_broadcast_eval(model: HWM14) -> None:
 
 if __name__ == "__main__":
     print("Running HWM14 wrapper smoke test...")
-    model = HWM14()
+    model = HWM14(data_dir=MODEL_DATA, auto_download=False)
     print("HWMPATH =", os.environ.get("HWMPATH"))
     test_single_point(model)
     test_broadcast_eval(model)

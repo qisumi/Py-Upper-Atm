@@ -11,8 +11,12 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
-# 测试文件
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
 
 # 系统文件
 .DS_Store
@@ -35,6 +39,8 @@ env/
 build/
 build-*/
 dist/
+*.egg-info/
+.tmp-wheel/
 
 # Windows编译相关
 *.ilk
@@ -50,6 +56,7 @@ dist/
 *.tmp
 *.temp
 .cache/
+.upperatmpy/
 TODO/
 
 # 备份文件
@@ -63,3 +70,7 @@ TODO/
 
 # 打包文件
 *.zip
+*.tar
+*.tgz
+*.gz
+*.whl

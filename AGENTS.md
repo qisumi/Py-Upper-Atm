@@ -88,7 +88,9 @@ UpperAtmPy/
 │       └── xarray_output.py
 ├── example/
 ├── tests/
-├── hwm14data/
+├── data/
+│   ├── hwm14data/
+│   └── msis2data/
 └── quick_run.py
 ```
 

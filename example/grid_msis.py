@@ -12,6 +12,7 @@ except Exception:
     tqdm = None
 
 ROOT = Path(__file__).resolve().parents[1]
+MODEL_DATA = ROOT / "data"
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
@@ -41,7 +42,7 @@ def compute_region_msis(
     out_numpy: bool = False,
 ) -> List[Dict[str, Any]]:
     if msis is None:
-        msis = MSIS2(precision="single")
+        msis = MSIS2(precision="single", data_dir=MODEL_DATA, auto_download=False)
 
     lats = np.linspace(float(lat0), float(lat1), max(1, int(lat_steps)))
     lons = np.linspace(float(lon0), float(lon1), max(1, int(lon_steps)))
@@ -86,7 +87,7 @@ def compute_region_msis(
 
 
 if __name__ == "__main__":
-    model = MSIS2(precision="single")
+    model = MSIS2(precision="single", data_dir=MODEL_DATA, auto_download=False)
     results = compute_region_msis(
         model,
         39.5,

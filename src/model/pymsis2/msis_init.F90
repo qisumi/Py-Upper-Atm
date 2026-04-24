@@ -408,15 +408,27 @@ contains
     integer, intent(in)          :: iun
 
     integer                      :: i0, i1
+    character(len=512)           :: data_root
+    character(len=512)           :: file_to_open
     logical                      :: havefile
     real(8), allocatable         :: parmin(:,:)
 
     ! Check if file exists
-    inquire(file=trim(name),exist=havefile)
+    file_to_open = trim(name)
+    inquire(file=trim(file_to_open),exist=havefile)
+    if (.not. havefile) then
+       call get_environment_variable('UPPERATMPY_DATA_DIR',data_root)
+       if (len_trim(data_root) .gt. 0) then
+          file_to_open = trim(data_root)//'/'//trim(name)
+          inquire(file=trim(file_to_open),exist=havefile)
+       endif
+    endif
+
     if (havefile) then
-       open(unit=iun,file=trim(name),status='old',access='stream',convert='little_endian')
+       open(unit=iun,file=trim(file_to_open),status='old',access='stream',convert='little_endian')
     else
        print *,"MSIS parameter set ",trim(name)," not found. Stopping."
+       print *,"Set UPPERATMPY_DATA_DIR or pass data_dir in Python."
        stop
     endif
 
