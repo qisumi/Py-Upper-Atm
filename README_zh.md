@@ -91,12 +91,17 @@ cmake --build --preset native-release
 1. 选择与当前系统和架构匹配的 wheel 文件，例如：
    - `upperatmpy-0.1.0-py3-none-win_amd64.whl`
    - `upperatmpy-0.1.0-py3-none-manylinux_x86_64.whl`
-   - `upperatmpy-0.1.0-py3-none-win_amd64.whl`
 2. 安装本地 wheel 文件
 
 ```bash
 python -m pip install /path/to/upperatmpy-0.1.0-py3-none-win_amd64.whl
 ```
+
+快速判断规则：
+
+- `py3-none-win_amd64`：可安装到 Windows x86_64 下任意支持的 Python 3.x（如 3.8~3.12）。
+- `py3-none-manylinux_x86_64`：可安装到 Linux x86_64 下任意支持的 Python 3.x（如 3.8~3.12）。
+- `py3-none-any`（若有）：可安装到任意平台且同 major Python 3 的解释器。
 
 或者直接从 release 直链安装：
 

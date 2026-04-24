@@ -14,7 +14,7 @@ env:
 
 jobs:
   build-wheel:
-    name: Build wheel (${{ matrix.os }})
+    name: Build wheel (${{ matrix.os }}, py3 generic)
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -96,6 +96,33 @@ jobs:
 
       - name: Build wheel
         run: python -m build --wheel
+
+      - name: Print wheel python compatibility
+        shell: python
+        run: |
+          import pathlib
+          wheels = sorted(pathlib.Path("dist").glob("*.whl"))
+          if not wheels:
+              raise SystemExit("No wheel files found in dist/")
+
+          wheel_name = wheels[0].name
+          stem = wheel_name.removesuffix(".whl")
+          parts = stem.split("-")
+          if len(parts) < 5:
+              raise SystemExit(f"Unrecognized wheel filename format: {wheel_name}")
+
+          py_tag, abi_tag, platform_tag = parts[-3], parts[-2], parts[-1]
+          if not (py_tag == "py3" and abi_tag == "none"):
+              raise SystemExit(f"Expected py3-none compatibility tags, got python={py_tag}, abi={abi_tag}")
+
+          print(
+              f"Wheel compatibility check passed: {wheel_name} is py3-none (Python 3.x, ABI independent)."
+          )
+          print(
+              "Quick rule: use wheel filename tag patterns to pick versions:"
+              " py3-none-win_amd64 -> Windows x64 (all supported CPython 3.x),"
+              " py3-none-manylinux_x86_64 -> Linux x86_64 (all supported CPython 3.x)."
+          )
 
       - name: Check wheel contents
         shell: python

@@ -102,6 +102,12 @@ If building native libraries is inconvenient, download the matching wheel from t
 python -m pip install /path/to/upperatmpy-0.1.0-py3-none-win_amd64.whl
 ```
 
+Quick compatibility rule:
+
+- `py3-none-win_amd64` wheels can be installed on **any supported CPython 3.x** on Windows x86_64.
+- `py3-none-manylinux_x86_64` wheels can be installed on **any supported CPython 3.x** on Linux x86_64.
+- `py3-none-any` (if available) can be installed on any platform with the same Python major version.
+
 Or install directly from a release URL:
 
 ```bash
