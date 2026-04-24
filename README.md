@@ -25,11 +25,99 @@ Supported models:
 
 ## Build
 
-Compile the native libraries before using a model from a source checkout.
+Before compiling from source, install the following toolchain and Python dependencies.
+
+### Build prerequisites
+
+- Python 3.8+
+- CMake (3.20+)
+- C/C++ compiler toolchain
+- GNU Fortran compiler (`gfortran`)
+- `pip` dependencies
+
+Common install steps:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+#### Linux (Ubuntu/Debian)
+
+```bash
+sudo apt update
+sudo apt install -y python3 python3-pip cmake build-essential gfortran git
+```
+
+#### macOS
+
+```bash
+brew install python cmake gcc
+```
+
+#### Windows
+
+Install:
+
+- Python
+- CMake
+- MinGW-w64 toolchain (for `gfortran` support), and keep the MinGW runtime directory
+  (`...\\mingw64\\bin`) visible in `PATH`.
+
+Example:
+
+```powershell
+winget install -e --id Python.Python.3
+winget install -e --id Kitware.CMake
+winget install -e --id MSYS2.MSYS2
+```
+
+Then in an MSYS2/MinGW shell:
+
+```bash
+pacman -S --noconfirm --needed mingw-w64-x86_64-toolchain
+```
+
+### Build from source
+
+Compile the native libraries before using a model from a source checkout. Make sure you
+run CMake from a shell where the compilers above are available.
 
 ```bash
 cmake --preset native-release
 cmake --build --preset native-release
+```
+
+### Prebuilt wheels
+
+If building native libraries is inconvenient, download the matching wheel from the repository
+`Releases` page and install it directly with pip.
+
+1. Choose a wheel file that matches your OS, architecture, and Python version.
+   Example naming patterns:
+   - `upperatmpy-0.1.0-py3-none-win_amd64.whl`
+   - `upperatmpy-0.1.0-cp310-cp310-manylinux2014_x86_64.whl`
+   - `upperatmpy-0.1.0-cp310-cp310-macosx_11_0_x86_64.whl`
+2. Install the wheel.
+
+```bash
+python -m pip install /path/to/upperatmpy-0.1.0-cp310-cp310-win_amd64.whl
+```
+
+Or install directly from a release URL:
+
+```bash
+python -m pip install https://github.com/<OWNER>/<REPO>/releases/download/<TAG>/<WHEEL_FILENAME>.whl
+```
+
+After installation, use the package as usual:
+
+```python
+from model import MSIS2
+from utils.time import doy, seconds_of_day
+
+msis = MSIS2(precision="single")
+_ = msis.calculate(day=doy(2023, 1, 1), utsec=seconds_of_day(12,0,0),
+                  alt_km=100.0, lat_deg=35.0, lon_deg=116.0, f107a=100.0, f107=100.0)
 ```
 
 ## Quick Start
@@ -71,6 +159,44 @@ from the project-maintained release manifest on first model instantiation. For o
 `data_dir=...` or set `UPPERATMPY_DATA_DIR` to a data root containing the legacy
 `msis2data/` and `hwm14data/` subdirectories. In the source tree, that root is
 `data/`.
+
+### Download and use release data files manually
+
+If you cannot download data files at runtime, you can fetch them manually from
+`GitHub Releases`:
+
+1. Open the release page and download data assets (or a combined data archive) for `msis2data` and `hwm14data`.
+2. Extract them so you get a data root directory containing both folders:
+
+```bash
+UPPERATMPY_DATA_DIR/
+├── msis2data/
+└── hwm14data/
+```
+
+3. Configure the project to load from this local root.
+
+Linux/macOS example:
+
+```bash
+export UPPERATMPY_DATA_DIR=/path/to/UPPERATMPY_DATA_DIR
+python -m pip install -U /path/to/upperatmpy.whl  # optional
+```
+
+Windows PowerShell example:
+
+```powershell
+$env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
+```
+
+You can also pass the path directly when constructing a model:
+
+```python
+from model import MSIS2, HWM14
+
+msis = MSIS2(precision="single", data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
+hwm = HWM14(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
+```
 
 ## API
 
