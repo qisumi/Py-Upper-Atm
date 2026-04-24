@@ -35,7 +35,7 @@ class Model:
     ) -> None:
         self._precision = precision.lower().strip()
         if self._precision not in ("single", "double"):
-            raise ValueError("precision 必须是 'single' 或 'double'")
+            raise ValueError("precision must be 'single' or 'double'")
 
         if dll_path is None:
             dll_path = Path(__file__).resolve().parent / "build" / "nrlmsis2.dll"
@@ -90,9 +90,9 @@ class Model:
         ap7=None,
     ) -> dict:
         """
-        计算温度和密度。
+        Calculate temperature and density.
 
-        标量输入返回标量结果；数组输入按 numpy 广播后返回数组结果。
+        Scalar inputs return scalar outputs; array inputs are broadcast and return array outputs.
         """
         day_arr, utsec_arr, alt_arr, lat_arr, lon_arr, f107a_arr, f107_arr = (
             np.broadcast_arrays(
@@ -179,16 +179,16 @@ def _normalize_ap7(ap7, count: int) -> np.ndarray:
     arr = np.asarray(ap7, dtype=float)
     if arr.ndim == 1:
         if arr.shape[0] != 7:
-            raise ValueError("ap7 长度必须为 7")
+            raise ValueError("ap7 length must be 7")
         return np.tile(arr, (count, 1))
 
     if arr.ndim == 2:
         if arr.shape[1] != 7:
-            raise ValueError("ap7 二维输入必须为 (N, 7)")
+            raise ValueError("2D ap7 input must have shape (N, 7)")
         if arr.shape[0] == 1:
             return np.tile(arr[0], (count, 1))
         if arr.shape[0] == count:
             return arr
-        raise ValueError("ap7 二维输入的行数必须为 1 或广播后的样本数")
+        raise ValueError("2D ap7 input row count must be 1 or broadcast sample count")
 
-    raise ValueError("ap7 维度错误")
+    raise ValueError("ap7 dimension error")

@@ -51,9 +51,9 @@ class Model:
         ap2=(0.0, 20.0),
     ) -> dict:
         """
-        计算 HWM14 水平风场。
+        Calculate HWM14 horizontal wind field.
 
-        标量输入返回标量结果；数组输入按 numpy 广播后返回数组结果。
+        Scalar inputs return scalar outputs; array inputs are broadcast and return array outputs.
         """
         return _calculate_hwm(
             self._hwm,
@@ -151,19 +151,19 @@ def _normalize_ap2(ap2, count: int) -> np.ndarray:
     arr = np.asarray(ap2, dtype=float)
     if arr.ndim == 1:
         if arr.shape[0] != 2:
-            raise ValueError("ap2 长度必须为 2")
+            raise ValueError("ap2 length must be 2")
         return np.tile(arr, (count, 1))
 
     if arr.ndim == 2:
         if arr.shape[1] != 2:
-            raise ValueError("ap2 二维输入必须为 (N, 2)")
+            raise ValueError("2D ap2 input must have shape (N, 2)")
         if arr.shape[0] == 1:
             return np.tile(arr[0], (count, 1))
         if arr.shape[0] == count:
             return arr
-        raise ValueError("ap2 二维输入的行数必须为 1 或广播后的样本数")
+        raise ValueError("2D ap2 input row count must be 1 or broadcast sample count")
 
-    raise ValueError("ap2 维度错误")
+    raise ValueError("ap2 dimension error")
 
 
 def _set_default_hwmpath(base: Path) -> None:

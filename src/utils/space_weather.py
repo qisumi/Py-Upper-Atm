@@ -91,7 +91,7 @@ def get_indices_celestrak(date: datetime) -> SpaceWeatherIndices:
     try:
         content = _fetch_url(url)
     except urllib.error.URLError as e:
-        raise ConnectionError(f"无法连接到 CelesTrak: {e}")
+        raise ConnectionError(f"Unable to connect to CelesTrak: {e}")
 
     target_date_str = date.strftime("%Y %m %d")
     f107 = 100.0
@@ -173,7 +173,7 @@ def get_indices(
     if source.lower() == "celestrak":
         return get_indices_celestrak(date)
     else:
-        raise ValueError(f"不支持的数据源: {source}，可选: 'celestrak'")
+        raise ValueError(f"Unsupported data source: {source}; supported: 'celestrak'")
 
 
 def clear_cache() -> int:

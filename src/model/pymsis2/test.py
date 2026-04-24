@@ -8,10 +8,10 @@ DLL = BUILD / "nrlmsis2.dll"
 
 msis = C.CDLL(str(DLL))
 
-# === 精度：若 rp=REAL(4) 用 c_float；若启用 -DDBLE 则改成 c_double ===
-FT = C.c_float   # 若库为双精度，改：FT = C.c_double
+# === Precision: use c_float if rp=REAL(4); use c_double when compiled with -DDBLE ===
+FT = C.c_float   # Use C.c_double if the library is double-precision
 
-# 解析稳定导出名（来自 shim 的 bind(C,name="msiscalc")）
+# Parse the stable export name (from shim bind(C, name="msiscalc"))
 msiscalc = getattr(msis, "msiscalc")
 
 # void msiscalc(FT day, FT utsec, FT z, FT lat, FT lon,
@@ -21,8 +21,8 @@ msiscalc.argtypes = [FT, FT, FT, FT, FT, FT, FT, C.POINTER(FT),
                      C.POINTER(FT), C.POINTER(FT), C.POINTER(FT)]
 msiscalc.restype = None
 
-# ==== 输入/输出缓冲 ====
-ap7 = (FT * 7)(*([4.0] * 7))     # 简单示例：Kp≈2 的近似
+# ==== Input/output buffers ====
+ap7 = (FT * 7)(*([4.0] * 7))     # Simple example: Kp≈2 approximation
 dn10 = (FT * 10)()
 t_local = FT()
 t_exo = FT()
@@ -41,24 +41,24 @@ def call_msiscalc(day: float, utsec: float, z_km: float,
              FT(f107a), FT(f107), ap7,
              C.byref(t_local), dn10, C.byref(t_exo))
 
-    # 输出打包
+    # Pack output
     return {
         "inputs": {"day": day, "utsec": utsec, "alt_km": z_km, "lat": lat_deg, "lon": lon_deg,
                    "f107a": f107a, "f107": f107, "ap7": [float(x) for x in ap7]},
         "T_local_K": float(t_local.value),
         "T_exo_K":   float(t_exo.value),
-        "densities": [float(dn10[i]) for i in range(10)]  # 具体物种顺序以实现为准（10 元）
+        "densities": [float(dn10[i]) for i in range(10)]  # Species order is implementation-specific (10 entries)
     }
 
 
-# ==== 冒烟：北京上空 250 km，2020 年第 200 天中午 ====
+# ==== Smoke test: 250 km above Beijing on the 200th day of 2020 at noon ====
 res = call_msiscalc(day=200.0, utsec=12*3600.0, z_km=250.0,
                     lat_deg=39.9, lon_deg=116.4,
                     f107a=150.0, f107=150.0)
 print("--- single point @250 km ---")
 print(res)
 
-# ==== 剖面：50~500 km，每 50 km ====
+# ==== Profile: 50~500 km, every 50 km ====
 print("--- profile 50~500 km step 50 ---")
 for h in range(50, 501, 50):
     out = call_msiscalc(day=200.0, utsec=12*3600.0, z_km=float(h),

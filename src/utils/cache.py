@@ -7,7 +7,7 @@ T = TypeVar("T")
 
 
 def make_hashable(obj: Any) -> Any:
-    """将常见容器转换为可哈希结构，便于构造缓存键。"""
+    """Convert common containers to hashable structures for cache-key construction."""
     if isinstance(obj, (list, tuple)):
         return tuple(make_hashable(item) for item in obj)
     if isinstance(obj, dict):
@@ -33,10 +33,10 @@ class CacheInfo(NamedTuple):
 
 def cached_call(func: Callable[..., T], *, cache_size: int = 10000) -> Callable[..., T]:
     """
-    为任意函数创建关键字参数缓存包装器。
+    Create a keyword-argument cache wrapper for any function.
 
-    该工具不假设模型接口；调用者需要直接传入具体函数，例如
-    `cached_call(model.calculate)`。
+    This utility does not assume a model interface; pass a concrete callable
+    directly, for example `cached_call(model.calculate)`.
     """
 
     cache: OrderedDict[Any, T] = OrderedDict()

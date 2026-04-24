@@ -15,8 +15,8 @@ try:
     import xarray as xr
 except ImportError as exc:  # pragma: no cover - guidance for runtime users
     raise SystemExit(
-        "运行此脚本需要安装 xarray（以及其依赖 pandas、numpy）。"
-        "请先执行 `pip install xarray pandas numpy` 后重试。"
+        "This script requires xarray and its dependencies (pandas, numpy). "
+        "Please run `pip install xarray pandas numpy` before retrying."
     ) from exc
 
 
@@ -27,43 +27,43 @@ REPO_ROOT = Path(__file__).absolute().parents[1]
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="将 data 目录下的 NetCDF (*.nc) 文件展开为 CSV，并输出参考分析信息。"
+        description="Expand NetCDF (*.nc) files under the data directory into CSV and print a reference analysis summary."
     )
     parser.add_argument(
         "-i",
         "--input-dir",
         type=Path,
         default=REPO_ROOT / "data",
-        help="NetCDF 输入目录（默认: ./data）",
+        help="NetCDF input directory (default: ./data)",
     )
     parser.add_argument(
         "-o",
         "--output-dir",
         type=Path,
         default=REPO_ROOT / "data",
-        help="CSV 输出目录（默认: ./data）",
+        help="CSV output directory (default: ./data)",
     )
     parser.add_argument(
         "-p",
         "--pattern",
         default="*.nc",
-        help="匹配 NetCDF 文件的 glob 模式（默认: *.nc）",
+        help="Glob pattern for matching NetCDF files (default: *.nc)",
     )
     parser.add_argument(
         "--float-format",
         default=DEFAULT_FLOAT_FORMAT,
-        help="CSV 写出时的浮点格式（printf 风格，默认: %.4f）。",
+        help="Float format for CSV export (printf-style, default: %.4f).",
     )
     parser.add_argument(
         "--overwrite",
         action="store_true",
-        help="目标 CSV 已存在时允许覆盖。",
+        help="Allow overwrite when target CSV already exists.",
     )
     parser.add_argument(
         "--no-summary",
         action="store_true",
         default=True,
-        help="只生成 CSV，不打印类似 ERA5_T_20120101_analysis.txt 的分析摘要。",
+        help="Only generate CSV, without printing an analysis summary like ERA5_T_20120101_analysis.txt.",
     )
     return parser.parse_args(argv)
 
@@ -129,45 +129,45 @@ def summarize_dataset(ds: xr.Dataset, source: Path) -> None:
         source.relative_to(REPO_ROOT) if source.is_relative_to(REPO_ROOT) else source
     )
     print(LINE)
-    print(f"成功打开文件: {rel_path}")
+    print(f"Opened file: {rel_path}")
     print(LINE)
-    print("\n全局属性:")
+    print("\nGlobal attributes:")
     if ds.attrs:
         for key, value in ds.attrs.items():
             print(f"  {key}: {value}")
     else:
-        print("  (无全局属性)")
+        print("  (No global attributes)")
 
     unlimited_dims = set(ds.encoding.get("unlimited_dims", []))
-    print("\n维度信息:")
+    print("\nDimension information:")
     if ds.dims:
         for name, length in ds.dims.items():
             is_unlimited = "True" if name in unlimited_dims else "False"
-            print(f"  {name}: {length} (无限: {is_unlimited})")
+            print(f"  {name}: {length} (unlimited: {is_unlimited})")
     else:
-        print("  (无维度信息)")
+        print("  (No dimension information)")
 
-    print("\n变量信息 (名称和范围):")
+    print("\nVariable information (names and ranges):")
     print("-" * 100)
     for name, data_array in _all_variables(ds):
-        print(f"变量名称: {name}")
-        print(f"  数据类型: {data_array.dtype}")
-        print(f"  维度: {data_array.dims}")
-        print(f"  形状: {tuple(data_array.shape)}")
+        print(f"Variable name: {name}")
+        print(f"  Data type: {data_array.dtype}")
+        print(f"  Dimensions: {data_array.dims}")
+        print(f"  Shape: {tuple(data_array.shape)}")
         attrs = data_array.attrs or {}
         if attrs:
-            print("  属性:")
+            print("  Attributes:")
             for key, value in attrs.items():
                 print(f"    {key}: {value}")
         stats = _compute_stats(np.asarray(data_array.values))
-        print("  数据范围:")
+        print("  Data range:")
         if stats is None:
-            print("    (非数值/日期类型或无有效数据，跳过统计)")
+            print("    (Non-numeric/date type or no valid data; skipping statistics)")
         else:
             min_val, max_val, mean_val = stats
-            print(f"    最小值: {min_val}")
-            print(f"    最大值: {max_val}")
-            print(f"    平均值: {mean_val}")
+            print(f"    Min: {min_val}")
+            print(f"    Max: {max_val}")
+            print(f"    Mean: {mean_val}")
         print()
 
 
@@ -183,7 +183,7 @@ def convert_file(
     csv_path = output_dir / f"{nc_path.stem}.csv"
     if csv_path.exists() and not overwrite:
         print(
-            f"跳过 {nc_path.name}: 目标 {csv_path.name} 已存在（使用 --overwrite 可覆盖）。"
+            f"Skipped {nc_path.name}: target {csv_path.name} already exists (use --overwrite to overwrite)."
         )
         return False
 
@@ -192,7 +192,7 @@ def convert_file(
             summarize_dataset(ds, nc_path)
         df = dataset_to_dataframe(ds)
     df.to_csv(csv_path, index=False, float_format=float_format)
-    print(f"已导出 CSV: {csv_path}（{len(df)} 行 × {len(df.columns)} 列）")
+    print(f"Exported CSV: {csv_path} ({len(df)} rows × {len(df.columns)} columns)")
     return True
 
 
@@ -203,7 +203,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     nc_files = find_nc_files(input_dir, args.pattern)
 
     if not nc_files:
-        print(f"未在 {input_dir} 找到匹配模式 {args.pattern!r} 的 NetCDF 文件。")
+        print(f"No NetCDF files matching pattern {args.pattern!r} found in {input_dir}.")
         return 1
 
     converted = 0
@@ -218,7 +218,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if success:
             converted += 1
 
-    print(f"\n任务完成：成功转换 {converted}/{len(nc_files)} 个文件。")
+    print(f"\nTask completed: converted {converted}/{len(nc_files)} files.")
     return 0 if converted else 1
 
 

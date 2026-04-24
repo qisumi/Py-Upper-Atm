@@ -50,6 +50,7 @@ dist/
 *.tmp
 *.temp
 .cache/
+TODO/
 
 # 备份文件
 *.bak

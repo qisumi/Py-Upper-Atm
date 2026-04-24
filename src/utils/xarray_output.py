@@ -44,7 +44,7 @@ MSIS00_SPECIES_NAMES = [
 def _require_xarray() -> None:
     if not _HAS_XARRAY:
         raise ImportError(
-            "xarray 未安装。请运行 'pip install xarray' 或 'pip install upperatmpy[full]'"
+            "xarray is not installed. Run 'pip install xarray' or 'pip install upperatmpy[full]'"
         )
 
 
@@ -54,7 +54,7 @@ def msis_to_xarray(
     species_names: Optional[Sequence[str]] = None,
     attrs: Optional[Dict[str, Any]] = None,
 ) -> "xr.Dataset":
-    """将 MSIS 模型 `calculate()` 返回的字典转换为 xarray Dataset。"""
+    """Convert the dictionary returned by MSIS model `calculate()` to an xarray Dataset."""
     _require_xarray()
 
     densities = np.asarray(result["densities"])
@@ -95,7 +95,7 @@ def hwm_to_xarray(
     *,
     attrs: Optional[Dict[str, Any]] = None,
 ) -> "xr.Dataset":
-    """将 HWM 模型 `calculate()` 返回的字典转换为 xarray Dataset。"""
+    """Convert the dictionary returned by HWM model `calculate()` to an xarray Dataset."""
     _require_xarray()
 
     alt = np.asarray(result["alt_km"]).reshape(-1)
