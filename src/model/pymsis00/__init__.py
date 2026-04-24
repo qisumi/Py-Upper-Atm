@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
+from utils.dll_loader import configure_dll_directories, resolve_dll_path
 
 __all__ = ["Model"]
 
@@ -35,7 +36,8 @@ class Model:
             else:
                 candidates = (base / "build" / "libmsis00.so", base / "libmsis00.so")
             dll_path = next((candidate for candidate in candidates if candidate.exists()), candidates[0])
-        self._dll_path = Path(dll_path)
+        self._dll_path = resolve_dll_path(dll_path)
+        self._dll_directory_handles = configure_dll_directories(self._dll_path)
         self._dll = ctypes.CDLL(str(self._dll_path))
 
         self._gtd7_eval = self._dll.gtd7_eval

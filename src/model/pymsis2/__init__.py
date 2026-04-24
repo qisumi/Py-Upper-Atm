@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Optional, Sequence, Union
 
 import numpy as np
+from utils.dll_loader import configure_dll_directories, resolve_dll_path
 from utils.model_data import DATA_ENV_VAR, ensure_model_data
 
 __all__ = ["Model"]
@@ -50,19 +51,15 @@ class Model:
         if dll_path is None:
             dll_name = "nrlmsis2.dll" if os.name == "nt" else "libnrlmsis2.so"
             dll_path = Path(__file__).resolve().parent / "build" / dll_name
-        self._dll_path = Path(dll_path)
+        self._dll_path = resolve_dll_path(dll_path)
 
-        if hasattr(os, "add_dll_directory"):
-            os.add_dll_directory(str(self._dll_path.parent))
-            if add_mingw_bin and sys.platform.startswith("win"):
-                mingw_bin = Path(r"C:\mingw64\bin")
-                if mingw_bin.exists():
-                    os.add_dll_directory(str(mingw_bin))
-            if extra_dll_dirs:
-                for path in extra_dll_dirs:
-                    resolved = Path(path)
-                    if resolved.exists():
-                        os.add_dll_directory(str(resolved))
+        dll_dirs = list(extra_dll_dirs or ())
+        if add_mingw_bin and sys.platform.startswith("win"):
+            dll_dirs.append(Path(r"C:\mingw64\bin"))
+        self._dll_directory_handles = configure_dll_directories(
+            self._dll_path,
+            extra_dirs=dll_dirs,
+        )
 
         self._dll = C.CDLL(str(self._dll_path))
         self._set_data_root()

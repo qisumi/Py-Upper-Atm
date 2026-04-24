@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
+from utils.dll_loader import configure_dll_directories, resolve_dll_path
 from utils.model_data import HWM14_ENV_VAR, ensure_model_data
 
 __all__ = ["Model"]
@@ -39,10 +40,8 @@ class Model:
         if dll_path is None:
             dll_name = "hwm14.dll" if os.name == "nt" else "libhwm14.so"
             dll_path = base / dll_name
-        self._dll_path = Path(dll_path)
-
-        if hasattr(os, "add_dll_directory"):
-            os.add_dll_directory(str(self._dll_path.parent))
+        self._dll_path = resolve_dll_path(dll_path)
+        self._dll_directory_handles = configure_dll_directories(self._dll_path)
 
         self._dll = C.cdll.LoadLibrary(str(self._dll_path))
         self._set_data_root()

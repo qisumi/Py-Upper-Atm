@@ -13,7 +13,7 @@ function(upperatmpy_set_output target output_dir)
 endfunction()
 
 function(upperatmpy_link_static_gnu_runtime target)
-  if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+  if(WIN32 AND CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
     target_link_options(
       ${target}
       PRIVATE
@@ -21,5 +21,16 @@ function(upperatmpy_link_static_gnu_runtime target)
         -static-libgfortran
         -static-libquadmath
     )
+  endif()
+endfunction()
+
+function(upperatmpy_use_gnu_legacy_fortran)
+  if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
+    foreach(source ${ARGN})
+      set_source_files_properties(
+        ${source}
+        PROPERTIES COMPILE_OPTIONS "-std=legacy;-fno-range-check"
+      )
+    endforeach()
   endif()
 endfunction()

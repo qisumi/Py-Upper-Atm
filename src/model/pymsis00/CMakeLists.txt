@@ -5,13 +5,7 @@ add_library(
     msis00_cshim.F90
 )
 
-if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
-  set_source_files_properties(
-    msis00.f
-    PROPERTIES COMPILE_OPTIONS "-std=legacy;-fno-range-check"
-  )
-endif()
-
+upperatmpy_use_gnu_legacy_fortran(msis00.f)
 upperatmpy_set_output(msis00 "${CMAKE_CURRENT_SOURCE_DIR}/build")
 upperatmpy_link_static_gnu_runtime(msis00)
 
