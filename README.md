@@ -92,15 +92,14 @@ cmake --build --preset native-release
 If building native libraries is inconvenient, download the matching wheel from the repository
 `Releases` page and install it directly with pip.
 
-1. Choose a wheel file that matches your OS, architecture, and Python version.
+1. Choose a wheel file that matches your OS and architecture.
    Example naming patterns:
+   - `upperatmpy-0.1.0-py3-none-manylinux_x86_64.whl`
    - `upperatmpy-0.1.0-py3-none-win_amd64.whl`
-   - `upperatmpy-0.1.0-cp310-cp310-manylinux2014_x86_64.whl`
-   - `upperatmpy-0.1.0-cp310-cp310-macosx_11_0_x86_64.whl`
 2. Install the wheel.
 
 ```bash
-python -m pip install /path/to/upperatmpy-0.1.0-cp310-cp310-win_amd64.whl
+python -m pip install /path/to/upperatmpy-0.1.0-py3-none-win_amd64.whl
 ```
 
 Or install directly from a release URL:

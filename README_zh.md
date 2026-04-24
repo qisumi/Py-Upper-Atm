@@ -88,14 +88,14 @@ cmake --build --preset native-release
 
 如果不方便自行编译，可直接从仓库的 `Releases` 页面下载对应平台的预编译 `.whl` 文件并安装。
 
-1. 选择与当前系统和 Python 版本匹配的 wheel 文件，例如：
+1. 选择与当前系统和架构匹配的 wheel 文件，例如：
    - `upperatmpy-0.1.0-py3-none-win_amd64.whl`
-   - `upperatmpy-0.1.0-cp310-cp310-manylinux2014_x86_64.whl`
-   - `upperatmpy-0.1.0-cp310-cp310-macosx_11_0_x86_64.whl`
+   - `upperatmpy-0.1.0-py3-none-manylinux_x86_64.whl`
+   - `upperatmpy-0.1.0-py3-none-win_amd64.whl`
 2. 安装本地 wheel 文件
 
 ```bash
-python -m pip install /path/to/upperatmpy-0.1.0-cp310-cp310-win_amd64.whl
+python -m pip install /path/to/upperatmpy-0.1.0-py3-none-win_amd64.whl
 ```
 
 或者直接从 release 直链安装：
