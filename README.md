@@ -81,34 +81,193 @@ Top-level `model` exports only:
 - `HWM14`
 - `HWM93`
 
-Each class provides `calculate(...)` and returns a dictionary.
+Each class provides `calculate(...)` and returns a plain dictionary.
+The model methods accept scalar or broadcastable array inputs.
 
-MSIS dictionaries contain:
-
-- `alt_km`
-- `T_local_K`
-- `T_exo_K`
-- `densities`
-
-HWM dictionaries contain:
-
-- `alt_km`
-- `meridional_wind_ms`
-- `zonal_wind_ms`
-
-Time helpers:
+### Model time helper functions
 
 ```python
 from utils.time import doy, seconds_of_day
 ```
 
-Optional utility modules:
+- `doy(year, month, day)`: returns day of year (1-366).
+- `seconds_of_day(hour, minute=0, second=0.0)`: returns seconds since midnight.
+
+### MSIS2.calculate
+
+Signature:
+
+```python
+MSIS2.calculate(*, day, utsec, alt_km, lat_deg, lon_deg, f107a, f107, ap7=None)
+```
+
+Input fields:
+
+- `day`: day-of-year, same as `utils.time.doy(...)`.
+- `utsec`: UT seconds (0-86400).
+- `alt_km`: altitude in km (float or array-like).
+- `lat_deg`: geodetic latitude in degrees.
+- `lon_deg`: longitude in degrees.
+- `f107a`: 81-day average F10.7 solar flux.
+- `f107`: daily F10.7 solar flux.
+- `ap7`: optional sequence length 7 for geomagnetic activity.
+
+Return fields:
+
+- `alt_km`: output altitude(s), same shape as broadcast inputs.
+- `T_local_K`: local temperature (K).
+- `T_exo_K`: exospheric temperature (K).
+- `densities`: array with shape `(..., 10)` for species:
+  `N2, O2, O, He, H, Ar, N, AnomalousO, NO, NPlus`.
+
+### MSIS00.calculate
+
+Signature:
+
+```python
+MSIS00.calculate(*, iyd, sec, alt_km, lat_deg, lon_deg, stl_hours, f107a, f107, ap7=None, mass=48, use_anomalous_o=False)
+```
+
+Input fields:
+
+- `iyd`: date as integer `YYYYDDD`.
+- `sec`: UTC seconds (0-86400).
+- `alt_km`: altitude in km.
+- `lat_deg`, `lon_deg`: geodetic coordinates in degrees.
+- `stl_hours`: local solar time in hours.
+- `f107a`: 81-day average F10.7 solar flux.
+- `f107`: daily F10.7 solar flux.
+- `ap7`: optional sequence length 7.
+- `mass`: optional target mass number selector, default `48`.
+- `use_anomalous_o`: whether to call anomalous-oxygen mode.
+
+Return fields:
+
+- `alt_km`: output altitude(s).
+- `T_local_K`: local temperature (K).
+- `T_exo_K`: exospheric temperature (K).
+- `densities`: array with shape `(..., 9)` for species:
+  `He, O, N2, O2, Ar, H, N, AnomalousO, TotalMass`.
+
+### HWM14.calculate and HWM93.calculate
+
+Both models share the same signature:
+
+```python
+calculate(*, iyd, sec, alt_km, glat_deg, glon_deg, stl_hours, f107a, f107, ap2=(0.0, 20.0))
+```
+
+Input fields:
+
+- `iyd`: date as integer `YYYYDDD`.
+- `sec`: UTC seconds (0-86400).
+- `alt_km`: altitude in km.
+- `glat_deg`, `glon_deg`: latitude/longitude in degrees.
+- `stl_hours`: local solar time in hours.
+- `f107a`: 81-day average F10.7 solar flux.
+- `f107`: daily F10.7 solar flux.
+- `ap2`: optional sequence length 2.
+
+Return fields:
+
+- `alt_km`: output altitude(s).
+- `meridional_wind_ms`: meridional (north-south) wind in m/s.
+- `zonal_wind_ms`: zonal (east-west) wind in m/s.
+
+### Optional utility modules
+
+These modules are not imported automatically by `import model`.
 
 - `utils.cache`
 - `utils.parallel`
 - `utils.space_weather`
 - `utils.xarray_output`
 - `utils.netcdf2csv`
+
+#### `utils.space_weather`
+
+Fetch and cache geomagnetic/solar inputs for model calls.
+
+- `get_indices(date=None, source="celestrak")`: default date is yesterday UTC.
+- `get_indices_celestrak(date)`: fetch from CelesTrak space weather file.
+- `clear_cache()`: remove cached local files.
+- `SpaceWeatherIndices`:
+  - `as_msis_params()` returns `{ "f107", "f107a", "ap7" }`
+  - `as_hwm_params()` returns `{ "f107", "f107a", "ap2" }`
+
+Usage:
+
+```python
+from model import MSIS2
+from utils.time import doy, seconds_of_day
+from utils.space_weather import get_indices
+
+sw = get_indices()
+result = MSIS2(precision="single").calculate(
+    day=doy(2023, 1, 1),
+    utsec=seconds_of_day(12, 0, 0),
+    alt_km=100.0,
+    lat_deg=35.0,
+    lon_deg=116.0,
+    **sw.as_msis_params(),
+)
+```
+
+#### `utils.cache`
+
+Memoize model/function calls (works for any callable).
+
+- `cached_call(func, cache_size=10000)` returns a wrapped callable.
+- wrapper exposes `cache_info()` and `cache_clear()`.
+
+Usage:
+
+```python
+from utils.cache import cached_call
+from model import MSIS2
+
+msis = MSIS2(precision="single")
+cached_calculate = cached_call(msis.calculate)
+cached_calculate(...)
+cached_calculate(...)
+print(cached_calculate.cache_info())
+```
+
+#### `utils.parallel`
+
+Run large batches in threads for better throughput.
+
+- `parallel_map(func, items, max_workers=None, show_progress=False)`
+- `parallel_batch_compute(compute_func, param_dicts, max_workers=None, show_progress=False)`
+
+Usage:
+
+```python
+from utils.parallel import parallel_batch_compute
+from utils.time import doy, seconds_of_day
+from model import MSIS2
+
+msis = MSIS2(precision="single")
+
+jobs = [dict(day=doy(2023, 1, 1), utsec=seconds_of_day(12,0,0),
+             alt_km=a, lat_deg=35.0, lon_deg=116.0,
+             f107a=100.0, f107=100.0) for a in [80.0, 100.0, 120.0]]
+results = parallel_batch_compute(msis.calculate, jobs, max_workers=4, show_progress=True)
+```
+
+#### `utils.xarray_output`
+
+Convert output dictionaries to xarray datasets.
+
+- `msis_to_xarray(result, species_names=None, attrs=None)`
+- `hwm_to_xarray(result, attrs=None)`
+
+Usage:
+
+```python
+from utils.xarray_output import msis_to_xarray
+ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
+```
 
 ## Project Structure
 
@@ -133,11 +292,4 @@ UpperAtmPy/
 │   ├── hwm14data/
 │   └── msis2data/
 └── quick_run.py
-```
-
-## Test
-
-```bash
-python -m pytest
-python quick_run.py
 ```
