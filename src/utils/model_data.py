@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Sequence, Union
 DATA_ENV_VAR = "UPPERATMPY_DATA_DIR"
 HWM14_ENV_VAR = "HWMPATH"
 _MANIFEST_NAME = "model_data_manifest.json"
-_USER_AGENT = "UpperAtmPy/0.1 model-data"
+_USER_AGENT = "UpperAtmPy/0.1.1 model-data"
 
 
 class ModelDataError(RuntimeError):

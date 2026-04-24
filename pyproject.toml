@@ -1,6 +1,6 @@
 [project]
 name = "upperatmpy"
-version = "0.1.0"
+version = "0.1.1"
 description = "Python wrapper for upper atmospheric models (NRLMSIS-2.0, NRLMSISE-00, HWM14, HWM93)"
 readme = "README.md"
 license = {text = "Placeholder"}
