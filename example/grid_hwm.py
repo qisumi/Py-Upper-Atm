@@ -1,19 +1,27 @@
 from __future__ import annotations
 
-from typing import Sequence, Optional, Any, Dict, List
-import numpy as np
 from datetime import date
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Sequence
+import sys
+
+import numpy as np
 
 try:
     from tqdm import tqdm
 except Exception:
     tqdm = None
 
-import model.pyhwm14 as pyhwm14
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
+
+from model import HWM14
 
 
 def compute_region_hwm(
-    hwm_module=None,
+    hwm_model=None,
     lat0: float = -90.0,
     lat1: float = 90.0,
     lon0: float = 0.0,
@@ -33,106 +41,63 @@ def compute_region_hwm(
     ap2: Optional[Sequence[float]] = None,
     out_numpy: bool = False,
 ) -> List[Dict[str, Any]]:
+    if hwm_model is None:
+        hwm_model = HWM14()
 
-    if hwm_module is None:
-        hwm_module = pyhwm14
-
-    lat_steps = max(1, int(lat_steps))
-    lon_steps = max(1, int(lon_steps))
-
-    lat0, lat1 = float(lat0), float(lat1)
-    lon0, lon1 = float(lon0), float(lon1)
-
-    lats = np.linspace(lat0, lat1, lat_steps)
-    lons = np.linspace(lon0, lon1, lon_steps)
-
+    lats = np.linspace(float(lat0), float(lat1), max(1, int(lat_steps)))
+    lons = np.linspace(float(lon0), float(lon1), max(1, int(lon_steps)))
     alt_km_arr = np.asarray(list(alt_km_list), dtype=float)
 
-    # 构造 iyd (YYYYDDD) 和 seconds
-    doy = date(year, month, day).timetuple().tm_yday
-    iyd = int(year) * 1000 + int(doy)
+    day_of_year = date(year, month, day).timetuple().tm_yday
+    iyd = int(year) * 1000 + int(day_of_year)
     sec = float(hour) * 3600.0 + float(minute) * 60.0 + float(second)
 
-    total = lat_steps * lon_steps
-    use_tqdm = tqdm is not None
-
-    results: List[Dict[str, Any]] = []
-
     iterator = ((ilat, ilon) for ilat in lats for ilon in lons)
-    if use_tqdm:
+    total = len(lats) * len(lons)
+    if tqdm is not None:
         iterator = tqdm(iterator, total=total, desc="HWM grid")
 
+    results: List[Dict[str, Any]] = []
     for lat, lon in iterator:
-        # hwm14_eval_many 支持广播高度数组
-        try:
-            wm, wz = hwm_module.hwm14_eval_many(
-                iyd=iyd,
-                sec=sec,
-                alt_km=alt_km_arr,
-                glat_deg=lat,
-                glon_deg=lon,
-                stl_hours=stl_hours,
-                f107a=f107a,
-                f107=f107,
-                ap2=ap2,
-            )
-            wm_arr = np.asarray(wm)
-            wz_arr = np.asarray(wz)
-        except Exception:
-            # 回退到逐高度调用
-            wm_list = []
-            wz_list = []
-            for h in alt_km_arr:
-                wm_val, wz_val = hwm_module.hwm14_eval(
-                    iyd=iyd,
-                    sec=sec,
-                    alt_km=float(h),
-                    glat_deg=float(lat),
-                    glon_deg=float(lon),
-                    stl_hours=stl_hours,
-                    f107a=f107a,
-                    f107=f107,
-                    ap2=ap2,
-                )
-                wm_list.append(wm_val)
-                wz_list.append(wz_val)
-
-            wm_arr = np.asarray(wm_list)
-            wz_arr = np.asarray(wz_list)
-
-        entry: Dict[str, Any] = {
-            "lat": float(lat),
-            "lon": float(lon),
-            "alt_km": alt_km_arr if out_numpy else list(alt_km_arr),
-            "wm": wm_arr if out_numpy else list(wm_arr),
-            "wz": wz_arr if out_numpy else list(wz_arr),
-        }
-
-        results.append(entry)
+        output = hwm_model.calculate(
+            iyd=iyd,
+            sec=sec,
+            alt_km=alt_km_arr,
+            glat_deg=float(lat),
+            glon_deg=float(lon),
+            stl_hours=stl_hours,
+            f107a=f107a,
+            f107=f107,
+            ap2=(0.0, 20.0) if ap2 is None else ap2,
+        )
+        wm = output["meridional_wind_ms"]
+        wz = output["zonal_wind_ms"]
+        results.append(
+            {
+                "lat": float(lat),
+                "lon": float(lon),
+                "alt_km": alt_km_arr if out_numpy else list(alt_km_arr),
+                "wm": wm if out_numpy else list(wm),
+                "wz": wz if out_numpy else list(wz),
+            }
+        )
 
     return results
 
 
 if __name__ == "__main__":
-    # 简单示例：小网格，演示调用和进度条
-    lat0, lat1 = 30.0, 31.0
-    lon0, lon1 = 114.0, 115.0
-    lat_steps, lon_steps = 3, 4
-    alt_km_list = [100, 200, 300]
-    year, month, day = 2025, 10, 17
-
     results = compute_region_hwm(
         None,
-        lat0,
-        lat1,
-        lon0,
-        lon1,
-        lat_steps,
-        lon_steps,
-        alt_km_list,
-        year,
-        month,
-        day,
+        30.0,
+        31.0,
+        114.0,
+        115.0,
+        3,
+        4,
+        [100, 200, 300],
+        2025,
+        10,
+        17,
         hour=12,
         stl_hours=12.0,
         out_numpy=False,
@@ -140,8 +105,8 @@ if __name__ == "__main__":
 
     print(f"Computed {len(results)} grid points. Example first point:")
     if results:
-        r0 = results[0]
-        print(r0["lat"], r0["lon"])
-        print("alt_km:", r0["alt_km"])
-        print("wm:", r0["wm"])
-        print("wz:", r0["wz"])
+        first = results[0]
+        print(first["lat"], first["lon"])
+        print("alt_km:", first["alt_km"])
+        print("wm:", first["wm"])
+        print("wz:", first["wz"])

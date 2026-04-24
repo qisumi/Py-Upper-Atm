@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+from pathlib import Path
+import sys
+
 import pytest
-from datetime import datetime
-from typing import Optional
+
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
 
 @pytest.fixture
@@ -23,63 +29,48 @@ def default_geo_params():
 
 
 @pytest.fixture
-def sample_datetime():
-    return datetime(2023, 7, 15, 12, 30, 0)
-
-
-@pytest.fixture
 def sample_iyd():
     return 2023196
 
 
 @pytest.fixture
-def sample_day():
-    return 196.0
-
-
-@pytest.fixture
-def sample_utsec():
-    return 45000.0
-
-
-@pytest.fixture
-def temp_density_model_msis2():
+def msis2_model():
     try:
-        from model import TempDensityModel
+        from model import MSIS2
 
-        return TempDensityModel(model_version="msis2")
-    except (ImportError, RuntimeError):
-        pytest.skip("MSIS-2.0 DLL not available")
-
-
-@pytest.fixture
-def temp_density_model_msis00():
-    try:
-        from model import TempDensityModel
-
-        return TempDensityModel(model_version="msis00")
-    except (ImportError, RuntimeError):
-        pytest.skip("MSIS-00 DLL not available")
+        return MSIS2(precision="single")
+    except Exception as exc:
+        pytest.skip(f"NRLMSIS-2.0 DLL not available: {exc}")
 
 
 @pytest.fixture
-def wind_model_hwm14():
+def msis00_model():
     try:
-        from model import WindModel
+        from model import MSIS00
 
-        return WindModel(model_version="hwm14")
-    except (ImportError, RuntimeError):
-        pytest.skip("HWM14 DLL not available")
+        return MSIS00()
+    except Exception as exc:
+        pytest.skip(f"MSIS-00 DLL not available: {exc}")
 
 
 @pytest.fixture
-def wind_model_hwm93():
+def hwm14_model():
     try:
-        from model import WindModel
+        from model import HWM14
 
-        return WindModel(model_version="hwm93")
-    except (ImportError, RuntimeError):
-        pytest.skip("HWM93 DLL not available")
+        return HWM14()
+    except Exception as exc:
+        pytest.skip(f"HWM14 DLL not available: {exc}")
+
+
+@pytest.fixture
+def hwm93_model():
+    try:
+        from model import HWM93
+
+        return HWM93()
+    except Exception as exc:
+        pytest.skip(f"HWM93 DLL not available: {exc}")
 
 
 def pytest_configure(config):

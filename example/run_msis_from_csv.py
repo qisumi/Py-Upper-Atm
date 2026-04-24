@@ -1,9 +1,9 @@
-"""从 CSV 读取剖面数据，调用 NRLMSIS2 批量计算并保存结果到 CSV。
+"""从 CSV 读取剖面数据，调用 MSIS2 批量计算并保存结果到 CSV。
 
 行为：
 - 从 `data/ERA5_T_20120101.csv` 读取：包含 valid_time, model_level, latitude, longitude, t
 - 使用 `data/137层气压_高度对应关系.txt` 将 model_level 映射为海拔高度（米 -> km）
-- 批量调用 `model.pymsis2.NRLMSIS2.calc_many` 获得 T_local, T_exo, dn10
+- 批量调用 `model.MSIS2.calculate` 获得 T_local, T_exo, densities
 - 将输出追加到 `results/ERA5_T_20120101_msis.csv`
 
 注意：脚本仅使用标准库，按块处理以控制内存；若未找到 MSIS DLL，会抛出并提示。
@@ -58,21 +58,22 @@ def main(chunk_size: int = 1000, f107a: float = 150.0, f107: float = 150.0):
 	# 保证路径
 	RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
-	# 将项目根加入 sys.path，以便导入 model.pymsis2
-	root_parent = Path(__file__).resolve().parent
-	if str(root_parent) not in sys.path:
-		sys.path.insert(0, str(root_parent))
+	# 将 src 加入 sys.path，以便源码运行时导入 model/utils
+	src_dir = Path(__file__).resolve().parents[1] / "src"
+	if str(src_dir) not in sys.path:
+		sys.path.insert(0, str(src_dir))
 
 	try:
-		from model.pymsis2 import NRLMSIS2, doy, seconds_of_day
+		from model import MSIS2
+		from utils.time import doy, seconds_of_day
 	except Exception as e:
-		raise RuntimeError("无法导入 model.pymsis2，请确认 DLL 已编译并且 Python 路径正确: " + str(e))
+		raise RuntimeError("无法导入 MSIS2，请确认 DLL 已编译并且 Python 路径正确: " + str(e))
 
 	level_map = load_level_map(LEVEL_MAP)
 	if not level_map:
 		print("警告：未加载到 level->height 映射，请检查", LEVEL_MAP)
 
-	msis = NRLMSIS2()  # 使用默认 DLL 路径与单精度
+	msis = MSIS2()  # 使用默认 DLL 路径与单精度
 
 	with INPUT_CSV.open("r", encoding="utf-8") as infh, OUTPUT_CSV.open("w", encoding="utf-8", newline='') as outfh:
 		reader = csv.DictReader(infh)
@@ -94,7 +95,7 @@ def main(chunk_size: int = 1000, f107a: float = 150.0, f107: float = 150.0):
 				return
 			# 调用 msis
 			try:
-				results = msis.calc_many(
+				results = msis.calculate(
 					day=batch_day,
 					utsec=batch_utsec,
 					alt_km=batch_alt,
@@ -103,17 +104,16 @@ def main(chunk_size: int = 1000, f107a: float = 150.0, f107: float = 150.0):
 					f107a=[f107a],
 					f107=[f107],
 					ap7=None,
-					out_numpy=False,
 				)
 			except Exception as e:
-				raise RuntimeError("调用 msis.calc_many 失败: " + str(e))
+				raise RuntimeError("调用 msis.calculate 失败: " + str(e))
 
-			for row, res in zip(batch_rows, results):
+			for idx, row in enumerate(batch_rows):
 				out = dict(row)
-				out["alt_km"] = f"{res.alt_km:.6f}"
-				out["T_local_K"] = f"{res.T_local_K:.6f}"
-				out["T_exo_K"] = f"{res.T_exo_K:.6f}"
-				for i, v in enumerate(res.dn10):
+				out["alt_km"] = f"{float(results['alt_km'][idx]):.6f}"
+				out["T_local_K"] = f"{float(results['T_local_K'][idx]):.6f}"
+				out["T_exo_K"] = f"{float(results['T_exo_K'][idx]):.6f}"
+				for i, v in enumerate(results["densities"][idx]):
 					out[f"dn10_{i}"] = f"{v:.6e}"
 				writer.writerow(out)
 

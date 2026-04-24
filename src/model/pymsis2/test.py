@@ -1,4 +1,4 @@
-# test.py — NRLMSIS2 C-ABI smoke test aligned to your signature
+# test.py — MSIS2 C-ABI smoke test aligned to the shim signature
 import ctypes as C
 from pathlib import Path
 

@@ -6,197 +6,142 @@
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-Placeholder-lightgrey)
 
-**UpperAtmPy** is a unified Python interface for upper atmospheric models, wrapping standard Fortran implementations for efficient computation of neutral temperature, density, and horizontal wind fields.
+**UpperAtmPy** provides direct Python wrappers for upper atmospheric model DLLs. The project uses a `src/` layout and exposes one public class per model.
 
-The library supports the following models via `ctypes` bindings:
-- **NRLMSIS-2.0** (Naval Research Laboratory Mass Spectrometer and Incoherent Scatter Radar Model, 2020)
-- **NRLMSISE-00** (Legacy MSIS-00 model)
-- **HWM14** (Horizontal Wind Model 2014)
-- **HWM93** (Horizontal Wind Model 1993)
+Supported models:
+
+- **MSIS2**: NRLMSIS-2.0 temperature and density
+- **MSIS00**: NRLMSISE-00 temperature and density
+- **HWM14**: Horizontal Wind Model 2014
+- **HWM93**: Horizontal Wind Model 1993
 
 ## Features
 
-- **Unified Python API**: Consistent interface for all temperature/density and wind models.
-- **Cross-platform**: Supports Windows, Linux, and macOS with PowerShell and Bash build scripts.
-- **High Performance**: Direct calls to Fortran shared libraries via `ctypes`.
-- **Batch Processing**: Built-in vectorized computation using `numpy`.
-- **Parallel Computing**: Multi-threaded parallel computation support for large-scale batch calculations.
-- **Result Caching**: Built-in LRU cache mechanism to avoid redundant computation.
-- **Space Weather Data**: Automatic retrieval of F10.7, Ap, and other geomagnetic activity indices.
-- **xarray Integration**: Convert results to xarray Datasets for downstream analysis.
-- **Type Safety**: Comprehensive type hints and result dataclasses.
-- **Lightweight**: Core functionality depends only on `numpy`.
+- One public interface per model: `Model.calculate(...)`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`.
+- Single-point and numpy-broadcast batch inputs through the same method.
+- Model outputs are plain dictionaries.
+- Utilities live under `utils`, not `model`.
 
-## Requirements
+## Build
 
-- **OS**: Windows / Linux / macOS
-- **Python**: 3.8+
-- **Compiler**: gfortran (MinGW on Windows)
-- **Python Dependencies**:
-  - `numpy` (required)
-  - `xarray` (optional, for data conversion)
-  - `pandas` (optional, for data utilities)
-  - `tqdm` (optional, for progress bars)
+Compile the DLLs you need before using a model.
 
-## Installation & Build
-
-This project runs directly from source. Before using the library, you must compile the Fortran shared libraries.
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/qisumi/Py-Upper-Atm.git
-cd Py-Upper-Atm
-```
-
-### 2. Compile Shared Libraries
-The project includes both PowerShell (Windows) and Bash (Linux/macOS) build scripts.
-
-**Windows (PowerShell):**
 ```powershell
-# Compile NRLMSIS-2.0
-cd model/pymsis2
+cd src/model/pymsis2
 powershell -ExecutionPolicy Bypass -File compile.ps1
-cd ../..
+cd ../../..
 
-# Compile HWM14
-cd model/pyhwm14
+cd src/model/pymsis00
 powershell -ExecutionPolicy Bypass -File compile.ps1
-cd ../..
+cd ../../..
+
+cd src/model/pyhwm14
+powershell -ExecutionPolicy Bypass -File compile.ps1
+cd ../../..
+
+cd src/model/pyhwm93
+powershell -ExecutionPolicy Bypass -File compile.ps1
+cd ../../..
 ```
-
-**Linux / macOS (Bash):**
-```bash
-# Compile NRLMSIS-2.0
-cd model/pymsis2
-chmod +x compile.sh && ./compile.sh
-cd ../..
-
-# Compile HWM14
-cd model/pyhwm14
-chmod +x compile.sh && ./compile.sh
-cd ../..
-```
-
-*(Repeat for `pyhwm93` and `pymsis00` as needed.)*
 
 ## Quick Start
 
-### Temperature & Density (NRLMSIS-2.0)
-
 ```python
-from model import TempDensityModel, convert_date_to_day, calculate_seconds_of_day
+from model import HWM14, MSIS2
+from utils.time import doy, seconds_of_day
 
-# Initialize model
-model = TempDensityModel()
-
-# Calculate parameters
-day_of_year = convert_date_to_day(2023, 1, 1)
-ut_seconds = calculate_seconds_of_day(12, 0, 0)  # 12:00:00 UTC
-
-# Calculate for a single point
-result = model.calculate_point(
-    day=day_of_year,    # Day of year (1-366)
-    utsec=ut_seconds,   # UTC seconds
-    alt_km=100.0,       # Altitude in km
-    lat_deg=35.0,       # Latitude
-    lon_deg=116.0,      # Longitude
-    f107a=100.0,        # 81-day average F10.7
-    f107=100.0,         # Daily F10.7
-    ap7=None            # Optional: Geomagnetic indices
+msis = MSIS2(precision="single")
+atmosphere = msis.calculate(
+    day=doy(2023, 1, 1),
+    utsec=seconds_of_day(12, 0, 0),
+    alt_km=[100.0, 200.0, 300.0],
+    lat_deg=35.0,
+    lon_deg=116.0,
+    f107a=100.0,
+    f107=100.0,
 )
+print(atmosphere["T_local_K"])
+print(atmosphere["densities"])
 
-print(f"Temperature: {result.T_local_K:.2f} K")
-print(f"N2 Density: {result.densities[0]:.2e} cm^-3")
-```
-
-### Horizontal Wind (HWM14)
-
-```python
-from model import WindModel
-
-# Initialize model
-wind_model = WindModel()
-
-# Calculate for a single point
-# iyd format: YYYYDDD (e.g., 2023001 for Jan 1, 2023)
-meridional, zonal = wind_model.calculate_point(
+hwm = HWM14()
+wind = hwm.calculate(
     iyd=2023001,
-    sec=43200.0,        # 12:00:00 UTC
+    sec=43200.0,
     alt_km=100.0,
     glat_deg=35.0,
     glon_deg=116.0,
-    stl_hours=12.0,     # Local solar time
+    stl_hours=12.0,
     f107a=100.0,
     f107=100.0,
-    ap2=(0.0, 20.0)     # Geomagnetic indices
 )
-
-print(f"Meridional Wind (North/South): {meridional:.2f} m/s")
-print(f"Zonal Wind (East/West): {zonal:.2f} m/s")
+print(wind["meridional_wind_ms"], wind["zonal_wind_ms"])
 ```
 
-## API Overview
+## API
 
-The library exposes the following components from `model/__init__.py`:
+Top-level `model` exports only:
 
-### Core Model Classes
+- `MSIS2`
+- `MSIS00`
+- `HWM14`
+- `HWM93`
 
-#### `TempDensityModel`
-- `calculate_point(...)`: Compute temperature and density at a single location/time.
-- `calculate_batch(...)`: Vectorized computation over input arrays (e.g., altitude profiles).
+Each class provides `calculate(...)` and returns a dictionary.
 
-#### `WindModel`
-- `calculate_point(...)`: Compute meridional and zonal wind components.
-- `calculate_batch(...)`: Vectorized computation over input arrays.
+MSIS dictionaries contain:
 
-### Result Dataclasses
-- `TempDensityResult`: Temperature and density computation result
-- `WindResult`: Wind computation result
+- `alt_km`
+- `T_local_K`
+- `T_exo_K`
+- `densities`
 
-### Cached Models
-- `CachedModel`: Temperature/density model wrapper with LRU cache
-- `CachedWindModel`: Wind model wrapper with LRU cache
+HWM dictionaries contain:
 
-### Space Weather
-- `SpaceWeatherIndices`: Space weather indices dataclass
-- `get_indices(date)`: Retrieve space weather indices for a given date
+- `alt_km`
+- `meridional_wind_ms`
+- `zonal_wind_ms`
 
-### Parallel Computing
-- `parallel_map(func, items)`: Parallel mapping function
-- `parallel_batch_compute(compute_func, param_dicts)`: Parallel batch computation
+Time helpers:
 
-### xarray Integration
-- `temp_density_results_to_xarray(results)`: Convert temperature/density results to xarray Dataset
-- `wind_results_to_xarray(results)`: Convert wind results to xarray Dataset
+```python
+from utils.time import doy, seconds_of_day
+```
 
-### Utility Functions
-- `convert_date_to_day(year, month, day)`: Convert date to day of year
-- `calculate_seconds_of_day(hour, minute, second)`: Convert time to seconds
-- `calculate_wind_at_point(...)`: Convenience function for wind computation
-- `calculate_wind_batch(...)`: Convenience function for batch wind computation
+Optional utility modules:
+
+- `utils.cache`
+- `utils.parallel`
+- `utils.space_weather`
+- `utils.xarray_output`
+- `utils.netcdf2csv`
 
 ## Project Structure
 
-```
+```text
 UpperAtmPy/
-├── model/
-│   ├── __init__.py           # Public API exports
-│   ├── temp_density_model.py # Main MSIS wrapper class
-│   ├── wind_model.py         # Main HWM wrapper class
-│   ├── cache.py              # Result caching module
-│   ├── parallel.py           # Parallel computing module
-│   ├── space_weather.py      # Space weather index retrieval
-│   ├── xarray_output.py      # xarray data conversion
-│   ├── pymsis2/              # NRLMSIS-2.0 Fortran source and build scripts
-│   ├── pymsis00/             # NRLMSISE-00 Fortran source and build scripts
-│   ├── pyhwm14/              # HWM14 Fortran source and build scripts
-│   └── pyhwm93/              # HWM93 Fortran source and build scripts
-├── example/                  # Usage scripts and tests
-├── utils/                    # Data processing utilities
-├── hwm14data/               # HWM14 data files
-└── quick_run.py             # Demo script
+├── src/
+│   ├── model/
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93
+│   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and build scripts
+│   │   ├── pymsis00/        # NRLMSISE-00 wrapper and build scripts
+│   │   ├── pyhwm14/         # HWM14 wrapper and build scripts
+│   │   └── pyhwm93/         # HWM93 wrapper and build scripts
+│   └── utils/
+│       ├── cache.py
+│       ├── parallel.py
+│       ├── space_weather.py
+│       ├── time.py
+│       └── xarray_output.py
+├── example/
+├── tests/
+├── hwm14data/
+└── quick_run.py
 ```
 
-## License
+## Test
 
-See [LICENSE](LICENSE) for details.
+```bash
+python -m pytest
+python quick_run.py
+```
