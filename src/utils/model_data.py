@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import importlib.metadata
 import hashlib
+import shutil
 import json
 import os
+import zipfile
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -12,8 +15,12 @@ from typing import Dict, List, Optional, Sequence, Union
 
 DATA_ENV_VAR = "UPPERATMPY_DATA_DIR"
 HWM14_ENV_VAR = "HWMPATH"
+DATA_TAG_ENV_VAR = "UPPERATMPY_DATA_TAG"
 _MANIFEST_NAME = "model_data_manifest.json"
 _USER_AGENT = "UpperAtmPy/0.1.1 model-data"
+_GITHUB_RELEASE_BASE = "https://github.com/qisumi/Py-Upper-Atm/releases/download"
+_DATA_BUNDLE_PREFIX = "upperatmpy-model-data"
+_DEFAULT_DATA_TAG = "model-data-v1"
 
 
 class ModelDataError(RuntimeError):
@@ -95,6 +102,15 @@ def _download_entry(root: Path, entry: Dict[str, object]) -> None:
 
     last_error = None
     for url in _entry_urls(entry):
+        if str(url).lower().endswith(".zip"):
+            try:
+                if _download_from_bundle(root, url, str(entry["path"]), expected_size, expected_hash):
+                    return
+            except (OSError, urllib.error.URLError, zipfile.BadZipFile, ModelDataError) as exc:
+                last_error = exc
+                continue
+            continue
+
         digest = hashlib.sha256()
         total = 0
         request = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
@@ -136,10 +152,126 @@ def _download_entry(root: Path, entry: Dict[str, object]) -> None:
 
 
 def _entry_urls(entry: Dict[str, object]) -> List[str]:
-    urls = [str(entry["url"])]
+    urls: List[str] = []
+    release_tag = _release_tag()
+    if release_tag:
+        file_name = str(Path(str(entry["path"])).name)
+        urls.append(_release_file_url(release_tag, file_name))
+        bundle_url = _release_bundle_url(release_tag)
+        if bundle_url is not None:
+            urls.append(bundle_url)
+    if "url" in entry and entry["url"]:
+        urls.append(str(entry["url"]))
     for url in entry.get("fallback_urls", []) or []:
         urls.append(str(url))
-    return urls
+    normalized = []
+    seen = set()
+    for url in urls:
+        if not url:
+            continue
+        if url in seen:
+            continue
+        seen.add(url)
+        normalized.append(url)
+    return normalized
+
+
+def _release_tag() -> str:
+    override = os.environ.get(DATA_TAG_ENV_VAR, "").strip()
+    if override:
+        return _normalize_release_tag(override)
+
+    try:
+        version = importlib.metadata.version("upperatmpy")
+    except Exception:
+        version = None
+    if not version:
+        version = _package_version()
+    if not version:
+        return _DEFAULT_DATA_TAG
+    return _normalize_release_tag(version)
+
+
+def _package_version() -> Optional[str]:
+    path = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    if not path.is_file():
+        return None
+
+    in_project = False
+    try:
+        with path.open("r", encoding="utf-8") as fh:
+            for line in fh:
+                stripped = line.strip()
+                if not stripped or stripped.startswith("#"):
+                    continue
+                if stripped.startswith("["):
+                    if stripped == "[project]":
+                        in_project = True
+                        continue
+                    if in_project:
+                        break
+                    in_project = False
+                    continue
+                if in_project and stripped.startswith("version"):
+                    _, value = stripped.split("=", 1)
+                    return value.strip().strip("'\"")
+    except OSError:
+        return None
+    return None
+
+
+def _normalize_release_tag(tag: str) -> str:
+    tag = tag.strip()
+    if not tag:
+        return _DEFAULT_DATA_TAG
+    return tag if tag.startswith("v") else f"v{tag}"
+
+
+def _release_file_url(release_tag: str, file_name: str) -> str:
+    return f"{_GITHUB_RELEASE_BASE}/{release_tag}/{file_name}"
+
+
+def _release_bundle_url(release_tag: str) -> Optional[str]:
+    # Newer release assets are packed as `upperatmpy-model-data-vX.Y.Z.zip`.
+    if release_tag.startswith("v"):
+        return f"{_GITHUB_RELEASE_BASE}/{release_tag}/{_DATA_BUNDLE_PREFIX}-{release_tag}.zip"
+    return None
+
+
+def _download_from_bundle(
+    root: Path,
+    url: str,
+    path: str,
+    expected_size: int,
+    expected_hash: str,
+) -> bool:
+    archive = root / ".upperatmpy-model-data.zip"
+    request = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
+    with urllib.request.urlopen(request, timeout=120) as response, archive.open("wb") as fh:
+        while True:
+            chunk = response.read(1024 * 1024)
+            if not chunk:
+                break
+            fh.write(chunk)
+
+    target = str(_safe_relative_path(path).as_posix())
+    with zipfile.ZipFile(archive) as zf:
+        if target not in zf.namelist():
+            _unlink_quietly(archive)
+            raise ModelDataError(
+                "数据压缩包中未包含目标文件：{path}".format(path=target)
+            )
+        destination = root / target
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with zf.open(target) as source, destination.open("wb") as target_file:
+            shutil.copyfileobj(source, target_file)
+
+    _unlink_quietly(archive)
+    destination = root / target
+    if destination.stat().st_size != expected_size or not _is_valid_file(destination, {"path": target, "size": expected_size, "sha256": expected_hash}):
+        _unlink_quietly(destination)
+        raise ModelDataError("bundle 内文件校验失败：{path}".format(path=target))
+    return True
 
 
 def _is_valid_file(path: Path, entry: Dict[str, object]) -> bool:

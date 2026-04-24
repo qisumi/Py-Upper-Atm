@@ -154,9 +154,11 @@ print(wind["meridional_wind_ms"], wind["zonal_wind_ms"])
 ```
 
 MSIS2 和 HWM14 需要外部模型数据。默认情况下，UpperAtmPy 会解析当前项目目录下的
-`.upperatmpy`，并在首次实例化模型时根据项目维护的 release manifest 下载缺失文件。离线使用时，
+`.upperatmpy`，并在首次实例化模型时按当前包版本的 release tag（如 `v0.1.1`）下载缺失文件。离线使用时，
 可以传入 `data_dir=...`，或设置 `UPPERATMPY_DATA_DIR` 指向包含 `msis2data/`
 和 `hwm14data/` 子目录的数据根目录。源码树中的统一数据根目录是 `data/`。
+
+可通过环境变量 `UPPERATMPY_DATA_TAG` 指定数据下载所用的 Release tag。
 
 ### 手动下载 release data 文件
 
