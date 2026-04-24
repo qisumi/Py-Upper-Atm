@@ -23,24 +23,11 @@
 
 ## 构建
 
-使用哪个模型，就先编译对应 DLL。
+从源码目录使用模型前，先统一编译原生库。
 
-```powershell
-cd src/model/pymsis2
-powershell -ExecutionPolicy Bypass -File compile.ps1
-cd ../../..
-
-cd src/model/pymsis00
-powershell -ExecutionPolicy Bypass -File compile.ps1
-cd ../../..
-
-cd src/model/pyhwm14
-powershell -ExecutionPolicy Bypass -File compile.ps1
-cd ../../..
-
-cd src/model/pyhwm93
-powershell -ExecutionPolicy Bypass -File compile.ps1
-cd ../../..
+```bash
+cmake --preset native-release
+cmake --build --preset native-release
 ```
 
 ## 快速开始
@@ -126,10 +113,10 @@ UpperAtmPy/
 ├── src/
 │   ├── model/
 │   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93
-│   │   ├── pymsis2/         # NRLMSIS-2.0 封装和构建脚本
-│   │   ├── pymsis00/        # NRLMSISE-00 封装和构建脚本
-│   │   ├── pyhwm14/         # HWM14 封装和构建脚本
-│   │   └── pyhwm93/         # HWM93 封装和构建脚本
+│   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
+│   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
+│   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
+│   │   └── pyhwm93/         # HWM93 封装和 Fortran 源码
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py

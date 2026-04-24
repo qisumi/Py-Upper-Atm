@@ -13,18 +13,9 @@ Each class provides one public calculation method: `calculate(...)`. Do not rein
 
 ## Build Commands
 
-```powershell
-cd src/model/pymsis2
-powershell -ExecutionPolicy Bypass -File compile.ps1
-
-cd src/model/pymsis00
-powershell -ExecutionPolicy Bypass -File compile.ps1
-
-cd src/model/pyhwm14
-powershell -ExecutionPolicy Bypass -File compile.ps1
-
-cd src/model/pyhwm93
-powershell -ExecutionPolicy Bypass -File compile.ps1
+```bash
+cmake --preset native-release
+cmake --build --preset native-release
 ```
 
 ## Test Commands

@@ -1,0 +1,22 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "native-release",
+      "displayName": "Native Release",
+      "description": "Configure native Fortran shared libraries with Ninja.",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/.cmake-build/native-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/.cmake-build/native-release/install"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "native-release",
+      "configurePreset": "native-release"
+    }
+  ]
+}

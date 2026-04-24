@@ -8,6 +8,7 @@ Public API:
 from __future__ import annotations
 
 import ctypes
+import os
 from pathlib import Path
 from typing import Optional, Union
 
@@ -28,7 +29,12 @@ class Model:
     ) -> None:
         del data_dir, auto_download
         if dll_path is None:
-            dll_path = Path(__file__).resolve().parent / "msis00.dll"
+            base = Path(__file__).resolve().parent
+            if os.name == "nt":
+                candidates = (base / "build" / "msis00.dll", base / "msis00.dll")
+            else:
+                candidates = (base / "build" / "libmsis00.so", base / "libmsis00.so")
+            dll_path = next((candidate for candidate in candidates if candidate.exists()), candidates[0])
         self._dll_path = Path(dll_path)
         self._dll = ctypes.CDLL(str(self._dll_path))
 

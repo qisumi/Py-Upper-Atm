@@ -25,24 +25,11 @@ Supported models:
 
 ## Build
 
-Compile the DLLs you need before using a model.
+Compile the native libraries before using a model from a source checkout.
 
-```powershell
-cd src/model/pymsis2
-powershell -ExecutionPolicy Bypass -File compile.ps1
-cd ../../..
-
-cd src/model/pymsis00
-powershell -ExecutionPolicy Bypass -File compile.ps1
-cd ../../..
-
-cd src/model/pyhwm14
-powershell -ExecutionPolicy Bypass -File compile.ps1
-cd ../../..
-
-cd src/model/pyhwm93
-powershell -ExecutionPolicy Bypass -File compile.ps1
-cd ../../..
+```bash
+cmake --preset native-release
+cmake --build --preset native-release
 ```
 
 ## Quick Start
@@ -130,10 +117,10 @@ UpperAtmPy/
 ├── src/
 │   ├── model/
 │   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93
-│   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and build scripts
-│   │   ├── pymsis00/        # NRLMSISE-00 wrapper and build scripts
-│   │   ├── pyhwm14/         # HWM14 wrapper and build scripts
-│   │   └── pyhwm93/         # HWM93 wrapper and build scripts
+│   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
+│   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
+│   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
+│   │   └── pyhwm93/         # HWM93 wrapper and Fortran sources
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py

@@ -1,0 +1,255 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CMAKE_PRESET: native-release
+
+jobs:
+  build-wheel:
+    name: Build wheel (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: wheels-linux
+          - os: windows-latest
+            artifact: wheels-windows
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake gfortran ninja-build
+
+      - name: Install Windows build dependencies
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: mingw-w64-ucrt-x86_64-gcc-fortran mingw-w64-ucrt-x86_64-ninja
+
+      - name: Add MinGW to PATH
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          "C:\msys64\ucrt64\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Install Python build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build pytest
+
+      - name: Check tag matches project version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: python
+        run: |
+          import os
+          import pathlib
+          import tomllib
+
+          tag = os.environ["GITHUB_REF_NAME"].removeprefix("v")
+          pyproject = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
+          version = pyproject["project"]["version"]
+          if tag != version:
+              raise SystemExit(f"Tag v{tag} does not match pyproject version {version}")
+
+      - name: Configure native libraries
+        run: cmake --preset "$env:CMAKE_PRESET"
+        if: runner.os == 'Windows'
+
+      - name: Configure native libraries
+        run: cmake --preset "$CMAKE_PRESET"
+        if: runner.os != 'Windows'
+
+      - name: Build native libraries
+        run: cmake --build --preset "$env:CMAKE_PRESET"
+        if: runner.os == 'Windows'
+
+      - name: Build native libraries
+        run: cmake --build --preset "$CMAKE_PRESET"
+        if: runner.os != 'Windows'
+
+      - name: Run tests
+        run: python -m pytest
+
+      - name: Build wheel
+        run: python -m build --wheel
+
+      - name: Check wheel contents
+        shell: python
+        run: |
+          import os
+          import pathlib
+          import zipfile
+
+          wheel = next(pathlib.Path("dist").glob("*.whl"))
+          names = set(zipfile.ZipFile(wheel).namelist())
+          if "none-any" in wheel.name:
+              raise SystemExit(f"Expected a platform wheel, got {wheel.name}")
+
+          suffix = ".dll" if os.environ["RUNNER_OS"] == "Windows" else ".so"
+          if os.environ["RUNNER_OS"] == "Windows":
+              expected = {
+                  "model/pymsis2/build/nrlmsis2.dll",
+                  "model/pymsis00/build/msis00.dll",
+                  "model/pyhwm14/hwm14.dll",
+                  "model/pyhwm93/hwm93.dll",
+              }
+          else:
+              expected = {
+                  "model/pymsis2/build/libnrlmsis2.so",
+                  "model/pymsis00/build/libmsis00.so",
+                  "model/pyhwm14/libhwm14.so",
+                  "model/pyhwm93/libhwm93.so",
+              }
+
+          expected.add("utils/model_data_manifest.json")
+          missing = expected - names
+          data_files = [name for name in names if name.startswith("data/")]
+          if missing:
+              raise SystemExit(f"Wheel {wheel.name} missing files: {sorted(missing)}")
+          if data_files:
+              raise SystemExit(f"Wheel {wheel.name} unexpectedly contains data files: {data_files[:10]}")
+
+          native_libs = sorted(name for name in names if name.endswith(suffix))
+          print(f"Checked {wheel.name}: {native_libs}")
+
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist/*.whl
+          if-no-files-found: error
+
+  build-source:
+    name: Build source distribution and data assets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+
+      - name: Check tag matches project version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: python
+        run: |
+          import os
+          import pathlib
+          import tomllib
+
+          tag = os.environ["GITHUB_REF_NAME"].removeprefix("v")
+          pyproject = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
+          version = pyproject["project"]["version"]
+          if tag != version:
+              raise SystemExit(f"Tag v{tag} does not match pyproject version {version}")
+
+      - name: Build source distribution
+        run: python -m build --sdist
+
+      - name: Check source distribution CMake layout
+        shell: python
+        run: |
+          import pathlib
+          import tarfile
+
+          sdist = next(pathlib.Path("dist").glob("*.tar.gz"))
+          names = set(tarfile.open(sdist).getnames())
+          root = sdist.name.removesuffix(".tar.gz")
+          expected = {
+              f"{root}/CMakeLists.txt",
+              f"{root}/CMakePresets.json",
+              f"{root}/cmake/UpperAtmPyNative.cmake",
+              f"{root}/src/model/pymsis2/CMakeLists.txt",
+              f"{root}/src/model/pymsis00/CMakeLists.txt",
+              f"{root}/src/model/pyhwm14/CMakeLists.txt",
+              f"{root}/src/model/pyhwm93/CMakeLists.txt",
+          }
+          missing = expected - names
+          data_files = [name for name in names if name.startswith(f"{root}/data/")]
+          if missing:
+              raise SystemExit(f"sdist {sdist.name} missing CMake files: {sorted(missing)}")
+          if data_files:
+              raise SystemExit(f"sdist {sdist.name} unexpectedly contains data files: {data_files[:10]}")
+
+          print(f"Checked {sdist.name}: split CMake layout is packaged")
+
+      - name: Collect model data release assets
+        run: |
+          mkdir -p release-data
+          cp data/msis2data/msis2.0.parm release-data/msis2.0.parm
+          cp data/hwm14data/hwm123114.bin release-data/hwm123114.bin
+          cp data/hwm14data/dwm07b104i.dat release-data/dwm07b104i.dat
+          cp data/hwm14data/gd2qd.dat release-data/gd2qd.dat
+
+      - name: Upload source distribution
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+      - name: Upload model data assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-data
+          path: release-data/*
+          if-no-files-found: error
+
+  create-release:
+    name: Create GitHub Release
+    needs:
+      - build-wheel
+      - build-source
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Download release artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG_NAME" release-assets/* \
+            --verify-tag \
+            --title "$TAG_NAME" \
+            --generate-notes

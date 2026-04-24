@@ -48,7 +48,8 @@ class Model:
         os.environ[DATA_ENV_VAR] = str(self._data_root)
 
         if dll_path is None:
-            dll_path = Path(__file__).resolve().parent / "build" / "nrlmsis2.dll"
+            dll_name = "nrlmsis2.dll" if os.name == "nt" else "libnrlmsis2.so"
+            dll_path = Path(__file__).resolve().parent / "build" / dll_name
         self._dll_path = Path(dll_path)
 
         if hasattr(os, "add_dll_directory"):
