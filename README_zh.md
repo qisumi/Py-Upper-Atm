@@ -12,11 +12,12 @@
 - **MSIS00**：NRLMSISE-00 温度和密度
 - **HWM14**：水平风场模型 2014
 - **HWM93**：水平风场模型 1993
+- **AuroraOval**：Feldstein 极光卵边界模型（Holzworth & Meng 参数化）
 
 ## 特性
 
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
@@ -204,6 +205,7 @@ hwm = HWM14(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 - `MSIS00`
 - `HWM14`
 - `HWM93`
+- `AuroraOval`
 
 每个类都提供 `calculate(...)`，返回普通字典。
 模型计算方法同时支持标量和可广播数组输入，输入标量返回标量结果，输入数组会按 numpy 广播返回对应形状。
@@ -299,6 +301,26 @@ calculate(*, iyd, sec, alt_km, glat_deg, glon_deg, stl_hours, f107a, f107, ap2=(
 - `alt_km`：输出高度（同广播后的形状）。
 - `meridional_wind_ms`：子午向风速（m/s）。
 - `zonal_wind_ms`：纬向风速（m/s）。
+
+### AuroraOval.calculate
+
+签名：
+
+```python
+AuroraOval.calculate(*, mlt_hours, activity_level)
+```
+
+输入字段：
+
+- `mlt_hours`：磁地方时（小时），标量或数组。
+- `activity_level`：地磁活动等级，0（宁静）至 6（活跃）。
+
+返回字段：
+
+- `mlt_hours`：输入的 MLT 值。
+- `activity_level`：输入的活动等级值。
+- `poleward_boundary_deg`：极向边界修正地磁纬度（°）。
+- `equatorward_boundary_deg`：赤道向边界修正地磁纬度（°）。
 
 ### 可选工具模块
 
@@ -405,11 +427,12 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93
+│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval
 │   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
 │   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
 │   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
-│   │   └── pyhwm93/         # HWM93 封装和 Fortran 源码
+│   │   ├── pyhwm93/         # HWM93 封装和 Fortran 源码
+│   │   └── pyaurora/        # Feldstein 极光卵（Holzworth & Meng）
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -423,6 +446,14 @@ UpperAtmPy/
 │   └── msis2data/
 └── quick_run.py
 ```
+
+`src/model/` 下每个模型目录都包含各自的 `README.md`（英文）和 `README_zh.md`（中文），详细文档涵盖模型背景、Fortran 接口、输入输出参数和用法示例：
+
+- [NRLMSIS 2.0](src/model/pymsis2/README_zh.md)
+- [NRLMSISE-00](src/model/pymsis00/README_zh.md)
+- [HWM14](src/model/pyhwm14/README_zh.md)
+- [HWM93](src/model/pyhwm93/README_zh.md)
+- [AuroraOval](src/model/pyaurora/README_zh.md)
 
 ## 测试
 

@@ -6,6 +6,7 @@ Only concrete model classes are exported:
 - MSIS00
 - HWM14
 - HWM93
+- AuroraOval
 
 Exports are lazy so `import model` does not load any model DLL.
 """
@@ -20,6 +21,7 @@ _LAZY_EXPORTS = {
     "MSIS00": ("model.pymsis00", "Model"),
     "HWM14": ("model.pyhwm14", "Model"),
     "HWM93": ("model.pyhwm93", "Model"),
+    "AuroraOval": ("model.pyaurora", "Model"),
 }
 
 __all__ = list(_LAZY_EXPORTS)

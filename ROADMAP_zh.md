@@ -12,6 +12,7 @@
 | NRLMSISE-00 | `MSIS00` | 中性大气温度与密度 | 已完成 |
 | HWM14 | `HWM14` | 水平中性风场 | 已完成 |
 | HWM93 | `HWM93` | 水平中性风场 | 已完成 |
+| 极光卵 | `AuroraOval` | Feldstein 极光卵边界模型（Holzworth & Meng 参数化） | 已完成 |
 
 ## 计划移植模型
 
@@ -55,7 +56,6 @@
 | MGST 系数 | `TODO/MGST-Model-Coefficients-All` | MGST 地磁场模型系数（1980、1981 历元） | 纯数据 | 2 个二进制 `.dat` 文件 |
 | Heppner-Maynard-Rich | `TODO/Heppner-Maynard-Rich_Electric-Field-Model` | 高纬电离层电势模型 — 球谐拟合，焦耳加热 | Fortran 77 | `hmcoef.dat`（二进制） |
 | ISR 离子漂移 | `TODO/ISR-Ion-Drift-Model` | 非相干散射雷达离子漂移模型 — 静日 E×B 漂移（300 km） | Fortran 77 | 无（硬编码系数） |
-| 极光卵 | `TODO/Auroral-Oval-Representation` | Feldstein 极光卵边界模型 — 傅里叶级数参数化的极向/赤道向边界 | Fortran 77/90 | 无（硬编码系数） |
 | Xu-Li 中性片 | `TODO/Xu-Li-Neutral-Sheet-Model` | 磁尾赤道中性片位置模型（SEN, DEN, AEN 三种变体） | Fortran 77 | 无（硬编码系数） |
 
 ### 第四阶段 — 太阳辐照度与行星模型

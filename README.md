@@ -14,11 +14,12 @@ Supported models:
 - **MSIS00**: NRLMSISE-00 temperature and density
 - **HWM14**: Horizontal Wind Model 2014
 - **HWM93**: Horizontal Wind Model 1993
+- **AuroraOval**: Feldstein auroral oval boundary (Holzworth & Meng)
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -214,6 +215,7 @@ Top-level `model` exports only:
 - `MSIS00`
 - `HWM14`
 - `HWM93`
+- `AuroraOval`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -307,6 +309,26 @@ Return fields:
 - `alt_km`: output altitude(s).
 - `meridional_wind_ms`: meridional (north-south) wind in m/s.
 - `zonal_wind_ms`: zonal (east-west) wind in m/s.
+
+### AuroraOval.calculate
+
+Signature:
+
+```python
+AuroraOval.calculate(*, mlt_hours, activity_level)
+```
+
+Input fields:
+
+- `mlt_hours`: magnetic local time in hours (scalar or array-like).
+- `activity_level`: geomagnetic activity level, 0 (quiet) – 6 (active).
+
+Return fields:
+
+- `mlt_hours`: input MLT value(s).
+- `activity_level`: input activity level value(s).
+- `poleward_boundary_deg`: poleward boundary corrected geomagnetic latitude (°).
+- `equatorward_boundary_deg`: equatorward boundary corrected geomagnetic latitude (°).
 
 ### Optional utility modules
 
@@ -409,11 +431,12 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
-│   │   └── pyhwm93/         # HWM93 wrapper and Fortran sources
+│   │   ├── pyhwm93/         # HWM93 wrapper and Fortran sources
+│   │   └── pyaurora/        # Feldstein auroral oval (Holzworth & Meng)
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -427,3 +450,11 @@ UpperAtmPy/
 │   └── msis2data/
 └── quick_run.py
 ```
+
+Each model directory under `src/model/` contains its own `README.md` (English) and `README_zh.md` (Chinese) with detailed documentation covering model background, Fortran interface, input/output parameters, and usage examples:
+
+- [NRLMSIS 2.0](src/model/pymsis2/README.md)
+- [NRLMSISE-00](src/model/pymsis00/README.md)
+- [HWM14](src/model/pyhwm14/README.md)
+- [HWM93](src/model/pyhwm93/README.md)
+- [AuroraOval](src/model/pyaurora/README.md)

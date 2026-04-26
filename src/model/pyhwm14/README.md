@@ -1,53 +1,55 @@
-# HWM14 — 水平风模型（2014 版）
+# HWM14 — Horizontal Wind Model (2014)
 
-## 模型背景
+[中文文档 (Chinese)](README_zh.md)
 
-HWM14（Horizontal Wind Model 2014）是美国海军研究实验室（NRL）开发的经验水平风场模型，用于计算从地面到约 500 km 高度的中性大气水平风速。它是 HWM 系列模型（HWM87、HWM90、HWM93、HWM07）的最新版本。
+## Model Background
 
-HWM14 的主要特点：
+HWM14 (Horizontal Wind Model 2014) is an empirical horizontal wind field model developed by the Naval Research Laboratory (NRL). It computes neutral atmospheric horizontal wind speeds from the ground to approximately 500 km altitude. It is the latest version in the HWM series (HWM87, HWM90, HWM93, HWM07).
 
-- **更广的高度覆盖**：将模型上界从 HWM07 的 ~500 km 略作扩展，向下延伸至地面。
-- **大量新观测数据**：利用了卫星测风数据（如 DE-2、UARS/WINDII、TIMED/TIDI、CHAMP/STAR 等）以及地面雷达和激光雷达数据。
-- **改进的经向风和纬向风**：修正了先前版本在高纬度和中间层的系统性偏差。
-- **全大气层一致性**：可与 NRLMSIS 2.0 搭配使用，提供温度-密度-风场的一致性描述。
+Key features of HWM14:
 
-**参考文献**：
+- **Extended altitude coverage**: The upper boundary was slightly extended from HWM07's ~500 km, and the model reaches down to ground level.
+- **Extensive new observations**: Incorporates satellite wind data (DE-2, UARS/WINDII, TIMED/TIDI, CHAMP/STAR, etc.) as well as ground-based radar and lidar measurements.
+- **Improved meridional and zonal winds**: Corrects systematic biases from previous versions at high latitudes and in the mesosphere.
+- **Whole-atmosphere consistency**: Can be paired with NRLMSIS 2.0 for a consistent description of temperature, density, and wind fields.
+
+**Reference**:
 > Drob, D. P., Emmert, J. T., Meriwether, J. W., Makela, J. J., Doornbos, E., et al. (2015). An update to the Horizontal Wind Model (HWM): The quiet time thermosphere. *Earth and Space Science*, 2(7), 301-319.
 
-**适用高度范围**：地面 ~ 500 km
+**Applicable altitude range**: Ground ~ 500 km
 
-## 输入参数
+## Input Parameters
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `iyd` | int / array | 年积日，格式为 YYYYDDD（如 `2025290`） |
-| `sec` | float / array | 世界时秒数（0 ~ 86400） |
-| `alt_km` | float / array | 海拔高度（km） |
-| `glat_deg` | float / array | 地理纬度（度） |
-| `glon_deg` | float / array | 地理经度（度） |
-| `stl_hours` | float / array | 地方视太阳时（小时，0 ~ 24） |
-| `f107a` | float / array | F10.7 太阳射电流量 81 天均值（sfu） |
-| `f107` | float / array | 前一日 F10.7 太阳射电流量日值（sfu） |
-| `ap2` | tuple / array | 地磁活动指数，长度 2（可选，默认 `(0.0, 20.0)`） |
+| Parameter | Type          | Description                                                       |
+|-----------|---------------|-------------------------------------------------------------------|
+| `iyd`     | int / array   | Day of year as YYYYDDD (e.g. `2025290`)                          |
+| `sec`     | float / array | UT seconds (0 ~ 86400)                                            |
+| `alt_km`  | float / array | Altitude (km)                                                     |
+| `glat_deg`  | float / array | Geographic latitude (°)                                         |
+| `glon_deg`  | float / array | Geographic longitude (°)                                        |
+| `stl_hours` | float / array | Local apparent solar time (hours, 0 ~ 24)                       |
+| `f107a`   | float / array | 81-day mean F10.7 solar radio flux (sfu)                          |
+| `f107`    | float / array | Daily F10.7 solar radio flux for the previous day (sfu)          |
+| `ap2`     | tuple / array | Geomagnetic activity indices, length 2 (optional, default `(0.0, 20.0)`) |
 
-### `ap2` 数组含义
+### `ap2` array meaning
 
-| 索引 | 含义 |
-|------|------|
-| `[0]` | 当日 Ap 日均值 |
-| `[1]` | 当前 3 小时 ap 指数 |
+| Index   | Meaning                         |
+|---------|---------------------------------|
+| `[0]`   | Daily Ap average for the day    |
+| `[1]`   | Current 3-hour ap index         |
 
-## 输出
+## Output
 
-`calculate()` 返回一个字典，包含以下字段：
+`calculate()` returns a dictionary with the following fields:
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `alt_km` | float / ndarray | 输入高度 |
-| `meridional_wind_ms` | float / ndarray | 经向风速（m/s），正值表示北向风 |
-| `zonal_wind_ms` | float / ndarray | 纬向风速（m/s），正值表示东向风 |
+| Field                 | Type          | Description                                     |
+|-----------------------|---------------|-------------------------------------------------|
+| `alt_km`              | float / ndarray | Input altitude                                |
+| `meridional_wind_ms`  | float / ndarray | Meridional wind speed (m/s), positive = northward |
+| `zonal_wind_ms`       | float / ndarray | Zonal wind speed (m/s), positive = eastward   |
 
-## 用法示例
+## Usage Examples
 
 ```python
 from model import HWM14
@@ -66,11 +68,11 @@ result = model.calculate(
     ap2=(0.0, 20.0),
 )
 
-print(f"经向风: {result['meridional_wind_ms']:.3f} m/s")
-print(f"纬向风: {result['zonal_wind_ms']:.3f} m/s")
+print(f"Meridional wind: {result['meridional_wind_ms']:.3f} m/s")
+print(f"Zonal wind: {result['zonal_wind_ms']:.3f} m/s")
 ```
 
-### 批量计算（经纬度网格）
+### Batch calculation (lat-lon grid)
 
 ```python
 import numpy as np
@@ -94,10 +96,10 @@ result = model.calculate(
 # result["zonal_wind_ms"].shape == (5, 9)
 ```
 
-## 构造参数
+## Constructor Parameters
 
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `dll_path` | 自动检测 | 自定义 DLL 路径 |
-| `data_dir` | 自动下载 | HWM14 数据文件目录 |
-| `auto_download` | `True` | 是否在数据缺失时自动下载 |
+| Parameter       | Default         | Description                             |
+|-----------------|-----------------|-----------------------------------------|
+| `dll_path`      | Auto-detected   | Custom DLL path                         |
+| `data_dir`      | Auto-download   | HWM14 data file directory               |
+| `auto_download` | `True`          | Whether to auto-download missing data   |

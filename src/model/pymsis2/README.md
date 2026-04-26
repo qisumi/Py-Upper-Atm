@@ -1,77 +1,79 @@
-# NRLMSIS 2.0 — 全大气层经验温度与中性粒子密度模型
+# NRLMSIS 2.0 — Whole-Atmosphere Empirical Temperature and Neutral Species Density Model
 
-## 模型背景
+[中文文档 (Chinese)](README_zh.md)
 
-NRLMSIS 2.0 是美国海军研究实验室（NRL）开发的全大气层经验模型，用于计算从地表到低外逸层的温度和中性粒子密度。它是 NRLMSISE-00 的重大升级版本，于 2020 年正式发布。
+## Model Background
 
-与上一代 NRLMSISE-00 相比，NRLMSIS 2.0 的主要改进包括：
+NRLMSIS 2.0 is a whole-atmosphere empirical model developed by the Naval Research Laboratory (NRL) for computing temperature and neutral species densities from ground level to the lower exosphere. It is a major upgrade over NRLMSISE-00, officially released in 2020.
 
-- **全大气层覆盖**：将模型从高层大气扩展至整个大气层（地面至低外逸层），引入了大量对流层、平流层和中间层的新观测数据。
-- **改进的物种分离表示**：通过高度相关的有效质量来表示从完全混合大气到扩散分离的过渡。
-- **C² 连续的温度剖面**：温度剖面在所有高度上二阶连续可导。
-- **全局重力位高度函数**：内部采用全局重力位高度函数。
-- **扩展的原子氧**：原子氧延伸至 50 km；85 km 以下使用与温度解耦的三次 B 样条表示。
-- **新增 NO 密度输出**（预留，当前版本尚未激活）。
+Key improvements over NRLMSISE-00:
 
-**参考文献**：
+- **Whole-atmosphere coverage**: Extends the model from the upper atmosphere to the entire atmosphere (ground to lower exosphere), incorporating large volumes of new tropospheric, stratospheric, and mesospheric observations.
+- **Improved species separation**: Represents the transition from fully mixed to diffusively separated atmosphere via altitude-dependent effective mass.
+- **C² continuous temperature profile**: Temperature profiles are twice continuously differentiable at all altitudes.
+- **Global geopotential height function**: Uses a global geopotential height function internally.
+- **Extended atomic oxygen**: Atomic oxygen extends down to 50 km; below 85 km it is represented by cubic B-splines decoupled from temperature.
+- **New NO density output** (reserved, not yet active in the current version).
+
+**Reference**:
 > Emmert, J.T., Drob, D. P., Picone, J. M., Siskind, D. E., Jones Jr., M., et al. (2020). NRLMSIS 2.0: A whole-atmosphere empirical model of temperature and neutral species densities. *Earth and Space Science*.
 
-**适用高度范围**：地面 ~ 1000 km
+**Applicable altitude range**: Ground ~ 1000 km
 
-## 输入参数
+## Input Parameters
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `day` | float / array | 年内积日（1.0 ~ 365/366），可使用 `utils.time.doy(year, month, day)` 获取 |
-| `utsec` | float / array | 世界时秒数（0 ~ 86400），可使用 `utils.time.seconds_of_day(h, m, s)` 获取 |
-| `alt_km` | float / array | 地理高度（km） |
-| `lat_deg` | float / array | 地理纬度（度，-90 ~ 90） |
-| `lon_deg` | float / array | 地理经度（度，-180 ~ 180） |
-| `f107a` | float / array | F10.7 太阳射电流量 81 天均值（sfu） |
-| `f107` | float / array | 前一日 F10.7 太阳射电流量日值（sfu） |
-| `ap7` | list / array | 地磁活动指数数组，长度 7（可选，默认全为 4.0） |
+| Parameter | Type          | Description                                                                                  |
+|-----------|---------------|----------------------------------------------------------------------------------------------|
+| `day`     | float / array | Day of year (1.0 ~ 365/366); use `utils.time.doy(year, month, day)`                         |
+| `utsec`   | float / array | UT seconds (0 ~ 86400); use `utils.time.seconds_of_day(h, m, s)`                            |
+| `alt_km`  | float / array | Altitude (km)                                                                                |
+| `lat_deg` | float / array | Geographic latitude (°, -90 ~ 90)                                                            |
+| `lon_deg` | float / array | Geographic longitude (°, -180 ~ 180)                                                         |
+| `f107a`   | float / array | 81-day mean F10.7 solar radio flux (sfu)                                                     |
+| `f107`    | float / array | Daily F10.7 solar radio flux for the previous day (sfu)                                      |
+| `ap7`     | list / array  | Geomagnetic activity indices, length 7 (optional, default all 4.0)                           |
 
-### `ap7` 数组含义
+### `ap7` array meaning
 
-| 索引 | 含义 |
-|------|------|
-| `[0]` | 当日 Ap 日均值 |
-| `[1]` | 当前时刻的 3 小时 ap 指数 |
-| `[2]` | 当前时刻前 3 小时的 3 小时 ap 指数 |
-| `[3]` | 当前时刻前 6 小时的 3 小时 ap 指数 |
-| `[4]` | 当前时刻前 9 小时的 3 小时 ap 指数 |
-| `[5]` | 前 12~33 小时内 8 个 3 小时 ap 指数的均值 |
-| `[6]` | 前 36~57 小时内 8 个 3 小时 ap 指数的均值 |
+| Index   | Meaning                                                        |
+|---------|----------------------------------------------------------------|
+| `[0]`   | Daily Ap average for the day                                   |
+| `[1]`   | Current 3-hour ap index                                        |
+| `[2]`   | 3-hour ap index 3 hours before current time                    |
+| `[3]`   | 3-hour ap index 6 hours before current time                    |
+| `[4]`   | 3-hour ap index 9 hours before current time                    |
+| `[5]`   | Mean of eight 3-hour ap indices from 12–33 hours prior         |
+| `[6]`   | Mean of eight 3-hour ap indices from 36–57 hours prior         |
 
-## 输出
+## Output
 
-`calculate()` 返回一个字典，包含以下字段：
+`calculate()` returns a dictionary with the following fields:
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `alt_km` | float / ndarray | 输入高度 |
-| `T_local_K` | float / ndarray | 指定高度处的局地温度（K） |
-| `T_exo_K` | float / ndarray | 外逸层温度（K） |
-| `densities` | ndarray | 密度数组，形状为 `(10,)` 或 `(N, 10)` |
+| Field       | Type          | Description                                        |
+|-------------|---------------|----------------------------------------------------|
+| `alt_km`    | float / ndarray | Input altitude                                    |
+| `T_local_K` | float / ndarray | Local temperature at the specified altitude (K)   |
+| `T_exo_K`   | float / ndarray | Exospheric temperature (K)                        |
+| `densities` | ndarray       | Density array, shape `(10,)` or `(N, 10)`          |
 
-### `densities` 数组各元素含义
+### `densities` array elements
 
-| 索引 | 含义 | 单位 |
-|------|------|------|
-| `[0]` | 总质量密度 | kg/m³ |
-| `[1]` | N₂ 数密度 | m⁻³ |
-| `[2]` | O₂ 数密度 | m⁻³ |
-| `[3]` | O 数密度 | m⁻³ |
-| `[4]` | He 数密度 | m⁻³ |
-| `[5]` | H 数密度 | m⁻³ |
-| `[6]` | Ar 数密度 | m⁻³ |
-| `[7]` | N 数密度 | m⁻³ |
-| `[8]` | 异常氧数密度 | m⁻³ |
-| `[9]` | 预留（NO 数密度，未来版本启用） | m⁻³ |
+| Index   | Meaning                                                   | Unit  |
+|---------|-----------------------------------------------------------|-------|
+| `[0]`   | Total mass density                                        | kg/m³ |
+| `[1]`   | N₂ number density                                         | m⁻³   |
+| `[2]`   | O₂ number density                                         | m⁻³   |
+| `[3]`   | O number density                                          | m⁻³   |
+| `[4]`   | He number density                                         | m⁻³   |
+| `[5]`   | H number density                                          | m⁻³   |
+| `[6]`   | Ar number density                                         | m⁻³   |
+| `[7]`   | N number density                                          | m⁻³   |
+| `[8]`   | Anomalous oxygen number density                           | m⁻³   |
+| `[9]`   | Reserved (NO number density, to be enabled in future)     | m⁻³   |
 
-> **注意**：NRLMSIS 2.0 的密度输出单位为 **国际单位制**（kg/m³、m⁻³），与 NRLMSISE-00 的 CGS 单位制（g/cm³、cm⁻³）不同，使用时请注意区分。
+> **Note**: NRLMSIS 2.0 outputs use **SI units** (kg/m³, m⁻³), unlike NRLMSISE-00 which uses CGS units (g/cm³, cm⁻³). Take care when comparing results.
 
-## 用法示例
+## Usage Examples
 
 ```python
 from model import MSIS2
@@ -90,15 +92,15 @@ result = model.calculate(
     ap7=[4.0] * 7,
 )
 
-print(f"局地温度: {result['T_local_K']:.1f} K")
-print(f"外逸层温度: {result['T_exo_K']:.1f} K")
-print(f"总质量密度: {result['densities'][0]:.2e} kg/m³")
-print(f"O 数密度: {result['densities'][3]:.2e} m⁻³")
+print(f"Local temperature: {result['T_local_K']:.1f} K")
+print(f"Exospheric temperature: {result['T_exo_K']:.1f} K")
+print(f"Total mass density: {result['densities'][0]:.2e} kg/m³")
+print(f"O number density: {result['densities'][3]:.2e} m⁻³")
 ```
 
-### 批量计算
+### Batch calculation
 
-所有输入参数均支持 NumPy 数组，自动进行广播：
+All input parameters accept NumPy arrays and are automatically broadcast:
 
 ```python
 import numpy as np
@@ -113,16 +115,16 @@ batch = model.calculate(
     f107=150.0,
 )
 
-# batch["T_local_K"] 的形状为 (10,)
-# batch["densities"] 的形状为 (10, 10)
+# batch["T_local_K"] shape is (10,)
+# batch["densities"] shape is (10, 10)
 ```
 
-## 构造参数
+## Constructor Parameters
 
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `precision` | `"single"` | 计算精度，可选 `"single"` 或 `"double"` |
-| `dll_path` | 自动检测 | 自定义 DLL 路径 |
-| `data_dir` | 自动下载 | MSIS2 参数数据目录 |
-| `auto_download` | `True` | 是否在数据缺失时自动下载 |
-| `add_mingw_bin` | `False` | 是否添加 MinGW bin 目录到 DLL 搜索路径（Windows） |
+| Parameter       | Default         | Description                                                |
+|-----------------|-----------------|------------------------------------------------------------|
+| `precision`     | `"single"`      | Computation precision, `"single"` or `"double"`            |
+| `dll_path`      | Auto-detected   | Custom DLL path                                            |
+| `data_dir`      | Auto-download   | MSIS2 parameter data directory                             |
+| `auto_download` | `True`          | Whether to auto-download missing data                      |
+| `add_mingw_bin` | `False`         | Whether to add MinGW bin directory to DLL search path (Windows) |

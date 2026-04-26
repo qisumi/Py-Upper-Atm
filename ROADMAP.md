@@ -12,6 +12,7 @@ The following models have been fully ported and are available in the `src/model/
 | NRLMSISE-00 | `MSIS00` | Neutral atmosphere temperature & density | Done |
 | HWM14 | `HWM14` | Horizontal neutral wind | Done |
 | HWM93 | `HWM93` | Horizontal neutral wind | Done |
+| Auroral Oval | `AuroraOval` | Feldstein auroral oval boundary (Holzworth & Meng) | Done |
 
 ## Planned Models
 
@@ -55,7 +56,6 @@ Spherical harmonic geomagnetic field models and high-latitude ionospheric electr
 | MGST Coefficients | `TODO/MGST-Model-Coefficients-All` | MGST geomagnetic field model coefficients for epochs 1980 and 1981 | Data only | 2 binary `.dat` files |
 | Heppner-Maynard-Rich | `TODO/Heppner-Maynard-Rich_Electric-Field-Model` | High-latitude ionospheric electric potential — spherical harmonic fits, Joule heating | Fortran 77 | `hmcoef.dat` (binary) |
 | ISR Ion Drift | `TODO/ISR-Ion-Drift-Model` | Incoherent Scatter Radar ion drift model — quiet-day E×B drifts at 300 km | Fortran 77 | None (hard-coded) |
-| Auroral Oval | `TODO/Auroral-Oval-Representation` | Feldstein auroral oval boundary model — poleward/equatorward boundaries via Fourier series | Fortran 77/90 | None (hard-coded) |
 | Xu-Li Neutral Sheet | `TODO/Xu-Li-Neutral-Sheet-Model` | Magnetotail equatorial neutral sheet position (SEN, DEN, AEN variants) | Fortran 77 | None (hard-coded) |
 
 ### Phase 4 — Solar Irradiance & Planetary Models
