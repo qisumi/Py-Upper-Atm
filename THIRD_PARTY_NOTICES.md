@@ -25,6 +25,8 @@ these files come from universities, government agencies, or individual model
 authors and may have their own notices or no explicit license statement.
 
 Files ported from `TODO/` into `src/model/` retain their upstream provenance.
+Files copied from `TODO/` into `data/` likewise remain upstream model data and
+are not relicensed by UpperAtmPy.
 Before redistributing a derived package or using a model in a commercial or
 restricted setting, review the notices in the relevant model directory and
 confirm that the intended use is permitted.

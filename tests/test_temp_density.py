@@ -21,13 +21,22 @@ class TestModelPackage:
 
         model = importlib.import_module("model")
 
-        assert model.__all__ == ["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF"]
+        assert model.__all__ == [
+            "MSIS2",
+            "MSIS00",
+            "HWM14",
+            "HWM93",
+            "AuroraOval",
+            "IGRF",
+            "CIRA86",
+        ]
         assert "model.pymsis2" not in sys.modules
         assert "model.pymsis00" not in sys.modules
         assert "model.pyhwm14" not in sys.modules
         assert "model.pyhwm93" not in sys.modules
         assert "model.pyaurora" not in sys.modules
         assert "model.pyigrf" not in sys.modules
+        assert "model.pycira86" not in sys.modules
         assert "utils.model_data" not in sys.modules
 
     def test_old_top_level_exports_are_removed(self):
@@ -43,9 +52,11 @@ class TestModelPackage:
     def test_model_modules_only_export_model(self):
         from model.pymsis2 import __all__ as msis2_exports
         from model.pymsis00 import __all__ as msis00_exports
+        from model.pycira86 import __all__ as cira86_exports
 
         assert msis2_exports == ["Model"]
         assert msis00_exports == ["Model"]
+        assert cira86_exports == ["Model"]
 
 
 class TestMSIS2:

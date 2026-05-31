@@ -6,7 +6,7 @@
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT%20%2B%20third--party%20terms-blue)
 
-**UpperAtmPy** provides direct Python wrappers for upper atmospheric model DLLs. The project uses a `src/` layout and exposes one public class per model.
+**UpperAtmPy** provides direct Python wrappers for upper atmospheric model DLLs and data tables. The project uses a `src/` layout and exposes one public class per model.
 
 Supported models:
 
@@ -16,11 +16,12 @@ Supported models:
 - **HWM93**: Horizontal Wind Model 1993
 - **AuroraOval**: Feldstein auroral oval boundary (Holzworth & Meng)
 - **IGRF**: International Geomagnetic Reference Field 13/14, including field components and L-value
+- **CIRA86**: COSPAR International Reference Atmosphere 1986 tables for 0-120 km
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -172,12 +173,14 @@ wind = hwm.calculate(
 print(wind["meridional_wind_ms"], wind["zonal_wind_ms"])
 ```
 
-MSIS2, HWM14, and IGRF need external model data. By default UpperAtmPy resolves
+MSIS2, HWM14, IGRF, and CIRA86 need external model data. By default UpperAtmPy resolves
 `.upperatmpy` under the current project directory and downloads missing files
 from the current package version's release tag (for example `v0.1.1`) on first
-model instantiation. For offline use, pass
+model instantiation when a download manifest is available. CIRA86 currently
+uses the local `cira86data/` ASCII tables, so source-checkout examples pass
+`data_dir=data/` explicitly. For offline use, pass
 `data_dir=...` or set `UPPERATMPY_DATA_DIR` to a data root containing the legacy
-`msis2data/`, `hwm14data/`, `igrf13data/`, and `igrf14data/` subdirectories. In
+`msis2data/`, `hwm14data/`, `igrf13data/`, `igrf14data/`, and `cira86data/` subdirectories. In
 the source tree, that root is `data/`.
 
 `UPPERATMPY_DATA_TAG` can force a specific release tag for data download.
@@ -187,7 +190,7 @@ the source tree, that root is `data/`.
 If you cannot download data files at runtime, you can fetch them manually from
 `GitHub Releases`:
 
-1. Open the release page and download data assets (or a combined data archive) for `msis2data`, `hwm14data`, `igrf13data`, and `igrf14data`.
+1. Open the release page and download data assets (or a combined data archive) for `msis2data`, `hwm14data`, `igrf13data`, `igrf14data`, and, when published, `cira86data`.
 2. Extract them so you get a data root directory containing the needed folders:
 
 ```bash
@@ -195,7 +198,8 @@ UPPERATMPY_DATA_DIR/
 ├── msis2data/
 ├── hwm14data/
 ├── igrf13data/
-└── igrf14data/
+├── igrf14data/
+└── cira86data/
 ```
 
 3. Configure the project to load from this local root.
@@ -216,11 +220,12 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 You can also pass the path directly when constructing a model:
 
 ```python
-from model import HWM14, IGRF, MSIS2
+from model import CIRA86, HWM14, IGRF, MSIS2
 
 msis = MSIS2(precision="single", data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 hwm = HWM14(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 igrf = IGRF(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
+cira = CIRA86(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 ```
 
 ## API
@@ -233,6 +238,7 @@ Top-level `model` exports only:
 - `HWM93`
 - `AuroraOval`
 - `IGRF`
+- `CIRA86`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -379,6 +385,31 @@ Return fields:
 - `L_value`: L-shell parameter.
 - `icode`: L-value status code from `SHELLG`.
 
+### CIRA86.calculate
+
+Signature:
+
+```python
+CIRA86.calculate(*, month, lat_deg, alt_km=None, pressure_mb=None)
+```
+
+Constructor options:
+
+- `data_dir`: optional data root containing `cira86data/`.
+- `auto_download`: retained for consistency with other data-backed models.
+
+Input fields:
+
+- `month`: month number, 1-12.
+- `lat_deg`: geodetic latitude in degrees, north positive, from -80 to 80.
+- `alt_km`: height-coordinate input in km, from 0 to 120. Mutually exclusive with `pressure_mb`.
+- `pressure_mb`: pressure-coordinate input in mb. Mutually exclusive with `alt_km`.
+
+Return fields:
+
+- Height mode: `month`, `alt_km`, `lat_deg`, `T_K`, `zonal_wind_ms`, `pressure_mb`.
+- Pressure mode: `month`, `pressure_mb`, `lat_deg`, `T_K`, `zonal_wind_ms`, `geopotential_height_m`.
+
 ### Optional utility modules
 
 These modules are not imported automatically by `import model`.
@@ -480,13 +511,14 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
 │   │   ├── pyhwm93/         # HWM93 wrapper and Fortran sources
 │   │   ├── pyaurora/        # Feldstein auroral oval (Holzworth & Meng)
-│   │   └── pyigrf/          # IGRF-13/14 geomagnetic field wrapper
+│   │   ├── pyigrf/          # IGRF-13/14 geomagnetic field wrapper
+│   │   └── pycira86/        # CIRA-86 table wrapper
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -499,6 +531,7 @@ UpperAtmPy/
 │   ├── hwm14data/
 │   ├── igrf13data/
 │   ├── igrf14data/
+│   ├── cira86data/
 │   └── msis2data/
 └── quick_run.py
 ```
@@ -511,3 +544,4 @@ Each model directory under `src/model/` contains its own `README.md` (English) a
 - [HWM93](src/model/pyhwm93/README.md)
 - [AuroraOval](src/model/pyaurora/README.md)
 - [IGRF](src/model/pyigrf/README.md)
+- [CIRA86](src/model/pycira86/README.md)

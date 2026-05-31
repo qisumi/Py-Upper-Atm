@@ -104,6 +104,16 @@ def igrf13_model():
         pytest.skip(f"IGRF-13 DLL not available: {exc}")
 
 
+@pytest.fixture
+def cira86_model():
+    try:
+        from model import CIRA86
+
+        return CIRA86(data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"CIRA-86 data not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"

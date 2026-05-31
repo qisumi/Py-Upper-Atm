@@ -14,10 +14,11 @@ The following models have been fully ported and are available in the `src/model/
 | HWM93 | `HWM93` | Horizontal neutral wind | Done |
 | Auroral Oval | `AuroraOval` | Feldstein auroral oval boundary (Holzworth & Meng) | Done |
 | IGRF-13/14 | `IGRF` | Int'l Geomagnetic Reference Field — computes field components (X, Y, Z, F, H), dip, declination, L-value from 1900 onward | Done |
+| CIRA-86 | `CIRA86` | COSPAR International Reference Atmosphere 1986 — monthly mean temperature, pressure, zonal wind, and geopotential height tables for 0-120 km | Done |
 
 ## Planned Models
 
-All models below are sourced from the `TODO/` directory (CCMC ModelWeb Archive). Each will be ported following the established pattern: Fortran/C source compiled to DLL via CMake, wrapped with `ctypes`, and exposed as a single `Model.calculate(...)` class.
+All models below are sourced from the `TODO/` directory (CCMC ModelWeb Archive). Native-code models will follow the established pattern: Fortran/C source compiled to DLL via CMake, wrapped with `ctypes`, and exposed as a single `Model.calculate(...)` class. Table-only models may be exposed through the same Python API without a DLL.
 
 ### Phase 1 — Atmospheric & Ionospheric Extensions
 
@@ -25,7 +26,6 @@ These models extend the existing neutral atmosphere and ionosphere capabilities 
 
 | Model | Directory | Description | Language | External Data |
 |-------|-----------|-------------|----------|---------------|
-| CIRA-86 | `TODO/CIRA` | COSPAR International Reference Atmosphere 1986 — temperature, pressure, zonal wind, geopotential height for 0–120 km | Fortran 77 | 24 binary + 12 ASCII monthly tables |
 | Jacchia 1977 | `TODO/Jacchi-Reference-Atmosphere` | Jacchia reference atmosphere — temperature and number density profiles (N2, O2, O, Ar, He, H) from 90–2500+ km | Fortran 77 | None (hard-coded) |
 | MET | `TODO/MET-Model` | Marshall Engineering Thermosphere — modified Jacchia 1970/71 thermospheric model for engineering applications | Fortran 77 | None (hard-coded) |
 | MSIS-86 | `TODO/MSIS/MSIS86` | MSIS-86 / CIRA-86 thermosphere model — historical MSIS generation | Fortran 77 | `msis86.dat` (binary coefficients) |

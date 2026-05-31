@@ -14,10 +14,11 @@
 | HWM93 | `HWM93` | 水平中性风场 | 已完成 |
 | 极光卵 | `AuroraOval` | Feldstein 极光卵边界模型（Holzworth & Meng 参数化） | 已完成 |
 | IGRF-13/14 | `IGRF` | 国际地磁参考场 — 计算地磁场分量（X, Y, Z, F, H）、磁倾角、磁偏角、L 值（1900 年起） | 已完成 |
+| CIRA-86 | `CIRA86` | COSPAR 国际参考大气 1986 — 0–120 km 月平均温度、气压、纬向风与位势高度表格 | 已完成 |
 
 ## 计划移植模型
 
-以下所有模型均来自 `TODO/` 目录（CCMC ModelWeb 存档）。每个模型将遵循已有模式进行移植：Fortran/C 源码通过 CMake 编译为 DLL，使用 `ctypes` 封装，对外暴露单一的 `Model.calculate(...)` 类接口。
+以下所有模型均来自 `TODO/` 目录（CCMC ModelWeb 存档）。原生代码模型将遵循已有模式进行移植：Fortran/C 源码通过 CMake 编译为 DLL，使用 `ctypes` 封装，对外暴露单一的 `Model.calculate(...)` 类接口。纯表格模型可使用同样的 Python API 暴露，无需额外 DLL。
 
 ### 第一阶段 — 大气与电离层扩展
 
@@ -25,7 +26,6 @@
 
 | 模型 | 目录 | 说明 | 原始语言 | 外部数据 |
 |------|------|------|----------|----------|
-| CIRA-86 | `TODO/CIRA` | COSPAR 国际参考大气 1986 — 0–120 km 温度、气压、纬向风、位势高度 | Fortran 77 | 24 个二进制 + 12 个 ASCII 月均表格 |
 | Jacchia 1977 | `TODO/Jacchi-Reference-Atmosphere` | Jacchia 参考大气 — 90–2500+ km 温度与数密度剖面（N2, O2, O, Ar, He, H） | Fortran 77 | 无（硬编码系数） |
 | MET | `TODO/MET-Model` | 马歇尔工程热层模型 — 改进的 Jacchia 1970/71 热层模型，面向工程应用 | Fortran 77 | 无（硬编码系数） |
 | MSIS-86 | `TODO/MSIS/MSIS86` | MSIS-86 / CIRA-86 热层模型 — MSIS 历史版本 | Fortran 77 | `msis86.dat`（二进制系数） |
