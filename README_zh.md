@@ -13,11 +13,12 @@
 - **HWM14**：水平风场模型 2014
 - **HWM93**：水平风场模型 1993
 - **AuroraOval**：Feldstein 极光卵边界模型（Holzworth & Meng 参数化）
+- **IGRF**：国际地磁参考场 13/14，计算地磁场分量和 L 值
 
 ## 特性
 
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
@@ -164,10 +165,10 @@ wind = hwm.calculate(
 print(wind["meridional_wind_ms"], wind["zonal_wind_ms"])
 ```
 
-MSIS2 和 HWM14 需要外部模型数据。默认情况下，UpperAtmPy 会解析当前项目目录下的
+MSIS2、HWM14 和 IGRF 需要外部模型数据。默认情况下，UpperAtmPy 会解析当前项目目录下的
 `.upperatmpy`，并在首次实例化模型时按当前包版本的 release tag（如 `v0.1.1`）下载缺失文件。离线使用时，
-可以传入 `data_dir=...`，或设置 `UPPERATMPY_DATA_DIR` 指向包含 `msis2data/`
-和 `hwm14data/` 子目录的数据根目录。源码树中的统一数据根目录是 `data/`。
+可以传入 `data_dir=...`，或设置 `UPPERATMPY_DATA_DIR` 指向包含 `msis2data/`、
+`hwm14data/`、`igrf13data/` 和 `igrf14data/` 子目录的数据根目录。源码树中的统一数据根目录是 `data/`。
 
 可通过环境变量 `UPPERATMPY_DATA_TAG` 指定数据下载所用的 Release tag。
 
@@ -175,13 +176,15 @@ MSIS2 和 HWM14 需要外部模型数据。默认情况下，UpperAtmPy 会解�
 
 如果不能在运行时联网自动下载模型数据，可直接从 `GitHub Releases` 手动下载：
 
-1. 打开 release 页面，下载 `msis2data` 与 `hwm14data` 的资源文件（或一个包含两者的合并压缩包）。
-2. 解压后确保目录结构如下（数据根目录中包含两个子目录）：
+1. 打开 release 页面，下载 `msis2data`、`hwm14data`、`igrf13data` 与 `igrf14data` 的资源文件（或一个合并压缩包）。
+2. 解压后确保目录结构如下（数据根目录中包含所需子目录）：
 
 ```text
 UPPERATMPY_DATA_DIR/
 ├── msis2data/
-└── hwm14data/
+├── hwm14data/
+├── igrf13data/
+└── igrf14data/
 ```
 
 3. 设置环境变量或直接在构造模型时指定 `data_dir`。
@@ -201,10 +204,11 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 代码中也可直接传入：
 
 ```python
-from model import MSIS2, HWM14
+from model import HWM14, IGRF, MSIS2
 
 msis = MSIS2(precision="single", data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 hwm = HWM14(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
+igrf = IGRF(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 ```
 
 ## API
@@ -216,6 +220,7 @@ hwm = HWM14(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 - `HWM14`
 - `HWM93`
 - `AuroraOval`
+- `IGRF`
 
 每个类都提供 `calculate(...)`，返回普通字典。
 模型计算方法同时支持标量和可广播数组输入，输入标量返回标量结果，输入数组会按 numpy 广播返回对应形状。
@@ -332,6 +337,38 @@ AuroraOval.calculate(*, mlt_hours, activity_level)
 - `poleward_boundary_deg`：极向边界修正地磁纬度（°）。
 - `equatorward_boundary_deg`：赤道向边界修正地磁纬度（°）。
 
+### IGRF.calculate
+
+签名：
+
+```python
+IGRF.calculate(*, year, lat_deg, lon_deg, alt_km)
+```
+
+构造参数：
+
+- `igrf_version`：`13` 或 `14`，默认 `14`。
+- `data_dir`：可选数据根目录，包含 `igrf13data/` 和/或 `igrf14data/`。
+- `auto_download`：缺失系数文件时是否自动下载。
+
+输入字段：
+
+- `year`：十进制年份，如 `2024.5`。
+- `lat_deg`：地理纬度（度），北纬为正。
+- `lon_deg`：地理经度（度），东经为正。
+- `alt_km`：海拔高度（km）。
+
+返回字段：
+
+- `year`、`lat_deg`、`lon_deg`、`alt_km`：广播后的输入坐标。
+- `B_north_nT`、`B_east_nT`、`B_down_nT`：磁场分量（nT）。
+- `B_abs_nT`：总磁场强度（nT）。
+- `H_nT`：水平磁场强度（nT）。
+- `inclination_deg`：磁倾角，向下为正。
+- `declination_deg`：磁偏角，东偏为正。
+- `L_value`：L-shell 参数。
+- `icode`：`SHELLG` 返回的 L 值状态码。
+
 ### 可选工具模块
 
 这些模块不会在 `import model` 时自动加载，需要时按需导入。
@@ -437,12 +474,13 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval
+│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF
 │   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
 │   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
 │   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
 │   │   ├── pyhwm93/         # HWM93 封装和 Fortran 源码
-│   │   └── pyaurora/        # Feldstein 极光卵（Holzworth & Meng）
+│   │   ├── pyaurora/        # Feldstein 极光卵（Holzworth & Meng）
+│   │   └── pyigrf/          # IGRF-13/14 地磁场封装
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -453,6 +491,8 @@ UpperAtmPy/
 ├── tests/
 ├── data/
 │   ├── hwm14data/
+│   ├── igrf13data/
+│   ├── igrf14data/
 │   └── msis2data/
 └── quick_run.py
 ```
@@ -464,6 +504,7 @@ UpperAtmPy/
 - [HWM14](src/model/pyhwm14/README_zh.md)
 - [HWM93](src/model/pyhwm93/README_zh.md)
 - [AuroraOval](src/model/pyaurora/README_zh.md)
+- [IGRF](src/model/pyigrf/README_zh.md)
 
 ## 测试
 

@@ -21,11 +21,13 @@ class TestModelPackage:
 
         model = importlib.import_module("model")
 
-        assert model.__all__ == ["MSIS2", "MSIS00", "HWM14", "HWM93"]
+        assert model.__all__ == ["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF"]
         assert "model.pymsis2" not in sys.modules
         assert "model.pymsis00" not in sys.modules
         assert "model.pyhwm14" not in sys.modules
         assert "model.pyhwm93" not in sys.modules
+        assert "model.pyaurora" not in sys.modules
+        assert "model.pyigrf" not in sys.modules
         assert "utils.model_data" not in sys.modules
 
     def test_old_top_level_exports_are_removed(self):

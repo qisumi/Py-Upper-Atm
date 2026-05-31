@@ -7,6 +7,7 @@ Only concrete model classes are exported:
 - HWM14
 - HWM93
 - AuroraOval
+- IGRF
 
 Exports are lazy so `import model` does not load any model DLL.
 """
@@ -22,6 +23,7 @@ _LAZY_EXPORTS = {
     "HWM14": ("model.pyhwm14", "Model"),
     "HWM93": ("model.pyhwm93", "Model"),
     "AuroraOval": ("model.pyaurora", "Model"),
+    "IGRF": ("model.pyigrf", "Model"),
 }
 
 __all__ = list(_LAZY_EXPORTS)

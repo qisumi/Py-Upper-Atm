@@ -153,6 +153,10 @@ def _download_entry(root: Path, entry: Dict[str, object]) -> None:
 
 def _entry_urls(entry: Dict[str, object]) -> List[str]:
     urls: List[str] = []
+    if "url" in entry and entry["url"]:
+        urls.append(str(entry["url"]))
+    for url in entry.get("fallback_urls", []) or []:
+        urls.append(str(url))
     release_tag = _release_tag()
     if release_tag:
         file_name = str(Path(str(entry["path"])).name)
@@ -160,10 +164,6 @@ def _entry_urls(entry: Dict[str, object]) -> List[str]:
         bundle_url = _release_bundle_url(release_tag)
         if bundle_url is not None:
             urls.append(bundle_url)
-    if "url" in entry and entry["url"]:
-        urls.append(str(entry["url"]))
-    for url in entry.get("fallback_urls", []) or []:
-        urls.append(str(url))
     normalized = []
     seen = set()
     for url in urls:
@@ -373,6 +373,8 @@ def _normalize_model_name(model_name: str) -> str:
         "hwm93": "hwm93",
         "msis00": "msis00",
         "nrlmsise00": "msis00",
+        "igrf13": "igrf13",
+        "igrf14": "igrf14",
     }
     return aliases.get(key, key)
 

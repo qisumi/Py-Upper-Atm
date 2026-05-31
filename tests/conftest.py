@@ -84,6 +84,26 @@ def aurora_model():
         pytest.skip(f"Aurora Oval DLL not available: {exc}")
 
 
+@pytest.fixture
+def igrf_model():
+    try:
+        from model import IGRF
+
+        return IGRF(igrf_version=14, data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"IGRF DLL not available: {exc}")
+
+
+@pytest.fixture
+def igrf13_model():
+    try:
+        from model import IGRF
+
+        return IGRF(igrf_version=13, data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"IGRF-13 DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"

@@ -9,6 +9,7 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.HWM14`
 - `model.HWM93`
 - `model.AuroraOval`
+- `model.IGRF`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -29,6 +30,7 @@ python example/test_msis00.py
 python example/test_hwm14.py
 python example/test_hwm93.py
 python example/test_aurora.py
+python example/test_igrf.py
 ```
 
 ## Public API Pattern
@@ -69,6 +71,13 @@ AuroraOval result dictionaries contain:
 - `poleward_boundary_deg`
 - `equatorward_boundary_deg`
 
+IGRF result dictionaries contain:
+
+- `year` / `lat_deg` / `lon_deg` / `alt_km`
+- `B_north_nT` / `B_east_nT` / `B_down_nT` / `B_abs_nT` / `H_nT`
+- `inclination_deg` / `declination_deg`
+- `L_value` / `icode`
+
 ## Project Structure
 
 ```text
@@ -80,6 +89,7 @@ UpperAtmPy/
 │   │   ├── pymsis00/
 │   │   ├── pyhwm14/
 │   │   ├── pyhwm93/
+│   │   ├── pyigrf/
 │   │   └── pyaurora/
 │   └── utils/
 │       ├── cache.py
@@ -91,6 +101,8 @@ UpperAtmPy/
 ├── tests/
 ├── data/
 │   ├── hwm14data/
+│   ├── igrf13data/
+│   ├── igrf14data/
 │   └── msis2data/
 └── quick_run.py
 ```
@@ -101,7 +113,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 

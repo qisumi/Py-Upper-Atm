@@ -15,11 +15,12 @@ Supported models:
 - **HWM14**: Horizontal Wind Model 2014
 - **HWM93**: Horizontal Wind Model 1993
 - **AuroraOval**: Feldstein auroral oval boundary (Holzworth & Meng)
+- **IGRF**: International Geomagnetic Reference Field 13/14, including field components and L-value
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -171,13 +172,13 @@ wind = hwm.calculate(
 print(wind["meridional_wind_ms"], wind["zonal_wind_ms"])
 ```
 
-MSIS2 and HWM14 need external model data. By default UpperAtmPy resolves
+MSIS2, HWM14, and IGRF need external model data. By default UpperAtmPy resolves
 `.upperatmpy` under the current project directory and downloads missing files
 from the current package version's release tag (for example `v0.1.1`) on first
 model instantiation. For offline use, pass
 `data_dir=...` or set `UPPERATMPY_DATA_DIR` to a data root containing the legacy
-`msis2data/` and `hwm14data/` subdirectories. In the source tree, that root is
-`data/`.
+`msis2data/`, `hwm14data/`, `igrf13data/`, and `igrf14data/` subdirectories. In
+the source tree, that root is `data/`.
 
 `UPPERATMPY_DATA_TAG` can force a specific release tag for data download.
 
@@ -186,13 +187,15 @@ model instantiation. For offline use, pass
 If you cannot download data files at runtime, you can fetch them manually from
 `GitHub Releases`:
 
-1. Open the release page and download data assets (or a combined data archive) for `msis2data` and `hwm14data`.
-2. Extract them so you get a data root directory containing both folders:
+1. Open the release page and download data assets (or a combined data archive) for `msis2data`, `hwm14data`, `igrf13data`, and `igrf14data`.
+2. Extract them so you get a data root directory containing the needed folders:
 
 ```bash
 UPPERATMPY_DATA_DIR/
 ├── msis2data/
-└── hwm14data/
+├── hwm14data/
+├── igrf13data/
+└── igrf14data/
 ```
 
 3. Configure the project to load from this local root.
@@ -213,10 +216,11 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 You can also pass the path directly when constructing a model:
 
 ```python
-from model import MSIS2, HWM14
+from model import HWM14, IGRF, MSIS2
 
 msis = MSIS2(precision="single", data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 hwm = HWM14(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
+igrf = IGRF(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 ```
 
 ## API
@@ -228,6 +232,7 @@ Top-level `model` exports only:
 - `HWM14`
 - `HWM93`
 - `AuroraOval`
+- `IGRF`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -342,6 +347,38 @@ Return fields:
 - `poleward_boundary_deg`: poleward boundary corrected geomagnetic latitude (°).
 - `equatorward_boundary_deg`: equatorward boundary corrected geomagnetic latitude (°).
 
+### IGRF.calculate
+
+Signature:
+
+```python
+IGRF.calculate(*, year, lat_deg, lon_deg, alt_km)
+```
+
+Constructor options:
+
+- `igrf_version`: `13` or `14`; default is `14`.
+- `data_dir`: optional data root containing `igrf13data/` and/or `igrf14data/`.
+- `auto_download`: download missing coefficient files when possible.
+
+Input fields:
+
+- `year`: decimal year, such as `2024.5`.
+- `lat_deg`: geodetic latitude in degrees, north positive.
+- `lon_deg`: geodetic longitude in degrees, east positive.
+- `alt_km`: altitude above sea level in km.
+
+Return fields:
+
+- `year`, `lat_deg`, `lon_deg`, `alt_km`: broadcast input coordinates.
+- `B_north_nT`, `B_east_nT`, `B_down_nT`: magnetic field components in nT.
+- `B_abs_nT`: total magnetic field intensity in nT.
+- `H_nT`: horizontal field intensity in nT.
+- `inclination_deg`: magnetic inclination, positive downward.
+- `declination_deg`: magnetic declination, positive eastward.
+- `L_value`: L-shell parameter.
+- `icode`: L-value status code from `SHELLG`.
+
 ### Optional utility modules
 
 These modules are not imported automatically by `import model`.
@@ -443,12 +480,13 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
 │   │   ├── pyhwm93/         # HWM93 wrapper and Fortran sources
-│   │   └── pyaurora/        # Feldstein auroral oval (Holzworth & Meng)
+│   │   ├── pyaurora/        # Feldstein auroral oval (Holzworth & Meng)
+│   │   └── pyigrf/          # IGRF-13/14 geomagnetic field wrapper
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -459,6 +497,8 @@ UpperAtmPy/
 ├── tests/
 ├── data/
 │   ├── hwm14data/
+│   ├── igrf13data/
+│   ├── igrf14data/
 │   └── msis2data/
 └── quick_run.py
 ```
@@ -470,3 +510,4 @@ Each model directory under `src/model/` contains its own `README.md` (English) a
 - [HWM14](src/model/pyhwm14/README.md)
 - [HWM93](src/model/pyhwm93/README.md)
 - [AuroraOval](src/model/pyaurora/README.md)
+- [IGRF](src/model/pyigrf/README.md)

@@ -13,6 +13,7 @@ The following models have been fully ported and are available in the `src/model/
 | HWM14 | `HWM14` | Horizontal neutral wind | Done |
 | HWM93 | `HWM93` | Horizontal neutral wind | Done |
 | Auroral Oval | `AuroraOval` | Feldstein auroral oval boundary (Holzworth & Meng) | Done |
+| IGRF-13/14 | `IGRF` | Int'l Geomagnetic Reference Field — computes field components (X, Y, Z, F, H), dip, declination, L-value from 1900 onward | Done |
 
 ## Planned Models
 
@@ -24,7 +25,6 @@ These models extend the existing neutral atmosphere and ionosphere capabilities 
 
 | Model | Directory | Description | Language | External Data |
 |-------|-----------|-------------|----------|---------------|
-| IGRF-13 | `TODO/IGRF` | International Geomagnetic Reference Field — computes geomagnetic field components (X, Y, Z, F), L-value, dip angle, declination from 1945 onward | Fortran 77 | DGRF/IGRF coefficient `.dat` files (1945–2025) |
 | CIRA-86 | `TODO/CIRA` | COSPAR International Reference Atmosphere 1986 — temperature, pressure, zonal wind, geopotential height for 0–120 km | Fortran 77 | 24 binary + 12 ASCII monthly tables |
 | Jacchia 1977 | `TODO/Jacchi-Reference-Atmosphere` | Jacchia reference atmosphere — temperature and number density profiles (N2, O2, O, Ar, He, H) from 90–2500+ km | Fortran 77 | None (hard-coded) |
 | MET | `TODO/MET-Model` | Marshall Engineering Thermosphere — modified Jacchia 1970/71 thermospheric model for engineering applications | Fortran 77 | None (hard-coded) |

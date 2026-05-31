@@ -13,6 +13,7 @@
 | HWM14 | `HWM14` | 水平中性风场 | 已完成 |
 | HWM93 | `HWM93` | 水平中性风场 | 已完成 |
 | 极光卵 | `AuroraOval` | Feldstein 极光卵边界模型（Holzworth & Meng 参数化） | 已完成 |
+| IGRF-13/14 | `IGRF` | 国际地磁参考场 — 计算地磁场分量（X, Y, Z, F, H）、磁倾角、磁偏角、L 值（1900 年起） | 已完成 |
 
 ## 计划移植模型
 
@@ -24,7 +25,6 @@
 
 | 模型 | 目录 | 说明 | 原始语言 | 外部数据 |
 |------|------|------|----------|----------|
-| IGRF-13 | `TODO/IGRF` | 国际地磁参考场 — 计算地磁场分量（X, Y, Z, F）、L 值、磁倾角、磁偏角（1945 年起） | Fortran 77 | DGRF/IGRF 系数 `.dat` 文件（1945–2025） |
 | CIRA-86 | `TODO/CIRA` | COSPAR 国际参考大气 1986 — 0–120 km 温度、气压、纬向风、位势高度 | Fortran 77 | 24 个二进制 + 12 个 ASCII 月均表格 |
 | Jacchia 1977 | `TODO/Jacchi-Reference-Atmosphere` | Jacchia 参考大气 — 90–2500+ km 温度与数密度剖面（N2, O2, O, Ar, He, H） | Fortran 77 | 无（硬编码系数） |
 | MET | `TODO/MET-Model` | 马歇尔工程热层模型 — 改进的 Jacchia 1970/71 热层模型，面向工程应用 | Fortran 77 | 无（硬编码系数） |

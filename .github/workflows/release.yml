@@ -143,6 +143,7 @@ jobs:
                   "model/pymsis00/build/msis00.dll",
                   "model/pyhwm14/hwm14.dll",
                   "model/pyhwm93/hwm93.dll",
+                  "model/pyigrf/igrf.dll",
               }
           else:
               expected = {
@@ -150,6 +151,7 @@ jobs:
                   "model/pymsis00/build/libmsis00.so",
                   "model/pyhwm14/libhwm14.so",
                   "model/pyhwm93/libhwm93.so",
+                  "model/pyigrf/libigrf.so",
               }
 
           expected.add("utils/model_data_manifest.json")
@@ -224,6 +226,7 @@ jobs:
               f"{root}/src/model/pymsis00/CMakeLists.txt",
               f"{root}/src/model/pyhwm14/CMakeLists.txt",
               f"{root}/src/model/pyhwm93/CMakeLists.txt",
+              f"{root}/src/model/pyigrf/CMakeLists.txt",
           }
           missing = expected - names
           data_files = [name for name in names if name.startswith(f"{root}/data/")]
@@ -250,6 +253,12 @@ jobs:
               pathlib.Path("hwm14data/dwm07b104i.dat"),
               pathlib.Path("hwm14data/gd2qd.dat"),
           ]
+          expected.extend(
+              sorted(path.relative_to(data_root) for path in (data_root / "igrf13data").glob("*") if path.is_file())
+          )
+          expected.extend(
+              sorted(path.relative_to(data_root) for path in (data_root / "igrf14data").glob("*") if path.is_file())
+          )
 
           missing = [str(path) for path in expected if not (data_root / path).is_file()]
           if missing:

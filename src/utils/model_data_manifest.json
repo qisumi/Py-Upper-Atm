@@ -48,6 +48,391 @@
       ],
       "sha256": "6bb1f2384e30b409240ee92c32726ed2a3d73eb550c05e0969d1178032319804",
       "size": 1500
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1945.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1945.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1945.dat"
+      ],
+      "sha256": "971866457787b0d8a65f1f79c99b0d1bf8b4b447155b3dfc061dedf496f1bcc2",
+      "size": 1591
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1950.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1950.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1950.dat"
+      ],
+      "sha256": "a02f100e73e5db50c8634dd93f22a3ae5f51a0b179b71beeb19391d432145254",
+      "size": 1591
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1955.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1955.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1955.dat"
+      ],
+      "sha256": "d473b69210f232b41eb8a301d955afb513ddbf2975ab586d32e11a556e48c0db",
+      "size": 1591
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1960.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1960.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1960.dat"
+      ],
+      "sha256": "d64339ec5b91fad838e965629902e7af43be4ead4797dd744e6c51c2a661dc4c",
+      "size": 1591
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1965.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1965.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1965.dat"
+      ],
+      "sha256": "adf478611a2304515ad0b0eb23a47aeba9294b80df381692b81e0e7adcb93877",
+      "size": 1591
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1970.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1970.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1970.dat"
+      ],
+      "sha256": "fbcdc95e67e9946c72d2bea74c836d1ecd77e1d4129be81cf9dcf965867a67c2",
+      "size": 1591
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1975.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1975.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1975.dat"
+      ],
+      "sha256": "948adfa4a8528067e71fe47a3edc59ebbf45fe301510d97e8b2fe78e7a7ca67c",
+      "size": 1591
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1980.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1980.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1980.dat"
+      ],
+      "sha256": "9bb772c00b27536ae37a5383a88bd8d04d0b2b7dcbdfa8d64fc0973b4e93210f",
+      "size": 1591
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1985.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1985.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1985.dat"
+      ],
+      "sha256": "628c6eea207151f37faaf9db7e79b3d561e9145828af9c48eae9cc01fd487648",
+      "size": 1591
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1990.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1990.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1990.dat"
+      ],
+      "sha256": "3146d58d606c1ac87badb7aef8686234234015f127951321716eb2815fd66efe",
+      "size": 1591
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf1995.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf1995.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf1995.dat"
+      ],
+      "sha256": "7d74da9fa5ed87a54690d1e812eb70d33d4e4cdee1cc350c38d1af420e9bec7e",
+      "size": 1590
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf2000.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf2000.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf2000.dat"
+      ],
+      "sha256": "8d25c7bf5e762c4bacd30d2144747772cb80e01e99e1305e4659dc926bac83f5",
+      "size": 1655
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf2005.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf2005.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf2005.dat"
+      ],
+      "sha256": "b3ce4d2b43318e1a02dac16629580338513157f0ea07a3662c07645ff44ead8c",
+      "size": 1785
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf2010.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf2010.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf2010.dat"
+      ],
+      "sha256": "2cc4fdfef7fc7da27e8ce3acaed0bd9a6950bd003c8846cb0a0faba002237181",
+      "size": 1785
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/dgrf2015.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-dgrf2015.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/dgrf2015.dat"
+      ],
+      "sha256": "e1454e12338797fc6ff1eb337192bb9ffaf82dca935a713e8d10d460611c87ad",
+      "size": 1785
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/igrf2020.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-igrf2020.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/igrf2020.dat"
+      ],
+      "sha256": "029b84d1c4e87d1e8abb5449e9abf20438551335b1c1d69672a41898c9fdeb59",
+      "size": 1785
+    },
+    {
+      "model": "igrf13",
+      "version": "igrf-13",
+      "path": "igrf13data/igrf2020s.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf13-igrf2020s.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf13data/igrf2020s.dat"
+      ],
+      "sha256": "fecc66b483306bd427f9fdd05f960f3f202dbfe44ba6a8b1154ff171222faee1",
+      "size": 1786
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1945.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1945.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1945.dat"
+      ],
+      "sha256": "971866457787b0d8a65f1f79c99b0d1bf8b4b447155b3dfc061dedf496f1bcc2",
+      "size": 1591
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1950.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1950.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1950.dat"
+      ],
+      "sha256": "a02f100e73e5db50c8634dd93f22a3ae5f51a0b179b71beeb19391d432145254",
+      "size": 1591
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1955.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1955.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1955.dat"
+      ],
+      "sha256": "d473b69210f232b41eb8a301d955afb513ddbf2975ab586d32e11a556e48c0db",
+      "size": 1591
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1960.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1960.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1960.dat"
+      ],
+      "sha256": "d64339ec5b91fad838e965629902e7af43be4ead4797dd744e6c51c2a661dc4c",
+      "size": 1591
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1965.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1965.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1965.dat"
+      ],
+      "sha256": "adf478611a2304515ad0b0eb23a47aeba9294b80df381692b81e0e7adcb93877",
+      "size": 1591
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1970.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1970.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1970.dat"
+      ],
+      "sha256": "fbcdc95e67e9946c72d2bea74c836d1ecd77e1d4129be81cf9dcf965867a67c2",
+      "size": 1591
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1975.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1975.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1975.dat"
+      ],
+      "sha256": "948adfa4a8528067e71fe47a3edc59ebbf45fe301510d97e8b2fe78e7a7ca67c",
+      "size": 1591
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1980.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1980.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1980.dat"
+      ],
+      "sha256": "9bb772c00b27536ae37a5383a88bd8d04d0b2b7dcbdfa8d64fc0973b4e93210f",
+      "size": 1591
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1985.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1985.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1985.dat"
+      ],
+      "sha256": "628c6eea207151f37faaf9db7e79b3d561e9145828af9c48eae9cc01fd487648",
+      "size": 1591
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1990.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1990.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1990.dat"
+      ],
+      "sha256": "3146d58d606c1ac87badb7aef8686234234015f127951321716eb2815fd66efe",
+      "size": 1591
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf1995.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf1995.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf1995.dat"
+      ],
+      "sha256": "7d74da9fa5ed87a54690d1e812eb70d33d4e4cdee1cc350c38d1af420e9bec7e",
+      "size": 1590
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf2000.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf2000.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf2000.dat"
+      ],
+      "sha256": "8d25c7bf5e762c4bacd30d2144747772cb80e01e99e1305e4659dc926bac83f5",
+      "size": 1655
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf2005.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf2005.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf2005.dat"
+      ],
+      "sha256": "b3ce4d2b43318e1a02dac16629580338513157f0ea07a3662c07645ff44ead8c",
+      "size": 1785
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf2010.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf2010.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf2010.dat"
+      ],
+      "sha256": "2cc4fdfef7fc7da27e8ce3acaed0bd9a6950bd003c8846cb0a0faba002237181",
+      "size": 1785
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf2015.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf2015.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf2015.dat"
+      ],
+      "sha256": "e1454e12338797fc6ff1eb337192bb9ffaf82dca935a713e8d10d460611c87ad",
+      "size": 1785
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/dgrf2020.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-dgrf2020.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/dgrf2020.dat"
+      ],
+      "sha256": "5ac1955bf257bdcba1c8ecd1c1a6297838ef6e170e84b70bae6ed0a10b77fbbb",
+      "size": 3529
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/igrf2025.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-igrf2025.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/igrf2025.dat"
+      ],
+      "sha256": "dd0bb07faf6dd9b4088abbcc3cf628ce7c22d1a21e18301d231c1f3188c63bf7",
+      "size": 3529
+    },
+    {
+      "model": "igrf14",
+      "version": "igrf-14",
+      "path": "igrf14data/igrf2025s.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v2/igrf14-igrf2025s.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/igrf14data/igrf2025s.dat"
+      ],
+      "sha256": "8b410ce9d721475a6c849e787620fa66a2cb0b9055d816dfa172a263e24654e5",
+      "size": 1505
     }
   ]
 }
