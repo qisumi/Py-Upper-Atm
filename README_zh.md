@@ -16,11 +16,12 @@
 - **IGRF**：国际地磁参考场 13/14，计算地磁场分量和 L 值
 - **CIRA86**：COSPAR 国际参考大气 1986，0-120 km 月平均表格
 - **MSIS86**：MSIS-86 / CIRA-86 热层模型 — 85 km 以上中性大气温度和密度
+- **MSISE90**：MSISE-90 中性大气模型 — 将 MSIS-86 向下延伸至地面
 
 ## 特性
 
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
@@ -229,6 +230,7 @@ cira = CIRA86(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 - `IGRF`
 - `CIRA86`
 - `MSIS86`
+- `MSISE90`
 
 每个类都提供 `calculate(...)`，返回普通字典。
 模型计算方法同时支持标量和可广播数组输入，输入标量返回标量结果，输入数组会按 numpy 广播返回对应形状。
@@ -431,6 +433,35 @@ MSIS86.calculate(*, iyd, sec, alt_km, lat_deg, lon_deg, stl_hours, f107a, f107, 
 - `densities`：形状为 `(..., 8)` 的密度数组，物种顺序为：
   `He, O, N2, O2, Ar, TotalMass, H, N`。
 
+### MSISE90.calculate
+
+签名：
+
+```python
+MSISE90.calculate(*, iyd, sec, alt_km, lat_deg, lon_deg, stl_hours, f107a, f107, ap7=None, mass=48)
+```
+
+输入字段：
+
+- `iyd`：日期，整数格式 `YYYYDDD`（如 `1990172`）。
+- `sec`：UTC 秒，0~86400。
+- `alt_km`：高度（公里），可从地面向上计算。
+- `lat_deg`：纬度（度）。
+- `lon_deg`：经度（度）。
+- `stl_hours`：地方太阳时（小时）。
+- `f107a`：81 天平均 F10.7 太阳通量。
+- `f107`：前一天的 F10.7 太阳通量。
+- `ap7`：可选，长度为 7 的地磁活动指数序列。
+- `mass`：可选，目标质量数选择器，默认 `48`（所有物种）。
+
+返回字段：
+
+- `alt_km`：输出高度（同广播后的形状）。
+- `T_local_K`：局地温度（K）。
+- `T_exo_K`：外逸层温度（K）。
+- `densities`：形状为 `(..., 8)` 的密度数组，物种顺序为：
+  `He, O, N2, O2, Ar, TotalMass, H, N`。
+
 ### 可选工具模块
 
 这些模块不会在 `import model` 时自动加载，需要时按需导入。
@@ -536,7 +567,7 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86
+│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90
 │   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
 │   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
 │   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
@@ -544,7 +575,8 @@ UpperAtmPy/
 │   │   ├── pyaurora/        # Feldstein 极光卵（Holzworth & Meng）
 │   │   ├── pyigrf/          # IGRF-13/14 地磁场封装
 │   │   ├── pycira86/        # CIRA-86 表格封装
-│   │   └── pymsis86/        # MSIS-86 热层模型封装
+│   │   ├── pymsis86/        # MSIS-86 热层模型封装
+│   │   └── pymsise90/       # MSISE-90 中性大气封装
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -558,7 +590,8 @@ UpperAtmPy/
 │   ├── igrf13data/
 │   ├── igrf14data/
 │   ├── cira86data/
-│   └── msis2data/
+│   ├── msis2data/
+│   └── msis86data/
 └── quick_run.py
 ```
 
@@ -572,6 +605,7 @@ UpperAtmPy/
 - [IGRF](src/model/pyigrf/README_zh.md)
 - [CIRA86](src/model/pycira86/README_zh.md)
 - [MSIS86](src/model/pymsis86/README_zh.md)
+- [MSISE90](src/model/pymsise90/README_zh.md)
 
 ## 测试
 

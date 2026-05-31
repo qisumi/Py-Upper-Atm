@@ -16,6 +16,7 @@
 | IGRF-13/14 | `IGRF` | 国际地磁参考场 — 计算地磁场分量（X, Y, Z, F, H）、磁倾角、磁偏角、L 值（1900 年起） | 已完成 |
 | CIRA-86 | `CIRA86` | COSPAR 国际参考大气 1986 — 0–120 km 月平均温度、气压、纬向风与位势高度表格 | 已完成 |
 | MSIS-86 | `MSIS86` | MSIS-86 / CIRA-86 热层模型 — 85 km 以上中性大气温度和密度 | 已完成 |
+| MSISE-90 | `MSISE90` | MSISE-90 — 将 MSIS-86 向下延伸至地面 | 已完成 |
 
 ## 计划移植模型
 
@@ -29,7 +30,6 @@
 |------|------|------|----------|----------|
 | Jacchia 1977 | `TODO/Jacchi-Reference-Atmosphere` | Jacchia 参考大气 — 90–2500+ km 温度与数密度剖面（N2, O2, O, Ar, He, H） | Fortran 77 | 无（硬编码系数） |
 | MET | `TODO/MET-Model` | 马歇尔工程热层模型 — 改进的 Jacchia 1970/71 热层模型，面向工程应用 | Fortran 77 | 无（硬编码系数） |
-| MSISE-90 | `TODO/MSIS/MSIS90` | MSISE-90 — 将 MSIS-86 向下延伸至地面 | Fortran 77 | 无（硬编码系数） |
 | Chiu 电离层模型 | `TODO/Chiu-Ionospheric-Model` | 经验电离层电子密度模型 — E、F1、F2 层电子密度（90–500 km） | Fortran 77 | 无（硬编码系数） |
 
 ### 第二阶段 — 磁层与辐射带模型

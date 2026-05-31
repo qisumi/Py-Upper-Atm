@@ -124,6 +124,16 @@ def msis86_model():
         pytest.skip(f"MSIS-86 DLL not available: {exc}")
 
 
+@pytest.fixture
+def msise90_model():
+    try:
+        from model import MSISE90
+
+        return MSISE90()
+    except Exception as exc:
+        pytest.skip(f"MSISE-90 DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"

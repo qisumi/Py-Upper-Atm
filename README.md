@@ -18,11 +18,12 @@ Supported models:
 - **IGRF**: International Geomagnetic Reference Field 13/14, including field components and L-value
 - **CIRA86**: COSPAR International Reference Atmosphere 1986 tables for 0-120 km
 - **MSIS86**: MSIS-86 / CIRA-86 thermosphere model — neutral temperature and density above 85 km
+- **MSISE90**: MSISE-90 neutral atmosphere model — extends MSIS-86 downward to ground level
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -242,6 +243,7 @@ Top-level `model` exports only:
 - `IGRF`
 - `CIRA86`
 - `MSIS86`
+- `MSISE90`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -441,6 +443,34 @@ Return fields:
 - `densities`: array with shape `(..., 8)` for species:
   `He, O, N2, O2, Ar, TotalMass, H, N`.
 
+### MSISE90.calculate
+
+Signature:
+
+```python
+MSISE90.calculate(*, iyd, sec, alt_km, lat_deg, lon_deg, stl_hours, f107a, f107, ap7=None, mass=48)
+```
+
+Input fields:
+
+- `iyd`: date as integer `YYYYDDD` (e.g., `1990172`).
+- `sec`: UTC seconds (0-86400).
+- `alt_km`: altitude in km, from ground level upward.
+- `lat_deg`, `lon_deg`: geodetic coordinates in degrees.
+- `stl_hours`: local solar time in hours.
+- `f107a`: 81-day average F10.7 solar flux.
+- `f107`: daily F10.7 solar flux for the previous day.
+- `ap7`: optional sequence length 7 for geomagnetic activity.
+- `mass`: optional target mass number selector, default `48` (all species).
+
+Return fields:
+
+- `alt_km`: output altitude(s).
+- `T_local_K`: local temperature (K).
+- `T_exo_K`: exospheric temperature (K).
+- `densities`: array with shape `(..., 8)` for species:
+  `He, O, N2, O2, Ar, TotalMass, H, N`.
+
 ### Optional utility modules
 
 These modules are not imported automatically by `import model`.
@@ -542,7 +572,7 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
@@ -550,7 +580,8 @@ UpperAtmPy/
 │   │   ├── pyaurora/        # Feldstein auroral oval (Holzworth & Meng)
 │   │   ├── pyigrf/          # IGRF-13/14 geomagnetic field wrapper
 │   │   ├── pycira86/        # CIRA-86 table wrapper
-│   │   └── pymsis86/        # MSIS-86 thermosphere model wrapper
+│   │   ├── pymsis86/        # MSIS-86 thermosphere model wrapper
+│   │   └── pymsise90/       # MSISE-90 neutral atmosphere wrapper
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -564,7 +595,8 @@ UpperAtmPy/
 │   ├── igrf13data/
 │   ├── igrf14data/
 │   ├── cira86data/
-│   └── msis2data/
+│   ├── msis2data/
+│   └── msis86data/
 └── quick_run.py
 ```
 
@@ -578,3 +610,4 @@ Each model directory under `src/model/` contains its own `README.md` (English) a
 - [IGRF](src/model/pyigrf/README.md)
 - [CIRA86](src/model/pycira86/README.md)
 - [MSIS86](src/model/pymsis86/README.md)
+- [MSISE90](src/model/pymsise90/README.md)
