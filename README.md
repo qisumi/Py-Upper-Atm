@@ -4,7 +4,7 @@
 
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
-![License](https://img.shields.io/badge/license-Placeholder-lightgrey)
+![License](https://img.shields.io/badge/license-MIT%20%2B%20third--party%20terms-blue)
 
 **UpperAtmPy** provides direct Python wrappers for upper atmospheric model DLLs. The project uses a `src/` layout and exposes one public class per model.
 
@@ -23,6 +23,18 @@ Supported models:
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
+
+## License
+
+Original UpperAtmPy wrappers, build files, tests, examples, and documentation
+are licensed under the MIT License. Third-party model source code and data are
+not relicensed by UpperAtmPy and remain subject to their upstream terms; see
+[LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+In particular, NRLMSIS 2.0 files under `src/model/pymsis2/` carry upstream
+academic, non-commercial terms from the U.S. Government / Naval Research
+Laboratory. Review the upstream notice before redistribution or non-academic
+use.
 
 ## Build
 

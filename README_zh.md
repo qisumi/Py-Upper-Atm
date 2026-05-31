@@ -2,7 +2,7 @@
 
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
-![License](https://img.shields.io/badge/license-Placeholder-lightgrey)
+![License](https://img.shields.io/badge/license-MIT%20%2B%20third--party%20terms-blue)
 
 **UpperAtmPy** 为高层大气模型 DLL 提供 Python 直接调用封装。项目使用 `src/` 布局，每个模型只公开一个类接口。
 
@@ -21,6 +21,16 @@
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
+
+## 许可证
+
+UpperAtmPy 原创的 Python 封装、构建文件、测试、示例和文档使用 MIT
+License。第三方模型源码和数据不会被 UpperAtmPy 重新授权，仍受其上游条款约束；
+详见 [LICENSE](LICENSE) 和 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+特别是 `src/model/pymsis2/` 下的 NRLMSIS 2.0 文件带有美国政府 / Naval
+Research Laboratory 的上游学术、非商业使用条款。重新分发或非学术使用前，请先检查
+其上游声明。
 
 ## 构建
 
