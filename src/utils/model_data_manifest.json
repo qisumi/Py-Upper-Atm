@@ -14,6 +14,17 @@
       "size": 536576
     },
     {
+      "model": "msis86",
+      "version": "msis86",
+      "path": "msis86data/msis86.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v1/msis86.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/msis86data/msis86.dat"
+      ],
+      "sha256": "a186133ea55de7977a8377cf1c8134818f4a758b0b999f7aac2448c7b6dd7acc",
+      "size": 19618
+    },
+    {
       "model": "hwm14",
       "version": "hwm14",
       "path": "hwm14data/hwm123114.bin",

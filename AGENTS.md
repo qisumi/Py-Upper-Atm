@@ -11,6 +11,7 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.AuroraOval`
 - `model.IGRF`
 - `model.CIRA86`
+- `model.MSIS86`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -33,6 +34,7 @@ python example/test_hwm93.py
 python example/test_aurora.py
 python example/test_igrf.py
 python example/test_cira86.py
+python example/test_msis86.py
 ```
 
 ## Public API Pattern
@@ -87,6 +89,13 @@ CIRA86 result dictionaries contain:
 - Pressure mode: `month` / `pressure_mb` / `lat_deg`
 - Pressure mode: `T_K` / `zonal_wind_ms` / `geopotential_height_m`
 
+MSIS86 result dictionaries contain:
+
+- `alt_km`
+- `T_local_K`
+- `T_exo_K`
+- `densities` (He, O, N2, O2, Ar, TotalMass, H, N)
+
 ## Project Structure
 
 ```text
@@ -100,7 +109,8 @@ UpperAtmPy/
 │   │   ├── pyhwm93/
 │   │   ├── pyigrf/
 │   │   ├── pycira86/
-│   │   └── pyaurora/
+│   │   ├── pyaurora/
+│   │   └── pymsis86/
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -124,7 +134,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 

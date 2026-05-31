@@ -17,11 +17,12 @@ Supported models:
 - **AuroraOval**: Feldstein auroral oval boundary (Holzworth & Meng)
 - **IGRF**: International Geomagnetic Reference Field 13/14, including field components and L-value
 - **CIRA86**: COSPAR International Reference Atmosphere 1986 tables for 0-120 km
+- **MSIS86**: MSIS-86 / CIRA-86 thermosphere model — neutral temperature and density above 85 km
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -173,7 +174,7 @@ wind = hwm.calculate(
 print(wind["meridional_wind_ms"], wind["zonal_wind_ms"])
 ```
 
-MSIS2, HWM14, IGRF, and CIRA86 need external model data. By default UpperAtmPy resolves
+MSIS2, HWM14, IGRF, CIRA86, and MSIS86 need external model data. By default UpperAtmPy resolves
 `.upperatmpy` under the current project directory and downloads missing files
 from the current package version's release tag (for example `v0.1.1`) on first
 model instantiation when a download manifest is available. CIRA86 currently
@@ -196,6 +197,7 @@ If you cannot download data files at runtime, you can fetch them manually from
 ```bash
 UPPERATMPY_DATA_DIR/
 ├── msis2data/
+├── msis86data/
 ├── hwm14data/
 ├── igrf13data/
 ├── igrf14data/
@@ -239,6 +241,7 @@ Top-level `model` exports only:
 - `AuroraOval`
 - `IGRF`
 - `CIRA86`
+- `MSIS86`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -410,6 +413,34 @@ Return fields:
 - Height mode: `month`, `alt_km`, `lat_deg`, `T_K`, `zonal_wind_ms`, `pressure_mb`.
 - Pressure mode: `month`, `pressure_mb`, `lat_deg`, `T_K`, `zonal_wind_ms`, `geopotential_height_m`.
 
+### MSIS86.calculate
+
+Signature:
+
+```python
+MSIS86.calculate(*, iyd, sec, alt_km, lat_deg, lon_deg, stl_hours, f107a, f107, ap7=None, mass=48)
+```
+
+Input fields:
+
+- `iyd`: date as integer `YYYYDDD` (e.g., `1987172`).
+- `sec`: UTC seconds (0-86400).
+- `alt_km`: altitude in km (must be > 85 km).
+- `lat_deg`, `lon_deg`: geodetic coordinates in degrees.
+- `stl_hours`: local solar time in hours.
+- `f107a`: 81-day average F10.7 solar flux.
+- `f107`: daily F10.7 solar flux.
+- `ap7`: optional sequence length 7 for geomagnetic activity.
+- `mass`: optional target mass number selector, default `48` (all species).
+
+Return fields:
+
+- `alt_km`: output altitude(s).
+- `T_local_K`: local temperature (K).
+- `T_exo_K`: exospheric temperature (K).
+- `densities`: array with shape `(..., 8)` for species:
+  `He, O, N2, O2, Ar, TotalMass, H, N`.
+
 ### Optional utility modules
 
 These modules are not imported automatically by `import model`.
@@ -511,14 +542,15 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
 │   │   ├── pyhwm93/         # HWM93 wrapper and Fortran sources
 │   │   ├── pyaurora/        # Feldstein auroral oval (Holzworth & Meng)
 │   │   ├── pyigrf/          # IGRF-13/14 geomagnetic field wrapper
-│   │   └── pycira86/        # CIRA-86 table wrapper
+│   │   ├── pycira86/        # CIRA-86 table wrapper
+│   │   └── pymsis86/        # MSIS-86 thermosphere model wrapper
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -545,3 +577,4 @@ Each model directory under `src/model/` contains its own `README.md` (English) a
 - [AuroraOval](src/model/pyaurora/README.md)
 - [IGRF](src/model/pyigrf/README.md)
 - [CIRA86](src/model/pycira86/README.md)
+- [MSIS86](src/model/pymsis86/README.md)

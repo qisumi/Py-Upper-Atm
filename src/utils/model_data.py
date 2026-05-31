@@ -377,6 +377,7 @@ def _normalize_model_name(model_name: str) -> str:
         "igrf14": "igrf14",
         "cira86": "cira86",
         "cira": "cira86",
+        "msis86": "msis86",
     }
     return aliases.get(key, key)
 

@@ -114,6 +114,16 @@ def cira86_model():
         pytest.skip(f"CIRA-86 data not available: {exc}")
 
 
+@pytest.fixture
+def msis86_model():
+    try:
+        from model import MSIS86
+
+        return MSIS86(data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"MSIS-86 DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"

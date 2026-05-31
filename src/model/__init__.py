@@ -9,6 +9,7 @@ Only concrete model classes are exported:
 - AuroraOval
 - IGRF
 - CIRA86
+- MSIS86
 
 Exports are lazy so `import model` does not load any model DLL.
 """
@@ -26,6 +27,7 @@ _LAZY_EXPORTS = {
     "AuroraOval": ("model.pyaurora", "Model"),
     "IGRF": ("model.pyigrf", "Model"),
     "CIRA86": ("model.pycira86", "Model"),
+    "MSIS86": ("model.pymsis86", "Model"),
 }
 
 __all__ = list(_LAZY_EXPORTS)

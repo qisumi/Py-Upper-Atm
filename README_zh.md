@@ -15,11 +15,12 @@
 - **AuroraOval**：Feldstein 极光卵边界模型（Holzworth & Meng 参数化）
 - **IGRF**：国际地磁参考场 13/14，计算地磁场分量和 L 值
 - **CIRA86**：COSPAR 国际参考大气 1986，0-120 km 月平均表格
+- **MSIS86**：MSIS-86 / CIRA-86 热层模型 — 85 km 以上中性大气温度和密度
 
 ## 特性
 
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
@@ -166,7 +167,7 @@ wind = hwm.calculate(
 print(wind["meridional_wind_ms"], wind["zonal_wind_ms"])
 ```
 
-MSIS2、HWM14、IGRF 和 CIRA86 需要外部模型数据。默认情况下，UpperAtmPy 会解析当前项目目录下的
+MSIS2、HWM14、IGRF、CIRA86 和 MSIS86 需要外部模型数据。默认情况下，UpperAtmPy 会解析当前项目目录下的
 `.upperatmpy`，并在存在下载清单时于首次实例化模型时按当前包版本的 release tag（如 `v0.1.1`）下载缺失文件。
 CIRA86 当前使用本地 `cira86data/` ASCII 表，因此源码示例会显式传入 `data_dir=data/`。离线使用时，
 可以传入 `data_dir=...`，或设置 `UPPERATMPY_DATA_DIR` 指向包含 `msis2data/`、
@@ -184,6 +185,7 @@ CIRA86 当前使用本地 `cira86data/` ASCII 表，因此源码示例会显式�
 ```text
 UPPERATMPY_DATA_DIR/
 ├── msis2data/
+├── msis86data/
 ├── hwm14data/
 ├── igrf13data/
 ├── igrf14data/
@@ -226,6 +228,7 @@ cira = CIRA86(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 - `AuroraOval`
 - `IGRF`
 - `CIRA86`
+- `MSIS86`
 
 每个类都提供 `calculate(...)`，返回普通字典。
 模型计算方法同时支持标量和可广播数组输入，输入标量返回标量结果，输入数组会按 numpy 广播返回对应形状。
@@ -399,6 +402,35 @@ CIRA86.calculate(*, month, lat_deg, alt_km=None, pressure_mb=None)
 - 高度模式：`month`、`alt_km`、`lat_deg`、`T_K`、`zonal_wind_ms`、`pressure_mb`。
 - 气压模式：`month`、`pressure_mb`、`lat_deg`、`T_K`、`zonal_wind_ms`、`geopotential_height_m`。
 
+### MSIS86.calculate
+
+签名：
+
+```python
+MSIS86.calculate(*, iyd, sec, alt_km, lat_deg, lon_deg, stl_hours, f107a, f107, ap7=None, mass=48)
+```
+
+输入字段：
+
+- `iyd`：日期，整数格式 `YYYYDDD`（如 `1987172`）。
+- `sec`：UTC 秒，0~86400。
+- `alt_km`：高度（公里），必须大于 85 km。
+- `lat_deg`：纬度（度）。
+- `lon_deg`：经度（度）。
+- `stl_hours`：地方太阳时（小时）。
+- `f107a`：81 天平均 F10.7 太阳通量。
+- `f107`：前一天的 F10.7 太阳通量。
+- `ap7`：可选，长度为 7 的地磁活动指数序列。
+- `mass`：可选，目标质量数选择器，默认 `48`（所有物种）。
+
+返回字段：
+
+- `alt_km`：输出高度（同广播后的形状）。
+- `T_local_K`：局地温度（K）。
+- `T_exo_K`：外逸层温度（K）。
+- `densities`：形状为 `(..., 8)` 的密度数组，物种顺序为：
+  `He, O, N2, O2, Ar, TotalMass, H, N`。
+
 ### 可选工具模块
 
 这些模块不会在 `import model` 时自动加载，需要时按需导入。
@@ -504,14 +536,15 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86
+│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86
 │   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
 │   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
 │   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
 │   │   ├── pyhwm93/         # HWM93 封装和 Fortran 源码
 │   │   ├── pyaurora/        # Feldstein 极光卵（Holzworth & Meng）
 │   │   ├── pyigrf/          # IGRF-13/14 地磁场封装
-│   │   └── pycira86/        # CIRA-86 表格封装
+│   │   ├── pycira86/        # CIRA-86 表格封装
+│   │   └── pymsis86/        # MSIS-86 热层模型封装
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -538,6 +571,7 @@ UpperAtmPy/
 - [AuroraOval](src/model/pyaurora/README_zh.md)
 - [IGRF](src/model/pyigrf/README_zh.md)
 - [CIRA86](src/model/pycira86/README_zh.md)
+- [MSIS86](src/model/pymsis86/README_zh.md)
 
 ## 测试
 

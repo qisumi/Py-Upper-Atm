@@ -29,6 +29,7 @@ class TestModelPackage:
             "AuroraOval",
             "IGRF",
             "CIRA86",
+            "MSIS86",
         ]
         assert "model.pymsis2" not in sys.modules
         assert "model.pymsis00" not in sys.modules
@@ -37,6 +38,7 @@ class TestModelPackage:
         assert "model.pyaurora" not in sys.modules
         assert "model.pyigrf" not in sys.modules
         assert "model.pycira86" not in sys.modules
+        assert "model.pymsis86" not in sys.modules
         assert "utils.model_data" not in sys.modules
 
     def test_old_top_level_exports_are_removed(self):

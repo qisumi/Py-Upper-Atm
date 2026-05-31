@@ -15,6 +15,7 @@ The following models have been fully ported and are available in the `src/model/
 | Auroral Oval | `AuroraOval` | Feldstein auroral oval boundary (Holzworth & Meng) | Done |
 | IGRF-13/14 | `IGRF` | Int'l Geomagnetic Reference Field — computes field components (X, Y, Z, F, H), dip, declination, L-value from 1900 onward | Done |
 | CIRA-86 | `CIRA86` | COSPAR International Reference Atmosphere 1986 — monthly mean temperature, pressure, zonal wind, and geopotential height tables for 0-120 km | Done |
+| MSIS-86 | `MSIS86` | MSIS-86 / CIRA-86 thermosphere model — neutral temperature and density above 85 km | Done |
 
 ## Planned Models
 
@@ -28,7 +29,6 @@ These models extend the existing neutral atmosphere and ionosphere capabilities 
 |-------|-----------|-------------|----------|---------------|
 | Jacchia 1977 | `TODO/Jacchi-Reference-Atmosphere` | Jacchia reference atmosphere — temperature and number density profiles (N2, O2, O, Ar, He, H) from 90–2500+ km | Fortran 77 | None (hard-coded) |
 | MET | `TODO/MET-Model` | Marshall Engineering Thermosphere — modified Jacchia 1970/71 thermospheric model for engineering applications | Fortran 77 | None (hard-coded) |
-| MSIS-86 | `TODO/MSIS/MSIS86` | MSIS-86 / CIRA-86 thermosphere model — historical MSIS generation | Fortran 77 | `msis86.dat` (binary coefficients) |
 | MSISE-90 | `TODO/MSIS/MSIS90` | MSISE-90 — extended MSIS-86 downward to ground level | Fortran 77 | None (hard-coded) |
 | Chiu Ionospheric Model | `TODO/Chiu-Ionospheric-Model` | Empirical ionospheric electron density — E, F1, F2 layer densities (90–500 km) | Fortran 77 | None (hard-coded) |
 
