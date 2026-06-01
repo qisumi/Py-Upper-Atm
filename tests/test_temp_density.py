@@ -31,6 +31,9 @@ class TestModelPackage:
             "CIRA86",
             "MSIS86",
             "MSISE90",
+            "Jacchia77",
+            "MET",
+            "Chiu",
         ]
         assert "model.pymsis2" not in sys.modules
         assert "model.pymsis00" not in sys.modules

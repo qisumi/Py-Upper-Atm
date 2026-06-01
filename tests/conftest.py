@@ -134,6 +134,36 @@ def msise90_model():
         pytest.skip(f"MSISE-90 DLL not available: {exc}")
 
 
+@pytest.fixture
+def jacchia77_model():
+    try:
+        from model import Jacchia77
+
+        return Jacchia77()
+    except Exception as exc:
+        pytest.skip(f"Jacchia 77 DLL not available: {exc}")
+
+
+@pytest.fixture
+def met_model():
+    try:
+        from model import MET
+
+        return MET()
+    except Exception as exc:
+        pytest.skip(f"MET DLL not available: {exc}")
+
+
+@pytest.fixture
+def chiu_model():
+    try:
+        from model import Chiu
+
+        return Chiu()
+    except Exception as exc:
+        pytest.skip(f"Chiu DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"

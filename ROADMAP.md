@@ -17,6 +17,9 @@ The following models have been fully ported and are available in the `src/model/
 | CIRA-86 | `CIRA86` | COSPAR International Reference Atmosphere 1986 — monthly mean temperature, pressure, zonal wind, and geopotential height tables for 0-120 km | Done |
 | MSIS-86 | `MSIS86` | MSIS-86 / CIRA-86 thermosphere model — neutral temperature and density above 85 km | Done |
 | MSISE-90 | `MSISE90` | MSISE-90 — extended MSIS-86 downward to ground level | Done |
+| Jacchia 1977 | `Jacchia77` | Jacchia reference atmosphere — temperature and species density profiles (N2, O2, O, Ar, He, H) for 90–2500 km | Done |
+| MET | `MET` | Marshall Engineering Thermosphere — modified Jacchia 1970 model for engineering applications | Done |
+| Chiu | `Chiu` | Chiu ionospheric electron density — E, F1, F2 layer densities (90–500 km) | Done |
 
 ## Planned Models
 
@@ -24,13 +27,7 @@ All models below are sourced from the `TODO/` directory (CCMC ModelWeb Archive).
 
 ### Phase 1 — Atmospheric & Ionospheric Extensions
 
-These models extend the existing neutral atmosphere and ionosphere capabilities and share similar FFI characteristics with the already-ported models.
-
-| Model | Directory | Description | Language | External Data |
-|-------|-----------|-------------|----------|---------------|
-| Jacchia 1977 | `TODO/Jacchi-Reference-Atmosphere` | Jacchia reference atmosphere — temperature and number density profiles (N2, O2, O, Ar, He, H) from 90–2500+ km | Fortran 77 | None (hard-coded) |
-| MET | `TODO/MET-Model` | Marshall Engineering Thermosphere — modified Jacchia 1970/71 thermospheric model for engineering applications | Fortran 77 | None (hard-coded) |
-| Chiu Ionospheric Model | `TODO/Chiu-Ionospheric-Model` | Empirical ionospheric electron density — E, F1, F2 layer densities (90–500 km) | Fortran 77 | None (hard-coded) |
+_No remaining models in this phase._
 
 ### Phase 2 — Magnetospheric & Radiation Belt Models
 

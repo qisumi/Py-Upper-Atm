@@ -19,11 +19,14 @@ Supported models:
 - **CIRA86**: COSPAR International Reference Atmosphere 1986 tables for 0-120 km
 - **MSIS86**: MSIS-86 / CIRA-86 thermosphere model — neutral temperature and density above 85 km
 - **MSISE90**: MSISE-90 neutral atmosphere model — extends MSIS-86 downward to ground level
+- **Jacchia77**: Jacchia 1977 Reference Atmosphere — temperature and species density profiles (N2, O2, O, Ar, He, H) for 90–2500 km
+- **MET**: Marshall Engineering Thermosphere — modified Jacchia 1970 model for engineering applications
+- **Chiu**: Chiu ionospheric electron density — E, F1, F2 layer densities (90–500 km)
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -244,6 +247,9 @@ Top-level `model` exports only:
 - `CIRA86`
 - `MSIS86`
 - `MSISE90`
+- `Jacchia77`
+- `MET`
+- `Chiu`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -471,6 +477,107 @@ Return fields:
 - `densities`: array with shape `(..., 8)` for species:
   `He, O, N2, O2, Ar, TotalMass, H, N`.
 
+### Jacchia77.calculate
+
+Signature:
+
+```python
+Jacchia77.calculate(*, alt_km, Tinf_K)
+```
+
+Input fields:
+
+- `alt_km`: altitude in km (scalar or array-like), range 0–2500.
+- `Tinf_K`: exospheric temperature in K (scalar).
+
+Return fields:
+
+- `alt_km`: output altitude(s), same shape as broadcast inputs.
+- `Tinf_K`: exospheric temperature (K).
+- `T_local_K`: local temperature (K).
+- `N2_cm3`: N2 number density (cm⁻³).
+- `O2_cm3`: O2 number density (cm⁻³).
+- `O_cm3`: O number density (cm⁻³).
+- `Ar_cm3`: Ar number density (cm⁻³).
+- `He_cm3`: He number density (cm⁻³).
+- `H_cm3`: H number density (cm⁻³).
+- `total_density_cm3`: total number density (cm⁻³).
+- `mean_molecular_weight`: mean molecular weight (g/mol).
+
+### MET.calculate
+
+Signature:
+
+```python
+MET.calculate(*, alt_km, lat_deg, lon_deg, year, month, day, hour, minute, geo_index_type, f107, f107a, ap)
+```
+
+Input fields:
+
+- `alt_km`: altitude in km (scalar or array-like).
+- `lat_deg`: geodetic latitude in degrees.
+- `lon_deg`: geodetic longitude in degrees.
+- `year`: year (2 digits, e.g., 23 for 2023).
+- `month`: month (1-12).
+- `day`: day of month.
+- `hour`: hour (0-23).
+- `minute`: minute (0-59).
+- `geo_index_type`: geomagnetic index type (1=Kp, 2=Ap).
+- `f107`: F10.7 solar radio noise flux.
+- `f107a`: 162-day average F10.7.
+- `ap`: geomagnetic activity index Ap.
+
+Return fields:
+
+- `alt_km`: output altitude(s).
+- `lat_deg`: latitude (degrees).
+- `lon_deg`: longitude (degrees).
+- `T_exo_K`: exospheric temperature (K).
+- `T_local_K`: local temperature at altitude Z (K).
+- `N2_m3`: N2 number density (per m³).
+- `O2_m3`: O2 number density (per m³).
+- `O_m3`: O number density (per m³).
+- `Ar_m3`: Ar number density (per m³).
+- `He_m3`: He number density (per m³).
+- `H_m3`: H number density (per m³).
+- `mean_molecular_weight`: average molecular weight.
+- `total_density_kg_m3`: total mass density (kg/m³).
+- `log10_density`: log10 of total density.
+- `pressure_Pa`: total pressure (Pa).
+- `gravity_m_s2`: gravitational acceleration (m/s²).
+- `gamma`: ratio of specific heats.
+- `scale_height_m`: pressure scale-height (m).
+- `cp`: specific heat at constant pressure.
+- `cv`: specific heat at constant volume.
+
+### Chiu.calculate
+
+Signature:
+
+```python
+Chiu.calculate(*, alt_km, sunspot_number, local_time_rad, month_from_dec15, geo_lat_rad, geo_mag_lat_rad, geo_mag_lon_rad, dip_angle_rad)
+```
+
+Input fields:
+
+- `alt_km`: altitude in km (90–500). Set to 0 to obtain layer peak densities only.
+- `sunspot_number`: Zurich smoothed sunspot number (Rz).
+- `local_time_rad`: local time angle in radians, measured from midnight (0 = midnight, π = noon).
+- `month_from_dec15`: annual time in months from December 15 of the previous year.
+- `geo_lat_rad`: geographic latitude in radians.
+- `geo_mag_lat_rad`: geomagnetic latitude in radians.
+- `geo_mag_lon_rad`: geomagnetic east longitude in radians.
+- `dip_angle_rad`: geomagnetic dip angle in radians.
+
+Return fields:
+
+- `alt_km`: output altitude(s).
+- `sunspot_number`: input sunspot number.
+- `Ne_total_cm3`: total electron density (cm⁻³).
+- `Ne_E_cm3`: E layer electron density (cm⁻³).
+- `Ne_F1_cm3`: F1 layer electron density (cm⁻³).
+- `Ne_F2_cm3`: F2 layer electron density (cm⁻³).
+
 ### Optional utility modules
 
 These modules are not imported automatically by `import model`.
@@ -572,7 +679,7 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
@@ -581,7 +688,10 @@ UpperAtmPy/
 │   │   ├── pyigrf/          # IGRF-13/14 geomagnetic field wrapper
 │   │   ├── pycira86/        # CIRA-86 table wrapper
 │   │   ├── pymsis86/        # MSIS-86 thermosphere model wrapper
-│   │   └── pymsise90/       # MSISE-90 neutral atmosphere wrapper
+│   │   ├── pymsise90/       # MSISE-90 neutral atmosphere wrapper
+│   │   ├── pyjacchia77/     # Jacchia 1977 Reference Atmosphere wrapper
+│   │   ├── pymet/           # Marshall Engineering Thermosphere wrapper
+│   │   └── pychiu/          # Chiu ionospheric electron density wrapper
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py

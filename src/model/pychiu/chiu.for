@@ -1,0 +1,184 @@
+      SUBROUTINE IONDEN (QTOT,QI,Z,RZUR,PHI,TMO,RLT,RLTM,RLGM,DIP)
+C-------------------------------------------------------------------------------
+C	THIS SUBROUTINE COMPUTES THE ELECTRON DENSITY AS DESCRIBED IN
+C	J. Atmos. Terres. Phys. 1615, 35, 1973.
+C
+C			OUTPUT
+C	QTOT	=   TOTAL ELECTRON DENSITY IN UNITS OF 1.E+5*CM**-3
+C	QI(1)	= E LAYER ELECTRON DENSITY  "   "   "       "
+C	  (2)	= F1  "      "        "     "   "   "       "
+C	  (3)	= F2  "      "        "     "   "   "       "
+C			INPUT
+C	Z	= ALTITUDE IN KM (90 < Z < 500, SEE "OPTION" BELOW)
+C	RZUR	= ZURICH SMOOTHED SUNSPOT NUMBER
+C	RLGM	= GEOMAGNETIC EAST LONGITUDE IN RADIANS
+C	RLTM	=      "      LATITUDE IN RADIANS
+C	DIP	=      "      DIP ANGLE "    "
+C	RLT	= GEOGRAPHIC  LATITUDE IN RADIANS
+C	PHI	= LOCAL TIME ANGLE IN RADIANS MEASURED FROM MIDNIGHT
+C	TMO	= ANNUAL TIME IN MONTHS FROM DEC. 15 OF PREVIOUS YEAR
+C			OPTIONS
+C	SET Z=0 TO OBTAIN THE PEAK DENSITY FOR LAYERS (QI(J),J=1,3)
+C		QTOT=0. IN THIS CASE
+C			NOTES
+C	DUE TO LACK OF DATA, THE F2 DENSITY HAS NOT BEEN MADE CONTINUOUS
+C	AT THE SOUTH MAGNETIC POLE.
+C	RLGM, RLTM & DIP CAN BE DERIVED FROM IGRF (JGR 74, 4407, 1969).
+C-------------------------------------------------------------------------------
+      DIMENSION QI(3), AMP(3), ALF(3), VAR(3), ZMAX(3), HMAX(3)
+      DATA HMAX(1),HMAX(2)/10.,34./
+      DATA AMP/1.36,2.44,.66/
+      DATA ALF/.5,.5,1./
+      DATA ZMAX(1),ZMAX(2)/110.,180./
+      PI=ACOS(-1.)
+      SDEC=.39795*SIN(PI*(TMO-3.167)/6.)
+      DEC=ASIN(SDEC)
+      DELP=ABS(ABS(RLT)-PI/2.)
+      IF (DELP.GT.1.E-03) GO TO 1
+      SEASN=RLT*DEC
+      IF (SEASN.LT.0.) PHI=0.
+      IF (SEASN.GE.0.) PHI=PI
+    1 R=RZUR/100.
+      CLTM=COS(RLTM)
+      SLTM=SIN(RLTM)
+      XLAM=1.+.5*ALOG(1.+30.*R)
+      VAR(1)=TVEF1(1.15,0.,.4,2.,RLT,R,PHI,DEC)
+      VAR(2)=TVEF1(1.24,.25,.25,XLAM,RLT,R,PHI,DEC)
+      VAR(3)=TVARF2(RLTM,RLGM,DIP,R,PHI,TMO,DEC,PI,CLTM,SLTM)
+      IF (Z.EQ.0.) GO TO 3
+      ZALF=-4.5*ABS(RLTM)-PI
+      ZBA=240.+10.*CLTM*COS(PI*(TMO/3.-1.5))
+      ZBAR=ZBA+R*(75.+83.*CLTM*ZETA(DEC,RLTM))
+      ZMAX(3)=ZBAR+30.*COS(PHI+ZALF)
+      HMAX(3)=.2*ZMAX(3)+40.
+      IF (Z.LT.ZMAX(3)) HMAX(3)=.2*Z+40.
+      SUM=0.
+      DO 2 I=1,3
+      ZP=(Z-ZMAX(I))/HMAX(I)
+      CZ=EXP(ALF(I)*(1.-ZP-EXP(-ZP)))
+      QI(I)=AMP(I)*VAR(I)*CZ
+      SUM=SUM+QI(I)
+    2 CONTINUE
+      QTOT=SUM
+      RETURN
+    3 CONTINUE
+      DO 4 I=1,3
+      QI(I)=AMP(I)*VAR(I)
+    4 CONTINUE
+      QTOT=0.
+      RETURN
+      END
+      FUNCTION TVEF1 (A,B,C,D,RLT,R,PHI,DEC)
+      RF=SQRT(1.+(A+B*R)*R)
+      CSL=COS(RLT)
+      CSX=-CSL*COS(DEC)*COS(PHI)+ZETA(RLT,DEC)
+      CSX2=SQRT(ABS(CSX))
+      XF=SIGN(CSX2,CSX)
+      VUT=W(C,RLT,PHI,DEC)
+      VDIUR=EXP(D*(XF-1.))
+      TVEF1=RF*VDIUR*VUT
+      RETURN
+      END
+      FUNCTION TVARF2 (RLTM,RLGM,DIP,R,PHI,TMO,DEC,PI,CLTM,SLTM)
+      ALTM=ABS(RLTM)
+      ATMO=TMO*PI/6.
+      SEMI=SEMIAN(ATMO)
+      REQ=1.-.2*R+.6*SQRT(R)
+      SD=ZETA(DEC,RLTM)
+      X=(2.2+(.2+.1*R)*SLTM)*CLTM
+      FF=EXP(-X**6)
+      GG=1.-FF
+      CPD=COS(PHI-.873)
+      EF=COS(PHI+PI/4.)
+      EMF=EF*EF
+      ADIUR=(.9+.32*SD)*(1.+SD*EMF)
+      BQ=COS(ALTM-.2618)
+      AQE=CLTM**8
+      AQT=AQE*CLTM*CLTM
+      AEQ=AQE*REQ*EXP(.25*(1.-CPD))
+      EQ=(1.-.4*AQT)*(1.+AEQ*BQ**12)*(1.+.6*AQT*EMF)
+      VEQ=EQ*(1.+.05*SEMI)
+      VDIUR=ADIUR*EXP(-1.1*(CPD+1.))
+      VLT=(EXP(3.*COS(RLTM*(SIN(PHI)-1.)/2.)))*(1.2-.5*CLTM*CLTM)
+      VLT=VLT*(1.+.05*R*COS(ATMO)*SLTM**3)
+      RTL=SQRT((12.*RLTM+4.*PI/3.)**2+(TMO/2.-3.)**2)
+      VLAT=VLT*(1.-.15*EXP(-RTL))
+      RF=1.+R+(.204+.03*R)*R*R
+      IF (R-1.1) 2,2,1
+    1 CQ=1.53*SLTM*SLTM
+      RF=2.39+CQ*(RF-2.39)
+    2 CONTINUE
+      VUT=YONII(RLTM,RF,R,PHI,TMO,DEC,PI,CLTM,SLTM)
+      POLER=POLAR(RLTM,RLGM,DIP,R,PHI,TMO,DEC,PI,CLTM,SLTM)
+      SHIFT=7.*PI/18.
+      VLONG=1.+.1*(CLTM**3)*COS(2.*(RLGM-SHIFT))
+      ADIP=ABS(DIP)
+      DP=.15-.5*(1.+R)*(1.-CLTM)*EXP(-.33*(TMO-6.)**2)
+      VDP=1.+DP*EXP(-18.*(ADIP-40.*PI/180.)**2)
+      VDIP=VDP*(1.+.03*SEMI)
+      F2=VDIUR*VLAT*VUT*VEQ*RF*VLONG*VDIP
+      TVARF2=FF*POLER+GG*F2
+      RETURN
+      END
+      FUNCTION POLAR (RLTM,RLGM,DIP,R,PHI,TMO,DEC,PI,CLTM,SLTM)
+      T=PI*TMO/12.
+      V=SIN(T)
+      U=COS(T+T)
+      Y=SIN(RLGM/2.)
+      YS=COS(RLGM/2.-PI/20.)
+      Z=SIN(RLGM)
+      ZA=SQRT(ABS(Z))
+      AM=1.+V
+      IF (RLTM) 2,1,1
+    1 C=-23.5*PI/180.
+      POLAR=(2.+1.2*R)*W(1.2,RLTM,PHI,C)*(1.+.3*V)
+      GO TO 3
+    2 B=V*(.5*Y-.5*Z-Y**8)-AM*U*(Z/ZA)*EXP(-4.*Y*Y)
+      POLAR=2.5+2.0*R+U*(0.5+(1.3+.2*R)*YS**4)
+      POLAR=POLAR+(1.3+0.5*R)*COS(PHI-PI*(1.+B))
+      POLAR=POLAR*(1.+0.4*(1.-V*V))*EXP(-1.0*V*YS**4)
+    3 CONTINUE
+      RETURN
+      END
+      FUNCTION YONII (RLTM,RF,R,PHI,TMO,DEC,PI,CLTM,SLTM)
+      B=1.3+(.139*(1.+COS(RLTM-PI/4.))+.0517*R)*R*R
+      DRF=1./RF
+      W1=PI/6.
+      W2=W1+W1
+      DE=.1778*R*R
+      ALTM=ABS(RLTM)
+      SNX=SIN(ALTM-.5236)
+      AE=.2*(1.-SNX)
+      BLTM=ABS(ALTM-PI/9.)
+      SX=SIN(BLTM)
+      FE=.13-.06*SX
+      YM=COS(RLTM+DEC)
+      CPHG=COS(PHI)
+      XTC=YM**3*(1.-CPHG)**.25
+      YTC=-(.15+.3*SIN(ALTM))*XTC
+      T1=AE*(1.+.6*COS(W2*(TMO-4.)))*COS(W1*(TMO-1.))
+      TRIV=(COS(RLTM-W1))*(COS(W1*(.5*TMO-1.)))**3
+      TRIV=TRIV+(COS(RLTM+PI/4.))*(COS(W1*(.5*TMO-4.)))**2
+      QQ=1.+.085*TRIV
+      T2=.7*(QQ+DE*DRF*COS(W2*(TMO-4.3)))*W(B,RLTM,PHI,DEC)
+      T3=FE*COS(W2*(TMO-4.5))+YTC
+      YONII=(T1+T3)*DRF+T2
+      RETURN
+      END
+      FUNCTION W (B,XI,ETA,DEC)
+      P=PSI(XI,ETA,DEC)
+      W=EXP(-B*(COS(P)-COS(XI)))
+      RETURN
+      END
+      FUNCTION PSI (XI,ETA,DEC)
+      PSI=XI+DEC*COS(ETA)
+      RETURN
+      END
+      FUNCTION SEMIAN (X)
+      SEMIAN=.5-COS(X+X)+COS(X)
+      RETURN
+      END
+      FUNCTION ZETA (A,B)
+      ZETA=SIN(A)*SIN(B)
+      RETURN
+      END

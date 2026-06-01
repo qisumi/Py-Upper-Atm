@@ -17,11 +17,14 @@
 - **CIRA86**：COSPAR 国际参考大气 1986，0-120 km 月平均表格
 - **MSIS86**：MSIS-86 / CIRA-86 热层模型 — 85 km 以上中性大气温度和密度
 - **MSISE90**：MSISE-90 中性大气模型 — 将 MSIS-86 向下延伸至地面
+- **Jacchia77**：Jacchia 1977 参考大气 — 90–2500 km 温度和数密度剖面（N2, O2, O, Ar, He, H）
+- **MET**：马歇尔工程热层模型 — 改进的 Jacchia 1970 热层模型，面向工程应用
+- **Chiu**：Chiu 电离层电子密度模型 — E、F1、F2 层电子密度（90–500 km）
 
 ## 特性
 
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
@@ -231,6 +234,9 @@ cira = CIRA86(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
 - `CIRA86`
 - `MSIS86`
 - `MSISE90`
+- `Jacchia77`
+- `MET`
+- `Chiu`
 
 每个类都提供 `calculate(...)`，返回普通字典。
 模型计算方法同时支持标量和可广播数组输入，输入标量返回标量结果，输入数组会按 numpy 广播返回对应形状。
@@ -462,6 +468,107 @@ MSISE90.calculate(*, iyd, sec, alt_km, lat_deg, lon_deg, stl_hours, f107a, f107,
 - `densities`：形状为 `(..., 8)` 的密度数组，物种顺序为：
   `He, O, N2, O2, Ar, TotalMass, H, N`。
 
+### Jacchia77.calculate
+
+签名：
+
+```python
+Jacchia77.calculate(*, alt_km, Tinf_K)
+```
+
+输入字段：
+
+- `alt_km`：高度（公里），标量或数组，范围 0–2500。
+- `Tinf_K`：外逸层温度（K），标量。
+
+返回字段：
+
+- `alt_km`：输出高度（同广播后的形状）。
+- `Tinf_K`：外逸层温度（K）。
+- `T_local_K`：局地温度（K）。
+- `N2_cm3`：N2 数密度（cm⁻³）。
+- `O2_cm3`：O2 数密度（cm⁻³）。
+- `O_cm3`：O 数密度（cm⁻³）。
+- `Ar_cm3`：Ar 数密度（cm⁻³）。
+- `He_cm3`：He 数密度（cm⁻³）。
+- `H_cm3`：H 数密度（cm⁻³）。
+- `total_density_cm3`：总数密度（cm⁻³）。
+- `mean_molecular_weight`：平均分子量（g/mol）。
+
+### MET.calculate
+
+签名：
+
+```python
+MET.calculate(*, alt_km, lat_deg, lon_deg, year, month, day, hour, minute, geo_index_type, f107, f107a, ap)
+```
+
+输入字段：
+
+- `alt_km`：高度（公里），标量或数组。
+- `lat_deg`：地理纬度（度）。
+- `lon_deg`：地理经度（度）。
+- `year`：年份（2位数，如23表示2023年）。
+- `month`：月份（1-12）。
+- `day`：日。
+- `hour`：时（0-23）。
+- `minute`：分（0-59）。
+- `geo_index_type`：地磁指数类型（1=Kp, 2=Ap）。
+- `f107`：F10.7 太阳射电噪声通量。
+- `f107a`：162天平均 F10.7。
+- `ap`：地磁活动指数 Ap。
+
+返回字段：
+
+- `alt_km`：输出高度。
+- `lat_deg`：纬度（度）。
+- `lon_deg`：经度（度）。
+- `T_exo_K`：外逸层温度（K）。
+- `T_local_K`：高度 Z 处的局地温度（K）。
+- `N2_m3`：N2 数密度（每立方米）。
+- `O2_m3`：O2 数密度（每立方米）。
+- `O_m3`：O 数密度（每立方米）。
+- `Ar_m3`：Ar 数密度（每立方米）。
+- `He_m3`：He 数密度（每立方米）。
+- `H_m3`：H 数密度（每立方米）。
+- `mean_molecular_weight`：平均分子量。
+- `total_density_kg_m3`：总质量密度（kg/m³）。
+- `log10_density`：总密度的对数。
+- `pressure_Pa`：总压力（Pa）。
+- `gravity_m_s2`：重力加速度（m/s²）。
+- `gamma`：比热比。
+- `scale_height_m`：气压标高（m）。
+- `cp`：定压比热。
+- `cv`：定容比热。
+
+### Chiu.calculate
+
+签名：
+
+```python
+Chiu.calculate(*, alt_km, sunspot_number, local_time_rad, month_from_dec15, geo_lat_rad, geo_mag_lat_rad, geo_mag_lon_rad, dip_angle_rad)
+```
+
+输入字段：
+
+- `alt_km`：高度（km），范围 90–500。设为 0 可获取各层峰值密度。
+- `sunspot_number`：苏黎世平滑太阳黑子数（Rz）。
+- `local_time_rad`：地方时角（弧度），从午夜起算（0 = 午夜，π = 正午）。
+- `month_from_dec15`：年度时间（月），从上年 12 月 15 日起算。
+- `geo_lat_rad`：地理纬度（弧度）。
+- `geo_mag_lat_rad`：地磁纬度（弧度）。
+- `geo_mag_lon_rad`：地磁东经（弧度）。
+- `dip_angle_rad`：地磁磁倾角（弧度）。
+
+返回字段：
+
+- `alt_km`：输出高度。
+- `sunspot_number`：输入太阳黑子数。
+- `Ne_total_cm3`：总电子密度（cm⁻³）。
+- `Ne_E_cm3`：E 层电子密度（cm⁻³）。
+- `Ne_F1_cm3`：F1 层电子密度（cm⁻³）。
+- `Ne_F2_cm3`：F2 层电子密度（cm⁻³）。
+
 ### 可选工具模块
 
 这些模块不会在 `import model` 时自动加载，需要时按需导入。
@@ -567,7 +674,7 @@ ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90
+│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu
 │   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
 │   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
 │   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
@@ -576,7 +683,10 @@ UpperAtmPy/
 │   │   ├── pyigrf/          # IGRF-13/14 地磁场封装
 │   │   ├── pycira86/        # CIRA-86 表格封装
 │   │   ├── pymsis86/        # MSIS-86 热层模型封装
-│   │   └── pymsise90/       # MSISE-90 中性大气封装
+│   │   ├── pymsise90/       # MSISE-90 中性大气封装
+│   │   ├── pyjacchia77/     # Jacchia 1977 参考大气封装
+│   │   ├── pymet/           # 马歇尔工程热层模型封装
+│   │   └── pychiu/          # Chiu 电离层电子密度模型封装
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py

@@ -13,6 +13,9 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.CIRA86`
 - `model.MSIS86`
 - `model.MSISE90`
+- `model.Jacchia77`
+- `model.MET`
+- `model.Chiu`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -37,6 +40,9 @@ python example/test_igrf.py
 python example/test_cira86.py
 python example/test_msis86.py
 python example/test_msise90.py
+python example/test_jacchia77.py
+python example/test_met.py
+python example/test_chiu.py
 ```
 
 ## Public API Pattern
@@ -105,6 +111,32 @@ MSISE90 result dictionaries contain:
 - `T_exo_K`
 - `densities` (He, O, N2, O2, Ar, TotalMass, H, N)
 
+Jacchia77 result dictionaries contain:
+
+- `alt_km`
+- `Tinf_K`
+- `T_local_K`
+- `N2_cm3` / `O2_cm3` / `O_cm3` / `Ar_cm3` / `He_cm3` / `H_cm3`
+- `total_density_cm3`
+- `mean_molecular_weight`
+
+MET result dictionaries contain:
+
+- `alt_km` / `lat_deg` / `lon_deg`
+- `T_exo_K` / `T_local_K`
+- `N2_m3` / `O2_m3` / `O_m3` / `Ar_m3` / `He_m3` / `H_m3`
+- `mean_molecular_weight`
+- `total_density_kg_m3` / `log10_density`
+- `pressure_Pa`
+- `gravity_m_s2` / `gamma` / `scale_height_m`
+- `cp` / `cv`
+
+Chiu result dictionaries contain:
+
+- `alt_km` / `sunspot_number`
+- `Ne_total_cm3`
+- `Ne_E_cm3` / `Ne_F1_cm3` / `Ne_F2_cm3`
+
 ## Project Structure
 
 ```text
@@ -120,7 +152,10 @@ UpperAtmPy/
 │   │   ├── pycira86/
 │   │   ├── pyaurora/
 │   │   ├── pymsis86/
-│   │   └── pymsise90/
+│   │   ├── pymsise90/
+│   │   ├── pyjacchia77/
+│   │   ├── pymet/
+│   │   └── pychiu/
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -144,7 +179,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 
