@@ -707,7 +707,7 @@ UpperAtmPy/
 │   ├── cira86data/
 │   ├── msis2data/
 │   └── msis86data/
-└── quick_run.py
+└── ROADMAP.md
 ```
 
 Each model directory under `src/model/` contains its own `README.md` (English) and `README_zh.md` (Chinese) with detailed documentation covering model background, Fortran interface, input/output parameters, and usage examples:
@@ -721,3 +721,6 @@ Each model directory under `src/model/` contains its own `README.md` (English) a
 - [CIRA86](src/model/pycira86/README.md)
 - [MSIS86](src/model/pymsis86/README.md)
 - [MSISE90](src/model/pymsise90/README.md)
+- [Jacchia77](src/model/pyjacchia77/README.md)
+- [MET](src/model/pymet/README.md)
+- [Chiu](src/model/pychiu/README.md)

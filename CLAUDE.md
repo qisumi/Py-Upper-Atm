@@ -28,8 +28,6 @@ python -m pytest tests/test_aurora.py -v
 # Smoke-test a single model
 python example/test_aurora.py
 
-# Smoke-test all models
-python quick_run.py
 ```
 
 ## Architecture

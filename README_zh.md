@@ -702,7 +702,7 @@ UpperAtmPy/
 │   ├── cira86data/
 │   ├── msis2data/
 │   └── msis86data/
-└── quick_run.py
+└── ROADMAP.md
 ```
 
 `src/model/` 下每个模型目录都包含各自的 `README.md`（英文）和 `README_zh.md`（中文），详细文档涵盖模型背景、Fortran 接口、输入输出参数和用法示例：
@@ -716,10 +716,12 @@ UpperAtmPy/
 - [CIRA86](src/model/pycira86/README_zh.md)
 - [MSIS86](src/model/pymsis86/README_zh.md)
 - [MSISE90](src/model/pymsise90/README_zh.md)
+- [Jacchia77](src/model/pyjacchia77/README_zh.md)
+- [MET](src/model/pymet/README_zh.md)
+- [Chiu](src/model/pychiu/README_zh.md)
 
 ## 测试
 
 ```bash
 python -m pytest
-python quick_run.py
 ```

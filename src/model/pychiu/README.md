@@ -1,44 +1,47 @@
-# Chiu 电离层电子密度模型
+# Chiu Ionospheric Electron Density Model
 
-## 模型背景
+[中文文档 (Chinese)](README_zh.md)
 
-Chiu 电离层模型是一个经验电子密度模型，使用 E、F1、F2 三个修正 Chapman 函数叠加描述 90-500 km 高度范围内的电离层电子密度剖面。
+## Model Background
 
-模型输入包含太阳活动、地方时、季节、地理纬度、地磁纬度/经度和磁倾角。本模块将 Fortran 源码编译为共享库，并通过 `ctypes` 封装为 `Chiu` 类，遵循项目统一的 `Model.calculate(...)` 接口。
+The Chiu ionospheric model is an empirical electron density model that combines three modified Chapman functions for the E, F1, and F2 layers. It describes ionospheric electron density profiles over roughly 90-500 km.
 
-**无需外部数据文件** - 所有经验系数均硬编码在 Fortran 源码中。
+Inputs include solar activity, local time, season, geographic latitude, geomagnetic latitude/longitude, and magnetic dip angle. This module compiles the Fortran source into a shared library and wraps it via `ctypes` as the `Chiu` class, following the project's unified `Model.calculate(...)` interface.
 
-## 目录结构
+**No external data files are required** - all empirical coefficients are hard-coded in the Fortran source.
+
+## Directory Structure
 
 ```text
 pychiu/
-├── chiu.for          # Fortran 77 原始模型子程序
-├── chiu_cshim.F90    # C ABI shim，导出 chiu_eval()
-├── CMakeLists.txt    # CMake 目标 chiu
-├── __init__.py       # Python Model 类
-└── README.md         # 本文件
+├── chiu.for          # Fortran 77 model subroutine
+├── chiu_cshim.F90    # C ABI shim, exports chiu_eval()
+├── CMakeLists.txt    # CMake target chiu
+├── __init__.py       # Python Model class
+├── README.md         # English documentation
+└── README_zh.md      # Chinese documentation
 ```
 
-## Fortran 接口
+## Fortran Interface
 
-### `chiu.for` - `IONDEN` 子程序
+### `chiu.for` - `IONDEN` subroutine
 
 ```fortran
 SUBROUTINE IONDEN(QTOT, QI, Z, RZUR, PHI, TMO, RLT, RLTM, RLGM, DIP)
 ```
 
-| 参数 | 方向 | 类型 | 说明 |
-|------|------|------|------|
-| `QTOT` | 输出 | `real` | 总电子密度，单位为 `1.0E5 cm^-3` |
-| `QI` | 输出 | `real(3)` | E、F1、F2 层电子密度，单位为 `1.0E5 cm^-3` |
-| `Z` | 输入 | `real` | 高度（km），90-500；设为 0 时返回层峰值密度 |
-| `RZUR` | 输入 | `real` | 苏黎世平滑太阳黑子数 |
-| `PHI` | 输入 | `real` | 从午夜起算的地方时角（弧度），0 为午夜，pi 为正午 |
-| `TMO` | 输入 | `real` | 从上年 12 月 15 日起算的月份数 |
-| `RLT` | 输入 | `real` | 地理纬度（弧度） |
-| `RLTM` | 输入 | `real` | 地磁纬度（弧度） |
-| `RLGM` | 输入 | `real` | 地磁东经（弧度） |
-| `DIP` | 输入 | `real` | 地磁磁倾角（弧度） |
+| Parameter | Direction | Type | Description |
+|-----------|-----------|------|-------------|
+| `QTOT` | output | `real` | Total electron density, in units of `1.0E5 cm^-3` |
+| `QI` | output | `real(3)` | E, F1, and F2 layer electron densities, in units of `1.0E5 cm^-3` |
+| `Z` | input | `real` | Altitude in km, 90-500; set to 0 to return layer peak densities |
+| `RZUR` | input | `real` | Zurich smoothed sunspot number |
+| `PHI` | input | `real` | Local time angle in radians from midnight; 0 is midnight, pi is noon |
+| `TMO` | input | `real` | Annual time in months from December 15 of the previous year |
+| `RLT` | input | `real` | Geographic latitude in radians |
+| `RLTM` | input | `real` | Geomagnetic latitude in radians |
+| `RLGM` | input | `real` | Geomagnetic east longitude in radians |
+| `DIP` | input | `real` | Geomagnetic dip angle in radians |
 
 ### `chiu_cshim.F90` - C ABI
 
@@ -46,37 +49,37 @@ SUBROUTINE IONDEN(QTOT, QI, Z, RZUR, PHI, TMO, RLT, RLTM, RLGM, DIP)
 void chiu_eval(float *indata, float *outdata);
 ```
 
-`indata` 包含 8 个输入值：`Z, RZUR, PHI, TMO, RLT, RLTM, RLGM, DIP`。`outdata` 包含 4 个输出值：`QTOT, QI_E, QI_F1, QI_F2`。
+`indata` contains 8 input values: `Z, RZUR, PHI, TMO, RLT, RLTM, RLGM, DIP`. `outdata` contains 4 output values: `QTOT, QI_E, QI_F1, QI_F2`.
 
-## 输入参数
+## Input Parameters
 
-| 参数 | 类型 | 说明 |
-|------|------|------|
-| `alt_km` | float / array | 高度（km），90-500；设为 0 时返回层峰值密度 |
-| `sunspot_number` | float / array | 苏黎世平滑太阳黑子数 |
-| `local_time_rad` | float / array | 从午夜起算的地方时角（弧度），0 为午夜，pi 为正午 |
-| `month_from_dec15` | float / array | 从上年 12 月 15 日起算的月份数 |
-| `geo_lat_rad` | float / array | 地理纬度（弧度） |
-| `geo_mag_lat_rad` | float / array | 地磁纬度（弧度） |
-| `geo_mag_lon_rad` | float / array | 地磁东经（弧度） |
-| `dip_angle_rad` | float / array | 地磁磁倾角（弧度） |
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `alt_km` | float / array | Altitude in km, 90-500; set to 0 to return layer peak densities |
+| `sunspot_number` | float / array | Zurich smoothed sunspot number |
+| `local_time_rad` | float / array | Local time angle in radians from midnight; 0 is midnight, pi is noon |
+| `month_from_dec15` | float / array | Annual time in months from December 15 of the previous year |
+| `geo_lat_rad` | float / array | Geographic latitude in radians |
+| `geo_mag_lat_rad` | float / array | Geomagnetic latitude in radians |
+| `geo_mag_lon_rad` | float / array | Geomagnetic east longitude in radians |
+| `dip_angle_rad` | float / array | Geomagnetic dip angle in radians |
 
-## 输出
+## Output
 
-`calculate()` 返回包含以下字段的字典：
+`calculate()` returns a dictionary with the following fields:
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `alt_km` | float / ndarray | 输入高度 |
-| `sunspot_number` | float / ndarray | 输入太阳黑子数 |
-| `Ne_total_cm3` | float / ndarray | 总电子密度（cm^-3） |
-| `Ne_E_cm3` | float / ndarray | E 层电子密度（cm^-3） |
-| `Ne_F1_cm3` | float / ndarray | F1 层电子密度（cm^-3） |
-| `Ne_F2_cm3` | float / ndarray | F2 层电子密度（cm^-3） |
+| Field | Type | Description |
+|-------|------|-------------|
+| `alt_km` | float / ndarray | Input altitude |
+| `sunspot_number` | float / ndarray | Input sunspot number |
+| `Ne_total_cm3` | float / ndarray | Total electron density (cm^-3) |
+| `Ne_E_cm3` | float / ndarray | E layer electron density (cm^-3) |
+| `Ne_F1_cm3` | float / ndarray | F1 layer electron density (cm^-3) |
+| `Ne_F2_cm3` | float / ndarray | F2 layer electron density (cm^-3) |
 
-## 使用示例
+## Usage Examples
 
-### 单点计算
+### Single-point calculation
 
 ```python
 import math
@@ -94,11 +97,11 @@ result = model.calculate(
     dip_angle_rad=math.radians(45.0),
 )
 
-print(f"总电子密度: {result['Ne_total_cm3']:.1f} cm^-3")
-print(f"F2 层电子密度: {result['Ne_F2_cm3']:.1f} cm^-3")
+print(f"Total electron density: {result['Ne_total_cm3']:.1f} cm^-3")
+print(f"F2 layer electron density: {result['Ne_F2_cm3']:.1f} cm^-3")
 ```
 
-### 高度剖面
+### Altitude profile
 
 ```python
 alts = [100.0, 200.0, 300.0, 400.0, 500.0]
@@ -116,7 +119,7 @@ result = model.calculate(
 print(result["Ne_total_cm3"].shape)  # (5,)
 ```
 
-### 峰值密度模式
+### Peak density mode
 
 ```python
 result = model.calculate(
@@ -133,19 +136,19 @@ result = model.calculate(
 print(result["Ne_E_cm3"], result["Ne_F1_cm3"], result["Ne_F2_cm3"])
 ```
 
-## 构造函数参数
+## Constructor Parameters
 
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `dll_path` | 自动检测 | 自定义 DLL 路径 |
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `dll_path` | Auto-detected | Custom DLL path |
 
-## 模型说明
+## Model Notes
 
-- `alt_km=0` 是原始模型定义的特殊模式：`Ne_total_cm3` 返回 0，分层字段返回 E、F1、F2 层峰值密度。
-- Fortran 原始输出单位为 `1.0E5 cm^-3`，Python wrapper 已转换为 `cm^-3`。
-- 所有输入都支持 numpy 广播；标量输入返回 Python 标量，数组输入返回 `numpy.ndarray`。
+- `alt_km=0` is a special mode defined by the original model: `Ne_total_cm3` returns 0, while the layer fields return E, F1, and F2 peak densities.
+- The original Fortran output unit is `1.0E5 cm^-3`; the Python wrapper converts values to `cm^-3`.
+- All inputs support numpy broadcasting. Scalar inputs return Python scalars, and array inputs return `numpy.ndarray`.
 
-## 参考文献
+## References
 
 1. Ching, B. K., and Chiu, Y. T., "A phenomenological model of global ionospheric electron density in the E-, F1- and F2-regions", Journal of Atmospheric and Terrestrial Physics, 35, 1615, 1973.
 

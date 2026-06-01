@@ -30,7 +30,6 @@ cmake --build --preset native-release
 
 ```bash
 python -m pytest
-python quick_run.py
 python example/test_msis20.py
 python example/test_msis00.py
 python example/test_hwm14.py
@@ -170,7 +169,6 @@ UpperAtmPy/
 │   ├── igrf14data/
 │   ├── cira86data/
 │   └── msis2data/
-└── quick_run.py
 ```
 
 ## Code Style Guidelines
