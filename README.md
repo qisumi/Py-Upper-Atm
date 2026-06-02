@@ -22,11 +22,13 @@ Supported models:
 - **Jacchia77**: Jacchia 1977 Reference Atmosphere — temperature and species density profiles (N2, O2, O, Ar, He, H) for 90–2500 km
 - **MET**: Marshall Engineering Thermosphere — modified Jacchia 1970 model for engineering applications
 - **Chiu**: Chiu ionospheric electron density — E, F1, F2 layer densities (90–500 km)
+- **Tsyganenko**: Tsyganenko magnetospheric magnetic field models (T89/T96/T01/TS04) — external field in GSM coordinates
+- **SOLPRO**: Interplanetary solar proton fluence at 1 AU — mission duration and confidence-level based
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -134,56 +136,17 @@ Or install directly from a release URL:
 python -m pip install https://github.com/<OWNER>/<REPO>/releases/download/<TAG>/<WHEEL_FILENAME>.whl
 ```
 
-After installation, use the package as usual:
+After installation, import model classes from `model`. See
+[Model Documentation](#model-documentation) for model-specific constructor
+arguments, `calculate(...)` signatures, inputs, outputs, and examples.
 
-```python
-from model import MSIS2
-from utils.time import doy, seconds_of_day
-
-msis = MSIS2(precision="single")
-_ = msis.calculate(day=doy(2023, 1, 1), utsec=seconds_of_day(12,0,0),
-                  alt_km=100.0, lat_deg=35.0, lon_deg=116.0, f107a=100.0, f107=100.0)
-```
-
-## Quick Start
-
-```python
-from model import HWM14, MSIS2
-from utils.time import doy, seconds_of_day
-
-msis = MSIS2(precision="single")
-atmosphere = msis.calculate(
-    day=doy(2023, 1, 1),
-    utsec=seconds_of_day(12, 0, 0),
-    alt_km=[100.0, 200.0, 300.0],
-    lat_deg=35.0,
-    lon_deg=116.0,
-    f107a=100.0,
-    f107=100.0,
-)
-print(atmosphere["T_local_K"])
-print(atmosphere["densities"])
-
-hwm = HWM14()
-wind = hwm.calculate(
-    iyd=2023001,
-    sec=43200.0,
-    alt_km=100.0,
-    glat_deg=35.0,
-    glon_deg=116.0,
-    stl_hours=12.0,
-    f107a=100.0,
-    f107=100.0,
-)
-print(wind["meridional_wind_ms"], wind["zonal_wind_ms"])
-```
+## Data Files
 
 MSIS2, HWM14, IGRF, CIRA86, and MSIS86 need external model data. By default UpperAtmPy resolves
 `.upperatmpy` under the current project directory and downloads missing files
 from the current package version's release tag (for example `v0.1.1`) on first
 model instantiation when a download manifest is available. CIRA86 currently
-uses the local `cira86data/` ASCII tables, so source-checkout examples pass
-`data_dir=data/` explicitly. For offline use, pass
+uses the local `cira86data/` ASCII tables. For offline use, pass
 `data_dir=...` or set `UPPERATMPY_DATA_DIR` to a data root containing the legacy
 `msis2data/`, `hwm14data/`, `igrf13data/`, `igrf14data/`, and `cira86data/` subdirectories. In
 the source tree, that root is `data/`.
@@ -223,17 +186,6 @@ Windows PowerShell example:
 $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 ```
 
-You can also pass the path directly when constructing a model:
-
-```python
-from model import CIRA86, HWM14, IGRF, MSIS2
-
-msis = MSIS2(precision="single", data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
-hwm = HWM14(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
-igrf = IGRF(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
-cira = CIRA86(data_dir="C:/path/to/UPPERATMPY_DATA_DIR")
-```
-
 ## API
 
 Top-level `model` exports only:
@@ -250,333 +202,35 @@ Top-level `model` exports only:
 - `Jacchia77`
 - `MET`
 - `Chiu`
+- `Tsyganenko`
+- `SOLPRO`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
 
-### Model time helper functions
-
-```python
-from utils.time import doy, seconds_of_day
-```
-
-- `doy(year, month, day)`: returns day of year (1-366).
-- `seconds_of_day(hour, minute=0, second=0.0)`: returns seconds since midnight.
-
-### MSIS2.calculate
-
-Signature:
-
-```python
-MSIS2.calculate(*, day, utsec, alt_km, lat_deg, lon_deg, f107a, f107, ap7=None)
-```
-
-Input fields:
-
-- `day`: day-of-year, same as `utils.time.doy(...)`.
-- `utsec`: UT seconds (0-86400).
-- `alt_km`: altitude in km (float or array-like).
-- `lat_deg`: geodetic latitude in degrees.
-- `lon_deg`: longitude in degrees.
-- `f107a`: 81-day average F10.7 solar flux.
-- `f107`: daily F10.7 solar flux.
-- `ap7`: optional sequence length 7 for geomagnetic activity.
-
-Return fields:
-
-- `alt_km`: output altitude(s), same shape as broadcast inputs.
-- `T_local_K`: local temperature (K).
-- `T_exo_K`: exospheric temperature (K).
-- `densities`: array with shape `(..., 10)` for species:
-  `N2, O2, O, He, H, Ar, N, AnomalousO, NO, NPlus`.
-
-### MSIS00.calculate
-
-Signature:
-
-```python
-MSIS00.calculate(*, iyd, sec, alt_km, lat_deg, lon_deg, stl_hours, f107a, f107, ap7=None, mass=48, use_anomalous_o=False)
-```
-
-Input fields:
-
-- `iyd`: date as integer `YYYYDDD`.
-- `sec`: UTC seconds (0-86400).
-- `alt_km`: altitude in km.
-- `lat_deg`, `lon_deg`: geodetic coordinates in degrees.
-- `stl_hours`: local solar time in hours.
-- `f107a`: 81-day average F10.7 solar flux.
-- `f107`: daily F10.7 solar flux.
-- `ap7`: optional sequence length 7.
-- `mass`: optional target mass number selector, default `48`.
-- `use_anomalous_o`: whether to call anomalous-oxygen mode.
-
-Return fields:
-
-- `alt_km`: output altitude(s).
-- `T_local_K`: local temperature (K).
-- `T_exo_K`: exospheric temperature (K).
-- `densities`: array with shape `(..., 9)` for species:
-  `He, O, N2, O2, Ar, H, N, AnomalousO, TotalMass`.
-
-### HWM14.calculate and HWM93.calculate
-
-Both models share the same signature:
-
-```python
-calculate(*, iyd, sec, alt_km, glat_deg, glon_deg, stl_hours, f107a, f107, ap2=(0.0, 20.0))
-```
-
-Input fields:
-
-- `iyd`: date as integer `YYYYDDD`.
-- `sec`: UTC seconds (0-86400).
-- `alt_km`: altitude in km.
-- `glat_deg`, `glon_deg`: latitude/longitude in degrees.
-- `stl_hours`: local solar time in hours.
-- `f107a`: 81-day average F10.7 solar flux.
-- `f107`: daily F10.7 solar flux.
-- `ap2`: optional sequence length 2.
-
-Return fields:
-
-- `alt_km`: output altitude(s).
-- `meridional_wind_ms`: meridional (north-south) wind in m/s.
-- `zonal_wind_ms`: zonal (east-west) wind in m/s.
-
-### AuroraOval.calculate
-
-Signature:
-
-```python
-AuroraOval.calculate(*, mlt_hours, activity_level)
-```
-
-Input fields:
-
-- `mlt_hours`: magnetic local time in hours (scalar or array-like).
-- `activity_level`: geomagnetic activity level, 0 (quiet) – 6 (active).
-
-Return fields:
-
-- `mlt_hours`: input MLT value(s).
-- `activity_level`: input activity level value(s).
-- `poleward_boundary_deg`: poleward boundary corrected geomagnetic latitude (°).
-- `equatorward_boundary_deg`: equatorward boundary corrected geomagnetic latitude (°).
-
-### IGRF.calculate
-
-Signature:
-
-```python
-IGRF.calculate(*, year, lat_deg, lon_deg, alt_km)
-```
-
-Constructor options:
-
-- `igrf_version`: `13` or `14`; default is `14`.
-- `data_dir`: optional data root containing `igrf13data/` and/or `igrf14data/`.
-- `auto_download`: download missing coefficient files when possible.
-
-Input fields:
-
-- `year`: decimal year, such as `2024.5`.
-- `lat_deg`: geodetic latitude in degrees, north positive.
-- `lon_deg`: geodetic longitude in degrees, east positive.
-- `alt_km`: altitude above sea level in km.
-
-Return fields:
-
-- `year`, `lat_deg`, `lon_deg`, `alt_km`: broadcast input coordinates.
-- `B_north_nT`, `B_east_nT`, `B_down_nT`: magnetic field components in nT.
-- `B_abs_nT`: total magnetic field intensity in nT.
-- `H_nT`: horizontal field intensity in nT.
-- `inclination_deg`: magnetic inclination, positive downward.
-- `declination_deg`: magnetic declination, positive eastward.
-- `L_value`: L-shell parameter.
-- `icode`: L-value status code from `SHELLG`.
-
-### CIRA86.calculate
-
-Signature:
-
-```python
-CIRA86.calculate(*, month, lat_deg, alt_km=None, pressure_mb=None)
-```
-
-Constructor options:
-
-- `data_dir`: optional data root containing `cira86data/`.
-- `auto_download`: retained for consistency with other data-backed models.
-
-Input fields:
-
-- `month`: month number, 1-12.
-- `lat_deg`: geodetic latitude in degrees, north positive, from -80 to 80.
-- `alt_km`: height-coordinate input in km, from 0 to 120. Mutually exclusive with `pressure_mb`.
-- `pressure_mb`: pressure-coordinate input in mb. Mutually exclusive with `alt_km`.
-
-Return fields:
-
-- Height mode: `month`, `alt_km`, `lat_deg`, `T_K`, `zonal_wind_ms`, `pressure_mb`.
-- Pressure mode: `month`, `pressure_mb`, `lat_deg`, `T_K`, `zonal_wind_ms`, `geopotential_height_m`.
-
-### MSIS86.calculate
-
-Signature:
-
-```python
-MSIS86.calculate(*, iyd, sec, alt_km, lat_deg, lon_deg, stl_hours, f107a, f107, ap7=None, mass=48)
-```
-
-Input fields:
-
-- `iyd`: date as integer `YYYYDDD` (e.g., `1987172`).
-- `sec`: UTC seconds (0-86400).
-- `alt_km`: altitude in km (must be > 85 km).
-- `lat_deg`, `lon_deg`: geodetic coordinates in degrees.
-- `stl_hours`: local solar time in hours.
-- `f107a`: 81-day average F10.7 solar flux.
-- `f107`: daily F10.7 solar flux.
-- `ap7`: optional sequence length 7 for geomagnetic activity.
-- `mass`: optional target mass number selector, default `48` (all species).
-
-Return fields:
-
-- `alt_km`: output altitude(s).
-- `T_local_K`: local temperature (K).
-- `T_exo_K`: exospheric temperature (K).
-- `densities`: array with shape `(..., 8)` for species:
-  `He, O, N2, O2, Ar, TotalMass, H, N`.
-
-### MSISE90.calculate
-
-Signature:
-
-```python
-MSISE90.calculate(*, iyd, sec, alt_km, lat_deg, lon_deg, stl_hours, f107a, f107, ap7=None, mass=48)
-```
-
-Input fields:
-
-- `iyd`: date as integer `YYYYDDD` (e.g., `1990172`).
-- `sec`: UTC seconds (0-86400).
-- `alt_km`: altitude in km, from ground level upward.
-- `lat_deg`, `lon_deg`: geodetic coordinates in degrees.
-- `stl_hours`: local solar time in hours.
-- `f107a`: 81-day average F10.7 solar flux.
-- `f107`: daily F10.7 solar flux for the previous day.
-- `ap7`: optional sequence length 7 for geomagnetic activity.
-- `mass`: optional target mass number selector, default `48` (all species).
-
-Return fields:
-
-- `alt_km`: output altitude(s).
-- `T_local_K`: local temperature (K).
-- `T_exo_K`: exospheric temperature (K).
-- `densities`: array with shape `(..., 8)` for species:
-  `He, O, N2, O2, Ar, TotalMass, H, N`.
-
-### Jacchia77.calculate
-
-Signature:
-
-```python
-Jacchia77.calculate(*, alt_km, Tinf_K)
-```
-
-Input fields:
-
-- `alt_km`: altitude in km (scalar or array-like), range 0–2500.
-- `Tinf_K`: exospheric temperature in K (scalar).
-
-Return fields:
-
-- `alt_km`: output altitude(s), same shape as broadcast inputs.
-- `Tinf_K`: exospheric temperature (K).
-- `T_local_K`: local temperature (K).
-- `N2_cm3`: N2 number density (cm⁻³).
-- `O2_cm3`: O2 number density (cm⁻³).
-- `O_cm3`: O number density (cm⁻³).
-- `Ar_cm3`: Ar number density (cm⁻³).
-- `He_cm3`: He number density (cm⁻³).
-- `H_cm3`: H number density (cm⁻³).
-- `total_density_cm3`: total number density (cm⁻³).
-- `mean_molecular_weight`: mean molecular weight (g/mol).
-
-### MET.calculate
-
-Signature:
-
-```python
-MET.calculate(*, alt_km, lat_deg, lon_deg, year, month, day, hour, minute, geo_index_type, f107, f107a, ap)
-```
-
-Input fields:
-
-- `alt_km`: altitude in km (scalar or array-like).
-- `lat_deg`: geodetic latitude in degrees.
-- `lon_deg`: geodetic longitude in degrees.
-- `year`: year (2 digits, e.g., 23 for 2023).
-- `month`: month (1-12).
-- `day`: day of month.
-- `hour`: hour (0-23).
-- `minute`: minute (0-59).
-- `geo_index_type`: geomagnetic index type (1=Kp, 2=Ap).
-- `f107`: F10.7 solar radio noise flux.
-- `f107a`: 162-day average F10.7.
-- `ap`: geomagnetic activity index Ap.
-
-Return fields:
-
-- `alt_km`: output altitude(s).
-- `lat_deg`: latitude (degrees).
-- `lon_deg`: longitude (degrees).
-- `T_exo_K`: exospheric temperature (K).
-- `T_local_K`: local temperature at altitude Z (K).
-- `N2_m3`: N2 number density (per m³).
-- `O2_m3`: O2 number density (per m³).
-- `O_m3`: O number density (per m³).
-- `Ar_m3`: Ar number density (per m³).
-- `He_m3`: He number density (per m³).
-- `H_m3`: H number density (per m³).
-- `mean_molecular_weight`: average molecular weight.
-- `total_density_kg_m3`: total mass density (kg/m³).
-- `log10_density`: log10 of total density.
-- `pressure_Pa`: total pressure (Pa).
-- `gravity_m_s2`: gravitational acceleration (m/s²).
-- `gamma`: ratio of specific heats.
-- `scale_height_m`: pressure scale-height (m).
-- `cp`: specific heat at constant pressure.
-- `cv`: specific heat at constant volume.
-
-### Chiu.calculate
-
-Signature:
-
-```python
-Chiu.calculate(*, alt_km, sunspot_number, local_time_rad, month_from_dec15, geo_lat_rad, geo_mag_lat_rad, geo_mag_lon_rad, dip_angle_rad)
-```
-
-Input fields:
-
-- `alt_km`: altitude in km (90–500). Set to 0 to obtain layer peak densities only.
-- `sunspot_number`: Zurich smoothed sunspot number (Rz).
-- `local_time_rad`: local time angle in radians, measured from midnight (0 = midnight, π = noon).
-- `month_from_dec15`: annual time in months from December 15 of the previous year.
-- `geo_lat_rad`: geographic latitude in radians.
-- `geo_mag_lat_rad`: geomagnetic latitude in radians.
-- `geo_mag_lon_rad`: geomagnetic east longitude in radians.
-- `dip_angle_rad`: geomagnetic dip angle in radians.
-
-Return fields:
-
-- `alt_km`: output altitude(s).
-- `sunspot_number`: input sunspot number.
-- `Ne_total_cm3`: total electron density (cm⁻³).
-- `Ne_E_cm3`: E layer electron density (cm⁻³).
-- `Ne_F1_cm3`: F1 layer electron density (cm⁻³).
-- `Ne_F2_cm3`: F2 layer electron density (cm⁻³).
+### Time Helpers
+
+- `utils.time.doy(year, month, day)`: returns day of year (1-366).
+- `utils.time.seconds_of_day(hour, minute=0, second=0.0)`: returns seconds since midnight.
+
+## Model Documentation
+
+Each model directory under `src/model/` contains its own `README.md` with detailed documentation covering model background, Fortran interface, constructor options, input/output parameters, and usage examples:
+
+- [NRLMSIS 2.0](src/model/pymsis2/README.md)
+- [NRLMSISE-00](src/model/pymsis00/README.md)
+- [HWM14](src/model/pyhwm14/README.md)
+- [HWM93](src/model/pyhwm93/README.md)
+- [AuroraOval](src/model/pyaurora/README.md)
+- [IGRF](src/model/pyigrf/README.md)
+- [CIRA86](src/model/pycira86/README.md)
+- [MSIS86](src/model/pymsis86/README.md)
+- [MSISE90](src/model/pymsise90/README.md)
+- [Jacchia77](src/model/pyjacchia77/README.md)
+- [MET](src/model/pymet/README.md)
+- [Chiu](src/model/pychiu/README.md)
+- [Tsyganenko](src/model/pytsyganenko/README.md)
+- [SOLPRO](src/model/pysolpro/README.md)
 
 ### Optional utility modules
 
@@ -599,43 +253,12 @@ Fetch and cache geomagnetic/solar inputs for model calls.
   - `as_msis_params()` returns `{ "f107", "f107a", "ap7" }`
   - `as_hwm_params()` returns `{ "f107", "f107a", "ap2" }`
 
-Usage:
-
-```python
-from model import MSIS2
-from utils.time import doy, seconds_of_day
-from utils.space_weather import get_indices
-
-sw = get_indices()
-result = MSIS2(precision="single").calculate(
-    day=doy(2023, 1, 1),
-    utsec=seconds_of_day(12, 0, 0),
-    alt_km=100.0,
-    lat_deg=35.0,
-    lon_deg=116.0,
-    **sw.as_msis_params(),
-)
-```
-
 #### `utils.cache`
 
 Memoize model/function calls (works for any callable).
 
 - `cached_call(func, cache_size=10000)` returns a wrapped callable.
 - wrapper exposes `cache_info()` and `cache_clear()`.
-
-Usage:
-
-```python
-from utils.cache import cached_call
-from model import MSIS2
-
-msis = MSIS2(precision="single")
-cached_calculate = cached_call(msis.calculate)
-cached_calculate(...)
-cached_calculate(...)
-print(cached_calculate.cache_info())
-```
 
 #### `utils.parallel`
 
@@ -644,21 +267,6 @@ Run large batches in threads for better throughput.
 - `parallel_map(func, items, max_workers=None, show_progress=False)`
 - `parallel_batch_compute(compute_func, param_dicts, max_workers=None, show_progress=False)`
 
-Usage:
-
-```python
-from utils.parallel import parallel_batch_compute
-from utils.time import doy, seconds_of_day
-from model import MSIS2
-
-msis = MSIS2(precision="single")
-
-jobs = [dict(day=doy(2023, 1, 1), utsec=seconds_of_day(12,0,0),
-             alt_km=a, lat_deg=35.0, lon_deg=116.0,
-             f107a=100.0, f107=100.0) for a in [80.0, 100.0, 120.0]]
-results = parallel_batch_compute(msis.calculate, jobs, max_workers=4, show_progress=True)
-```
-
 #### `utils.xarray_output`
 
 Convert output dictionaries to xarray datasets.
@@ -666,20 +274,13 @@ Convert output dictionaries to xarray datasets.
 - `msis_to_xarray(result, species_names=None, attrs=None)`
 - `hwm_to_xarray(result, attrs=None)`
 
-Usage:
-
-```python
-from utils.xarray_output import msis_to_xarray
-ds = msis_to_xarray(result, attrs={"model": "MSIS2"})
-```
-
 ## Project Structure
 
 ```text
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
@@ -691,7 +292,9 @@ UpperAtmPy/
 │   │   ├── pymsise90/       # MSISE-90 neutral atmosphere wrapper
 │   │   ├── pyjacchia77/     # Jacchia 1977 Reference Atmosphere wrapper
 │   │   ├── pymet/           # Marshall Engineering Thermosphere wrapper
-│   │   └── pychiu/          # Chiu ionospheric electron density wrapper
+│   │   ├── pychiu/          # Chiu ionospheric electron density wrapper
+│   │   ├── pytsyganenko/    # Tsyganenko magnetospheric field model wrapper (T89/T96/T01/TS04)
+│   │   └── pysolpro/        # SOLPRO solar proton fluence model wrapper
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -710,17 +313,5 @@ UpperAtmPy/
 └── ROADMAP.md
 ```
 
-Each model directory under `src/model/` contains its own `README.md` (English) and `README_zh.md` (Chinese) with detailed documentation covering model background, Fortran interface, input/output parameters, and usage examples:
-
-- [NRLMSIS 2.0](src/model/pymsis2/README.md)
-- [NRLMSISE-00](src/model/pymsis00/README.md)
-- [HWM14](src/model/pyhwm14/README.md)
-- [HWM93](src/model/pyhwm93/README.md)
-- [AuroraOval](src/model/pyaurora/README.md)
-- [IGRF](src/model/pyigrf/README.md)
-- [CIRA86](src/model/pycira86/README.md)
-- [MSIS86](src/model/pymsis86/README.md)
-- [MSISE90](src/model/pymsise90/README.md)
-- [Jacchia77](src/model/pyjacchia77/README.md)
-- [MET](src/model/pymet/README.md)
-- [Chiu](src/model/pychiu/README.md)
+Each model directory under `src/model/` contains model-specific English and
+Chinese README files. See [Model Documentation](#model-documentation).

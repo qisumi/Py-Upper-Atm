@@ -20,6 +20,8 @@
 | Jacchia 1977 | `Jacchia77` | Jacchia 参考大气 — 90–2500 km 温度与数密度剖面（N2, O2, O, Ar, He, H） | 已完成 |
 | MET | `MET` | 马歇尔工程热层模型 — 改进的 Jacchia 1970 热层模型，面向工程应用 | 已完成 |
 | Chiu | `Chiu` | Chiu 电离层电子密度模型 — E、F1、F2 层电子密度（90–500 km） | 已完成 |
+| Tsyganenko（T89/T96/T01/TS04） | `Tsyganenko` | 数据驱动的磁层磁场模型 — GSM 坐标系外源磁场贡献 | 已完成 |
+| SOLPRO | `SOLPRO` | 1 AU 行星际太阳质子积分通量 — 基于任务时长和置信水平 | 已完成 |
 
 ## 计划移植模型
 
@@ -35,10 +37,8 @@ _本阶段无剩余模型。_
 
 | 模型 | 目录 | 说明 | 原始语言 | 外部数据 |
 |------|------|------|----------|----------|
-| Tsyganenko（T89/T96/T01/TS04） | `TODO/Tsyganenko-Models` | 数据驱动的磁层磁场模型 — 外源磁场贡献、磁力线追踪 | Fortran 77 | 无（硬编码系数）；含 Geopack-2005 |
 | RADBELT（AP8/AE8） | `TODO/RADBELT` | 捕获辐射环境模型 — 全向质子/电子通量（AP8MAX/MIN, AE8MAX/MIN） | Fortran 77 / C | 8 个二进制/ASCII 通量地图（各约 80K） |
 | SHIELDOSE | `TODO/SHIELDOSE` | 铝屏蔽后的辐射剂量 — 捕获带、太阳质子、电子环境 | Fortran 77 | `shieldose.dat`（二进制剂量-深度数据） |
-| SOLPRO | `TODO/SOLPRO` | 1 AU 行星际太阳质子积分通量 — 基于任务时长和置信水平 | Fortran IV | 无（硬编码系数） |
 | SOFIP | `TODO/SOFIP` | 短轨道通量积分程序 — 沿航天器轨道计算任务平均通量，使用 AP8/AE8 | Fortran 77 | 二进制辐射带地图 |
 | 地磁截止刚度 | `TODO/Geomagnetic-Cutoff-Rigidity` | 宇宙线截止刚度阈值 — 带电粒子轨迹预测 | Fortran 77 | 无（内部使用 IGRF） |
 

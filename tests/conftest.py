@@ -164,6 +164,56 @@ def chiu_model():
         pytest.skip(f"Chiu DLL not available: {exc}")
 
 
+@pytest.fixture
+def tsyganenko_t89_model():
+    try:
+        from model import Tsyganenko
+
+        return Tsyganenko(model_version="T89")
+    except Exception as exc:
+        pytest.skip(f"Tsyganenko T89 DLL not available: {exc}")
+
+
+@pytest.fixture
+def tsyganenko_t96_model():
+    try:
+        from model import Tsyganenko
+
+        return Tsyganenko(model_version="T96")
+    except Exception as exc:
+        pytest.skip(f"Tsyganenko T96 DLL not available: {exc}")
+
+
+@pytest.fixture
+def tsyganenko_t01_model():
+    try:
+        from model import Tsyganenko
+
+        return Tsyganenko(model_version="T01")
+    except Exception as exc:
+        pytest.skip(f"Tsyganenko T01 DLL not available: {exc}")
+
+
+@pytest.fixture
+def tsyganenko_ts04_model():
+    try:
+        from model import Tsyganenko
+
+        return Tsyganenko(model_version="TS04")
+    except Exception as exc:
+        pytest.skip(f"Tsyganenko TS04 DLL not available: {exc}")
+
+
+@pytest.fixture
+def solpro_model():
+    try:
+        from model import SOLPRO
+
+        return SOLPRO()
+    except Exception as exc:
+        pytest.skip(f"SOLPRO DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"

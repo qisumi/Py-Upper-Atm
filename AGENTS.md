@@ -16,6 +16,8 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.Jacchia77`
 - `model.MET`
 - `model.Chiu`
+- `model.Tsyganenko`
+- `model.SOLPRO`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -42,6 +44,8 @@ python example/test_msise90.py
 python example/test_jacchia77.py
 python example/test_met.py
 python example/test_chiu.py
+python example/test_tsyganenko.py
+python example/test_solpro.py
 ```
 
 ## Public API Pattern
@@ -136,6 +140,19 @@ Chiu result dictionaries contain:
 - `Ne_total_cm3`
 - `Ne_E_cm3` / `Ne_F1_cm3` / `Ne_F2_cm3`
 
+Tsyganenko result dictionaries contain:
+
+- `tilt_rad`
+- `Bx_ext_nT` / `By_ext_nT` / `Bz_ext_nT`
+- (if `include_dipole=True`) `Bx_dip_nT` / `By_dip_nT` / `Bz_dip_nT`
+- (if `include_dipole=True`) `Bx_total_nT` / `By_total_nT` / `Bz_total_nT`
+
+SOLPRO result dictionaries contain:
+
+- `duration_months` / `confidence_pct`
+- `fluence_cm2` (shape `(10,)` for scalar, `(N, 10)` for batch; columns = 10, 20, …, 100 MeV)
+- `n_al_events`
+
 ## Project Structure
 
 ```text
@@ -154,7 +171,9 @@ UpperAtmPy/
 │   │   ├── pymsise90/
 │   │   ├── pyjacchia77/
 │   │   ├── pymet/
-│   │   └── pychiu/
+│   │   ├── pychiu/
+│   │   ├── pytsyganenko/
+│   │   └── pysolpro/
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -177,7 +196,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 
@@ -315,7 +334,7 @@ Synchronize the following sections in both files:
 | Supported models | Append line: `- **Foo**: description` |
 | Features | Update top-level lazy alias list |
 | API → `model` exports | Append `- Foo` |
-| API → New `Foo.calculate` subsection | Include signature, input fields, return fields |
+| Model Documentation | Append links to `src/model/pyfoo/README.md` and `src/model/pyfoo/README_zh.md` as appropriate |
 | Project Structure | Append `pyfoo/` line with comment |
 
 ### Step 10 — Update `ROADMAP.md` and `ROADMAP_zh.md`
@@ -327,7 +346,12 @@ Synchronize the following sections in both files:
 
 ### Step 11 — Write module README
 
-Create `src/model/pyfoo/README.md` in Chinese, referencing `src/model/pyaurora/README.md`. Content should cover: model background, directory structure, Fortran interface description, input/output parameters, usage examples, constructor parameters, references.
+Create both module README files:
+
+- `src/model/pyfoo/README.md` in English, referencing `src/model/pyaurora/README.md`.
+- `src/model/pyfoo/README_zh.md` in Chinese, referencing `src/model/pyaurora/README_zh.md`.
+
+Content should cover: model background, directory structure, Fortran interface description, input/output parameters, usage examples, constructor parameters, references.
 
 ### Step 12 — Build and verify
 
@@ -359,7 +383,7 @@ python -c "import sys; sys.path.insert(0,'src'); import model; print(model.__all
 | 7 | `example/test_foo.py` | Create new |
 | 8 | `tests/test_foo.py` | Create new |
 | 9 | `tests/conftest.py` | Append fixture |
-| 10 | `src/model/pyfoo/README.md` | Create new |
+| 10 | `src/model/pyfoo/README.md` / `src/model/pyfoo/README_zh.md` | Create new English and Chinese module README files |
 | 11 | `AGENTS.md` | Update model list, structure, constraints |
 | 12 | `README.md` | Update model list, API, structure |
 | 13 | `README_zh.md` | Sync changes from README.md |

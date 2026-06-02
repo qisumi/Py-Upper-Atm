@@ -20,6 +20,8 @@ The following models have been fully ported and are available in the `src/model/
 | Jacchia 1977 | `Jacchia77` | Jacchia reference atmosphere — temperature and species density profiles (N2, O2, O, Ar, He, H) for 90–2500 km | Done |
 | MET | `MET` | Marshall Engineering Thermosphere — modified Jacchia 1970 model for engineering applications | Done |
 | Chiu | `Chiu` | Chiu ionospheric electron density — E, F1, F2 layer densities (90–500 km) | Done |
+| Tsyganenko (T89/T96/T01/TS04) | `Tsyganenko` | Data-based magnetospheric magnetic field models — external field contribution in GSM coordinates | Done |
+| SOLPRO | `SOLPRO` | Interplanetary solar proton fluence at 1 AU — mission duration and confidence-level based | Done |
 
 ## Planned Models
 
@@ -35,10 +37,8 @@ These models address magnetospheric physics and the radiation environment, criti
 
 | Model | Directory | Description | Language | External Data |
 |-------|-----------|-------------|----------|---------------|
-| Tsyganenko (T89/T96/T01/TS04) | `TODO/Tsyganenko-Models` | Data-based magnetospheric magnetic field models — external field contribution, field line tracing | Fortran 77 | None (hard-coded); includes Geopack-2005 |
 | RADBELT (AP8/AE8) | `TODO/RADBELT` | Trapped radiation environment — omnidirectional proton/electron fluxes (AP8MAX/MIN, AE8MAX/MIN) | Fortran 77 / C | 8 binary/ASCII flux maps (~80K each) |
 | SHIELDOSE | `TODO/SHIELDOSE` | Radiation dose behind aluminum shielding — trapped, solar proton, and electron environments | Fortran 77 | `shieldose.dat` (binary dose-depth data) |
-| SOLPRO | `TODO/SOLPRO` | Interplanetary solar proton fluence at 1 AU — mission duration and confidence-level based | Fortran IV | None (hard-coded) |
 | SOFIP | `TODO/SOFIP` | Short Orbital Flux Integration Program — mission-averaged fluxes along spacecraft trajectories using AP8/AE8 | Fortran 77 | Binary radiation belt maps |
 | Geomagnetic Cutoff Rigidity | `TODO/Geomagnetic-Cutoff-Rigidity` | Cosmic ray cutoff rigidity thresholds — charged particle trajectory prediction | Fortran 77 | None (uses IGRF internally) |
 
