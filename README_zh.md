@@ -109,12 +109,12 @@ cmake --build --preset native-release
 如果不方便自行编译，可直接从仓库的 `Releases` 页面下载对应平台的预编译 `.whl` 文件并安装。
 
 1. 选择与当前系统和架构匹配的 wheel 文件，例如：
-   - `upperatmpy-0.1.0-py3-none-win_amd64.whl`
-   - `upperatmpy-0.1.0-py3-none-manylinux_x86_64.whl`
+   - `upperatmpy-0.2.0-py3-none-win_amd64.whl`
+   - `upperatmpy-0.2.0-py3-none-manylinux_x86_64.whl`
 2. 安装本地 wheel 文件
 
 ```bash
-python -m pip install /path/to/upperatmpy-0.1.0-py3-none-win_amd64.whl
+python -m pip install /path/to/upperatmpy-0.2.0-py3-none-win_amd64.whl
 ```
 
 快速判断规则：
@@ -135,7 +135,7 @@ python -m pip install https://github.com/<OWNER>/<REPO>/releases/download/<TAG>/
 ## 数据文件
 
 MSIS2、HWM14、IGRF、CIRA86 和 MSIS86 需要外部模型数据。默认情况下，UpperAtmPy 会解析当前项目目录下的
-`.upperatmpy`，并在存在下载清单时于首次实例化模型时按当前包版本的 release tag（如 `v0.1.1`）下载缺失文件。
+`.upperatmpy`，并在存在下载清单时于首次实例化模型时按当前包版本的 release tag（如 `v0.2.0`）下载缺失文件。
 CIRA86 当前使用本地 `cira86data/` ASCII 表。离线使用时，
 可以传入 `data_dir=...`，或设置 `UPPERATMPY_DATA_DIR` 指向包含 `msis2data/`、
 `hwm14data/`、`igrf13data/`、`igrf14data/` 和 `cira86data/` 子目录的数据根目录。源码树中的统一数据根目录是 `data/`。

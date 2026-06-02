@@ -116,12 +116,12 @@ If building native libraries is inconvenient, download the matching wheel from t
 
 1. Choose a wheel file that matches your OS and architecture.
    Example naming patterns:
-   - `upperatmpy-0.1.0-py3-none-manylinux_x86_64.whl`
-   - `upperatmpy-0.1.0-py3-none-win_amd64.whl`
+   - `upperatmpy-0.2.0-py3-none-manylinux_x86_64.whl`
+   - `upperatmpy-0.2.0-py3-none-win_amd64.whl`
 2. Install the wheel.
 
 ```bash
-python -m pip install /path/to/upperatmpy-0.1.0-py3-none-win_amd64.whl
+python -m pip install /path/to/upperatmpy-0.2.0-py3-none-win_amd64.whl
 ```
 
 Quick compatibility rule:
@@ -144,7 +144,7 @@ arguments, `calculate(...)` signatures, inputs, outputs, and examples.
 
 MSIS2, HWM14, IGRF, CIRA86, and MSIS86 need external model data. By default UpperAtmPy resolves
 `.upperatmpy` under the current project directory and downloads missing files
-from the current package version's release tag (for example `v0.1.1`) on first
+from the current package version's release tag (for example `v0.2.0`) on first
 model instantiation when a download manifest is available. CIRA86 currently
 uses the local `cira86data/` ASCII tables. For offline use, pass
 `data_dir=...` or set `UPPERATMPY_DATA_DIR` to a data root containing the legacy
