@@ -144,6 +144,7 @@ jobs:
                   "model/pyhwm14/hwm14.dll",
                   "model/pyhwm93/hwm93.dll",
                   "model/pyigrf/igrf.dll",
+                  "model/pymsis86/build/msis86.dll",
               }
           else:
               expected = {
@@ -152,6 +153,7 @@ jobs:
                   "model/pyhwm14/libhwm14.so",
                   "model/pyhwm93/libhwm93.so",
                   "model/pyigrf/libigrf.so",
+                  "model/pymsis86/build/libmsis86.so",
               }
 
           expected.add("utils/model_data_manifest.json")
@@ -249,6 +251,7 @@ jobs:
           data_root = pathlib.Path("data")
           expected = [
               pathlib.Path("msis2data/msis2.0.parm"),
+              pathlib.Path("msis86data/msis86.dat"),
               pathlib.Path("hwm14data/hwm123114.bin"),
               pathlib.Path("hwm14data/dwm07b104i.dat"),
               pathlib.Path("hwm14data/gd2qd.dat"),

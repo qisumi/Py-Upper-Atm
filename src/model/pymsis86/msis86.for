@@ -744,7 +744,7 @@ C--------------------------------------------------------------------
       SUBROUTINE PRMSG5
 C          CIRA     11-FEB-86   
       CHARACTER ISD(3),IST(2),NAME(2),ISDATE(3),ISTIME(2)*4
-      CHARACTER*512 FNAME, DRROOT
+      CHARACTER*512 FNAME, FNAME2, DRROOT
       COMMON/UINR/IUMSIS,MONITO,IIEE
       COMMON/MSIS86DR/DRROOT
       COMMON/PARMB/GSURF,RE
@@ -761,12 +761,18 @@ c
       RE=6356.77
       IIEE=0
 2392  IF(LEN_TRIM(DRROOT).GT.0) THEN
-        FNAME=TRIM(DRROOT)//'/MSIS86.DAT'
+        FNAME=TRIM(DRROOT)//'/msis86.dat'
+        FNAME2=TRIM(DRROOT)//'/MSIS86.DAT'
       ELSE
-        FNAME='MSIS86.DAT'
+        FNAME='msis86.dat'
+        FNAME2='MSIS86.DAT'
       ENDIF
       OPEN(UNIT=IUMSIS,FILE=FNAME,FORM='FORMATTED',
+     &	  ERR=2398,STATUS='OLD')
+      GOTO 2393
+2398  OPEN(UNIT=IUMSIS,FILE=FNAME2,FORM='FORMATTED',
      &	  ERR=2399,STATUS='OLD')
+2393  CONTINUE
 c2392  OPEN(UNIT=IUMSIS,FILE=
 c     &'/ncf/nssdc/pub/ftp/pub/models/atmospheric/msis/msis86/msis86.dat'
 c     &,FORM='FORMATTED',ERR=2399,STATUS='OLD')
