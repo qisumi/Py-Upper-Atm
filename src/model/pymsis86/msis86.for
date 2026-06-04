@@ -89,7 +89,7 @@ C Dieter Bilitza !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! March 87
 C **********************************************************************
       LOGICAL METER
       DIMENSION D(8),T(2),MT(10),AP(7),ALTL(8)
-      CHARACTER NAME(2)*4
+      CHARACTER*4 NAME(2),ISDATE(3),ISTIME(2)
       COMMON/UINR/IUMSIS,MONITO,IIEE
       COMMON/GTS3C/TLB,S,DB04,DB16,DB28,DB32,DB40,DB48,DB01,ZA,T0,Z0
      $ ,G0,RL,DD,DB14
@@ -97,7 +97,7 @@ C **********************************************************************
       COMMON/PARM5/PT(150),PD(150,7),PS(150),PDL(25,2)
       COMMON/CSW/SW(25),ISW,SWC(25)
       COMMON/TTEST/TINFG,GB,ROUT,TT(15)
-      COMMON/DATIME/ISDATE(3),ISTIME(2),NAME
+      COMMON/DATIME/ISDATE,ISTIME,NAME
       DATA MT/48,0,4,16,28,32,40,1,49,14/,IFL/0/
       DATA ALTL/200.,400.,150.,200.,240.,450.,320.,450./
       DATA IMR/0/
@@ -743,7 +743,7 @@ C     Eq. A20a or Eq. A21
 C--------------------------------------------------------------------
       SUBROUTINE PRMSG5
 C          CIRA     11-FEB-86   
-      CHARACTER ISD(3),IST(2),NAME(2),ISDATE(3),ISTIME(2)*4
+      CHARACTER*4 ISD(3),IST(2),NAME(2),ISDATE(3),ISTIME(2)
       CHARACTER*512 FNAME, FNAME2, DRROOT
       COMMON/UINR/IUMSIS,MONITO,IIEE
       COMMON/MSIS86DR/DRROOT
