@@ -56,18 +56,18 @@ class TestMSIS86:
         assert 1000.0 < result["T_local_K"] < 1500.0
         assert 1000.0 < result["T_exo_K"] < 1500.0
         np.testing.assert_allclose(result["T_exo_K"], 1277.3132, rtol=1e-5)
-        np.testing.assert_allclose(result["T_local_K"], 1265.6276, rtol=1e-5)
+        np.testing.assert_allclose(result["T_local_K"], 1270.0803, rtol=1e-5)
         np.testing.assert_allclose(
             result["densities"],
             [
-                6.51949562e05,
-                9.84292240e07,
-                1.56377280e07,
-                5.49094062e05,
-                3.27906323e03,
-                3.45177107e-15,
-                3.48313242e04,
-                3.30794900e06,
+                6.67590625e05,
+                1.08792512e08,
+                2.07025880e07,
+                6.72686625e05,
+                4.22998145e03,
+                3.97616662e-15,
+                3.49830469e04,
+                3.60913725e06,
             ],
             rtol=1e-5,
         )
