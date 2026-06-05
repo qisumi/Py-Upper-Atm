@@ -25,6 +25,7 @@ The following models have been fully ported and are available in the `src/model/
 | RADBELT (AP8/AE8) | `RADBELT` | Trapped radiation environment — omnidirectional proton/electron fluxes (AP8MAX/MIN, AE8MAX/MIN) | Done |
 | SHIELDOSE | `SHIELDOSE` | Radiation dose behind aluminum shielding — trapped, solar proton, and electron environments | Done |
 | SOFIP | `SOFIP` | Short Orbital Flux Integration Program — mission-averaged fluxes along spacecraft trajectories using AP8/AE8 | Done |
+| Geomagnetic Cutoff Rigidity | `CutoffRigidity` | Cosmic ray cutoff rigidity thresholds — charged particle trajectory prediction (IGRF-95) | Done |
 
 ## Planned Models
 
@@ -38,9 +39,7 @@ _No remaining models in this phase._
 
 These models address magnetospheric physics and the radiation environment, critical for space weather and spacecraft mission planning.
 
-| Model | Directory | Description | Language | External Data |
-|-------|-----------|-------------|----------|---------------|
-| Geomagnetic Cutoff Rigidity | `TODO/Geomagnetic-Cutoff-Rigidity` | Cosmic ray cutoff rigidity thresholds — charged particle trajectory prediction | Fortran 77 | None (uses IGRF internally) |
+_No remaining models in this phase._
 
 ### Phase 3 — Geomagnetic & Electric Field Models
 

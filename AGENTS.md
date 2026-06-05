@@ -21,6 +21,7 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.RADBELT`
 - `model.SHIELDOSE`
 - `model.SOFIP`
+- `model.CutoffRigidity`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -52,6 +53,7 @@ python example/test_solpro.py
 python example/test_radbelt.py
 python example/test_shieldose.py
 python example/test_sofip.py
+python example/test_cutoff.py
 ```
 
 ## Public API Pattern
@@ -186,6 +188,17 @@ SOFIP result dictionaries contain:
 - `total_time_hours` — 总轨迹时间 (小时)
 - `time_step_minutes` — 时间步长 (分钟)
 
+CutoffRigidity result dictionaries contain (single trajectory mode):
+
+- `rigidity_gv` / `result_code` / `fate`
+- `asymptotic_latitude_deg` / `asymptotic_longitude_deg` / `path_length_re`
+
+CutoffRigidity result dictionaries contain (scan mode):
+
+- `cutoff_rigidity_gv` / `fate`
+- `asymptotic_latitude_deg` / `asymptotic_longitude_deg` / `path_length_re`
+- `n_trajectories_computed` / `rigidity_gv` (ndarray) / `trajectory_results` (ndarray)
+
 ## Project Structure
 
 ```text
@@ -209,7 +222,8 @@ UpperAtmPy/
 │   │   ├── pysolpro/
 │   │   ├── pyradbelt/
 │   │   ├── pyshieldose/
-│   │   └── pysofip/
+│   │   ├── pysofip/
+│   │   └── pycutoff/
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -232,7 +246,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 

@@ -19,6 +19,7 @@ Only concrete model classes are exported:
 - RADBELT
 - SHIELDOSE
 - SOFIP
+- CutoffRigidity
 
 Exports are lazy so `import model` does not load any model DLL.
 """
@@ -46,6 +47,7 @@ _LAZY_EXPORTS = {
     "RADBELT": ("model.pyradbelt", "Model"),
     "SHIELDOSE": ("model.pyshieldose", "Model"),
     "SOFIP": ("model.pysofip", "Model"),
+    "CutoffRigidity": ("model.pycutoff", "Model"),
 }
 
 __all__ = list(_LAZY_EXPORTS)

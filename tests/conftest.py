@@ -274,6 +274,16 @@ def sofip_ae8min_model():
         pytest.skip(f"SOFIP AE8MIN DLL not available: {exc}")
 
 
+@pytest.fixture
+def cutoff_model():
+    try:
+        from model import CutoffRigidity
+
+        return CutoffRigidity()
+    except Exception as exc:
+        pytest.skip(f"Cutoff Rigidity DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"

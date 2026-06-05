@@ -39,6 +39,7 @@ class TestModelPackage:
             "RADBELT",
             "SHIELDOSE",
             "SOFIP",
+            "CutoffRigidity",
         ]
         assert "model.pymsis2" not in sys.modules
         assert "model.pymsis00" not in sys.modules
