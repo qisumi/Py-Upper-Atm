@@ -24,6 +24,7 @@ The following models have been fully ported and are available in the `src/model/
 | SOLPRO | `SOLPRO` | Interplanetary solar proton fluence at 1 AU — mission duration and confidence-level based | Done |
 | RADBELT (AP8/AE8) | `RADBELT` | Trapped radiation environment — omnidirectional proton/electron fluxes (AP8MAX/MIN, AE8MAX/MIN) | Done |
 | SHIELDOSE | `SHIELDOSE` | Radiation dose behind aluminum shielding — trapped, solar proton, and electron environments | Done |
+| SOFIP | `SOFIP` | Short Orbital Flux Integration Program — mission-averaged fluxes along spacecraft trajectories using AP8/AE8 | Done |
 
 ## Planned Models
 
@@ -39,7 +40,6 @@ These models address magnetospheric physics and the radiation environment, criti
 
 | Model | Directory | Description | Language | External Data |
 |-------|-----------|-------------|----------|---------------|
-| SOFIP | `TODO/SOFIP` | Short Orbital Flux Integration Program — mission-averaged fluxes along spacecraft trajectories using AP8/AE8 | Fortran 77 | Binary radiation belt maps |
 | Geomagnetic Cutoff Rigidity | `TODO/Geomagnetic-Cutoff-Rigidity` | Cosmic ray cutoff rigidity thresholds — charged particle trajectory prediction | Fortran 77 | None (uses IGRF internally) |
 
 ### Phase 3 — Geomagnetic & Electric Field Models

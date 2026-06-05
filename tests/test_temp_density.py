@@ -38,6 +38,7 @@ class TestModelPackage:
             "SOLPRO",
             "RADBELT",
             "SHIELDOSE",
+            "SOFIP",
         ]
         assert "model.pymsis2" not in sys.modules
         assert "model.pymsis00" not in sys.modules

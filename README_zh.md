@@ -24,11 +24,12 @@
 - **SOLPRO**：1 AU 行星际太阳质子积分通量 — 基于任务时长和置信水平
 - **RADBELT**：AP-8 / AE-8 捕获辐射模型 — 全向积分质子/电子通量（AP8MAX/MIN、AE8MAX/MIN）
 - **SHIELDOSE**：铝屏蔽后辐射剂量模型 — 捕获带、太阳质子、电子环境
+- **SOFIP**：短轨道通量积分程序 — 使用 AP8/AE8 计算沿航天器轨迹的任务平均通量
 
 ## 特性
 
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
@@ -195,6 +196,7 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 - `SOLPRO`
 - `RADBELT`
 - `SHIELDOSE`
+- `SOFIP`
 
 每个类都提供 `calculate(...)`，返回普通字典。
 模型计算方法同时支持标量和可广播数组输入，输入标量返回标量结果，输入数组会按 numpy 广播返回对应形状。
@@ -224,6 +226,7 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 - [SOLPRO](src/model/pysolpro/README_zh.md)
 - [RADBELT](src/model/pyradbelt/README_zh.md)
 - [SHIELDOSE](src/model/pyshieldose/README_zh.md)
+- [SOFIP](src/model/pysofip/README_zh.md)
 
 ### 可选工具模块
 
@@ -273,7 +276,7 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE
+│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP
 │   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
 │   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
 │   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
@@ -289,7 +292,8 @@ UpperAtmPy/
 │   │   ├── pytsyganenko/    # Tsyganenko 磁层磁场模型封装（T89/T96/T01/TS04）
 │   │   ├── pysolpro/        # SOLPRO 太阳质子通量模型封装
 │   │   ├── pyradbelt/       # RADBELT AP-8/AE-8 捕获辐射模型封装
-│   │   └── pyshieldose/     # SHIELDOSE 铝屏蔽后辐射剂量模型封装
+│   │   ├── pyshieldose/     # SHIELDOSE 铝屏蔽后辐射剂量模型封装
+│   │   └── pysofip/          # SOFIP 短轨道通量积分程序封装
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py

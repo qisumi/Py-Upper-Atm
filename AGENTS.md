@@ -20,6 +20,7 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.SOLPRO`
 - `model.RADBELT`
 - `model.SHIELDOSE`
+- `model.SOFIP`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -50,6 +51,7 @@ python example/test_tsyganenko.py
 python example/test_solpro.py
 python example/test_radbelt.py
 python example/test_shieldose.py
+python example/test_sofip.py
 ```
 
 ## Public API Pattern
@@ -170,6 +172,20 @@ SHIELDOSE result dictionaries contain:
 - `dose_sphere` — 球体中心剂量 [ndepth, 5] (rads)
 - 各剂量矩阵的 5 列: [电子, 轫致辐射, 电子+轫致, 捕获质子, 太阳质子]
 
+SOFIP result dictionaries contain:
+
+- `energy_levels` — 能量阈值 (MeV)，形状 (30,)
+- `integral_flux` — 平均积分通量 (#/cm²/s)，形状 (30,)
+- `differential_flux` — 微分通量 (#/cm²/s/keV)，形状 (30,)
+- `difference_flux` — 差分积分通量 (#/cm²/s/DE)，形状 (30,)
+- `solar_proton_energy` — 太阳质子能量 (MeV)，形状 (20,)
+- `solar_proton_fluence` — 太阳质子注量 (#/cm²)，形状 (20,)
+- `n_al_events` — AL 事件数
+- `exposure_factor` — 暴露因子
+- `lzone_counts` — L 壳区间点计数，形状 (4,)
+- `total_time_hours` — 总轨迹时间 (小时)
+- `time_step_minutes` — 时间步长 (分钟)
+
 ## Project Structure
 
 ```text
@@ -192,7 +208,8 @@ UpperAtmPy/
 │   │   ├── pytsyganenko/
 │   │   ├── pysolpro/
 │   │   ├── pyradbelt/
-│   │   └── pyshieldose/
+│   │   ├── pyshieldose/
+│   │   └── pysofip/
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -215,7 +232,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 

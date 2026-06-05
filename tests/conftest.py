@@ -254,6 +254,26 @@ def shieldose_si_model():
         pytest.skip(f"SHIELDOSE Si DLL not available: {exc}")
 
 
+@pytest.fixture
+def sofip_ap8max_model():
+    try:
+        from model import SOFIP
+
+        return SOFIP("AP8MAX", data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"SOFIP AP8MAX DLL not available: {exc}")
+
+
+@pytest.fixture
+def sofip_ae8min_model():
+    try:
+        from model import SOFIP
+
+        return SOFIP("AE8MIN", data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"SOFIP AE8MIN DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"

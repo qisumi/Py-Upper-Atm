@@ -26,11 +26,12 @@ Supported models:
 - **SOLPRO**: Interplanetary solar proton fluence at 1 AU — mission duration and confidence-level based
 - **RADBELT**: AP-8 / AE-8 trapped radiation models — omnidirectional integral proton/electron fluxes (AP8MAX/MIN, AE8MAX/MIN)
 - **SHIELDOSE**: Radiation dose behind aluminum shielding — trapped, solar proton, and electron environments
+- **SOFIP**: Short Orbital Flux Integration Program — mission-averaged fluxes along spacecraft trajectories using AP8/AE8
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -208,6 +209,7 @@ Top-level `model` exports only:
 - `SOLPRO`
 - `RADBELT`
 - `SHIELDOSE`
+- `SOFIP`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -237,6 +239,7 @@ Each model directory under `src/model/` contains its own `README.md` with detail
 - [SOLPRO](src/model/pysolpro/README.md)
 - [RADBELT](src/model/pyradbelt/README.md)
 - [SHIELDOSE](src/model/pyshieldose/README.md)
+- [SOFIP](src/model/pysofip/README.md)
 
 ### Optional utility modules
 
@@ -286,7 +289,7 @@ Convert output dictionaries to xarray datasets.
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
@@ -302,7 +305,8 @@ UpperAtmPy/
 │   │   ├── pytsyganenko/    # Tsyganenko magnetospheric field model wrapper (T89/T96/T01/TS04)
 │   │   ├── pysolpro/        # SOLPRO solar proton fluence model wrapper
 │   │   ├── pyradbelt/       # RADBELT AP-8/AE-8 trapped radiation wrapper
-│   │   └── pyshieldose/     # SHIELDOSE radiation dose behind shielding wrapper
+│   │   ├── pyshieldose/     # SHIELDOSE radiation dose behind shielding wrapper
+│   │   └── pysofip/          # SOFIP Short Orbital Flux Integration Program wrapper
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
