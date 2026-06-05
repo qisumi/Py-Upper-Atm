@@ -22,6 +22,8 @@ The following models have been fully ported and are available in the `src/model/
 | Chiu | `Chiu` | Chiu ionospheric electron density — E, F1, F2 layer densities (90–500 km) | Done |
 | Tsyganenko (T89/T96/T01/TS04) | `Tsyganenko` | Data-based magnetospheric magnetic field models — external field contribution in GSM coordinates | Done |
 | SOLPRO | `SOLPRO` | Interplanetary solar proton fluence at 1 AU — mission duration and confidence-level based | Done |
+| RADBELT (AP8/AE8) | `RADBELT` | Trapped radiation environment — omnidirectional proton/electron fluxes (AP8MAX/MIN, AE8MAX/MIN) | Done |
+| SHIELDOSE | `SHIELDOSE` | Radiation dose behind aluminum shielding — trapped, solar proton, and electron environments | Done |
 
 ## Planned Models
 
@@ -37,8 +39,6 @@ These models address magnetospheric physics and the radiation environment, criti
 
 | Model | Directory | Description | Language | External Data |
 |-------|-----------|-------------|----------|---------------|
-| RADBELT (AP8/AE8) | `TODO/RADBELT` | Trapped radiation environment — omnidirectional proton/electron fluxes (AP8MAX/MIN, AE8MAX/MIN) | Fortran 77 / C | 8 binary/ASCII flux maps (~80K each) |
-| SHIELDOSE | `TODO/SHIELDOSE` | Radiation dose behind aluminum shielding — trapped, solar proton, and electron environments | Fortran 77 | `shieldose.dat` (binary dose-depth data) |
 | SOFIP | `TODO/SOFIP` | Short Orbital Flux Integration Program — mission-averaged fluxes along spacecraft trajectories using AP8/AE8 | Fortran 77 | Binary radiation belt maps |
 | Geomagnetic Cutoff Rigidity | `TODO/Geomagnetic-Cutoff-Rigidity` | Cosmic ray cutoff rigidity thresholds — charged particle trajectory prediction | Fortran 77 | None (uses IGRF internally) |
 

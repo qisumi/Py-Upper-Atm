@@ -22,6 +22,8 @@
 | Chiu | `Chiu` | Chiu 电离层电子密度模型 — E、F1、F2 层电子密度（90–500 km） | 已完成 |
 | Tsyganenko（T89/T96/T01/TS04） | `Tsyganenko` | 数据驱动的磁层磁场模型 — GSM 坐标系外源磁场贡献 | 已完成 |
 | SOLPRO | `SOLPRO` | 1 AU 行星际太阳质子积分通量 — 基于任务时长和置信水平 | 已完成 |
+| RADBELT（AP8/AE8） | `RADBELT` | 捕获辐射环境模型 — 全向质子/电子通量（AP8MAX/MIN, AE8MAX/MIN） | 已完成 |
+| SHIELDOSE | `SHIELDOSE` | 铝屏蔽后辐射剂量模型 — 捕获带、太阳质子、电子环境 | 已完成 |
 
 ## 计划移植模型
 
@@ -37,8 +39,6 @@ _本阶段无剩余模型。_
 
 | 模型 | 目录 | 说明 | 原始语言 | 外部数据 |
 |------|------|------|----------|----------|
-| RADBELT（AP8/AE8） | `TODO/RADBELT` | 捕获辐射环境模型 — 全向质子/电子通量（AP8MAX/MIN, AE8MAX/MIN） | Fortran 77 / C | 8 个二进制/ASCII 通量地图（各约 80K） |
-| SHIELDOSE | `TODO/SHIELDOSE` | 铝屏蔽后的辐射剂量 — 捕获带、太阳质子、电子环境 | Fortran 77 | `shieldose.dat`（二进制剂量-深度数据） |
 | SOFIP | `TODO/SOFIP` | 短轨道通量积分程序 — 沿航天器轨道计算任务平均通量，使用 AP8/AE8 | Fortran 77 | 二进制辐射带地图 |
 | 地磁截止刚度 | `TODO/Geomagnetic-Cutoff-Rigidity` | 宇宙线截止刚度阈值 — 带电粒子轨迹预测 | Fortran 77 | 无（内部使用 IGRF） |
 

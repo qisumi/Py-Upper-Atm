@@ -16,6 +16,8 @@ Only concrete model classes are exported:
 - Chiu
 - Tsyganenko
 - SOLPRO
+- RADBELT
+- SHIELDOSE
 
 Exports are lazy so `import model` does not load any model DLL.
 """
@@ -40,6 +42,8 @@ _LAZY_EXPORTS = {
     "Chiu": ("model.pychiu", "Model"),
     "Tsyganenko": ("model.pytsyganenko", "Model"),
     "SOLPRO": ("model.pysolpro", "Model"),
+    "RADBELT": ("model.pyradbelt", "Model"),
+    "SHIELDOSE": ("model.pyshieldose", "Model"),
 }
 
 __all__ = list(_LAZY_EXPORTS)

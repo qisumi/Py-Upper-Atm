@@ -214,6 +214,46 @@ def solpro_model():
         pytest.skip(f"SOLPRO DLL not available: {exc}")
 
 
+@pytest.fixture
+def radbelt_ae8min_model():
+    try:
+        from model import RADBELT
+
+        return RADBELT("AE8MIN", data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"RADBELT AE8MIN DLL not available: {exc}")
+
+
+@pytest.fixture
+def radbelt_ap8min_model():
+    try:
+        from model import RADBELT
+
+        return RADBELT("AP8MIN", data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"RADBELT AP8MIN DLL not available: {exc}")
+
+
+@pytest.fixture
+def shieldose_al_model():
+    try:
+        from model import SHIELDOSE
+
+        return SHIELDOSE(detector=1, unit=2, data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"SHIELDOSE Al DLL not available: {exc}")
+
+
+@pytest.fixture
+def shieldose_si_model():
+    try:
+        from model import SHIELDOSE
+
+        return SHIELDOSE(detector=3, unit=2, data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"SHIELDOSE Si DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"

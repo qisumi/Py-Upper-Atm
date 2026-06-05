@@ -444,6 +444,61 @@
       ],
       "sha256": "8b410ce9d721475a6c849e787620fa66a2cb0b9055d816dfa172a263e24654e5",
       "size": 1505
+    },
+    {
+      "model": "radbelt",
+      "version": "radbelt-1988",
+      "path": "radbeltdata/ap8max.asc",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v3/ap8max.asc",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/radbeltdata/ap8max.asc"
+      ],
+      "sha256": "e21fced8e9c2e97d6bf4824173bed1af803b9f52ca261c49106b0c58e609a7de",
+      "size": 100542
+    },
+    {
+      "model": "radbelt",
+      "version": "radbelt-1988",
+      "path": "radbeltdata/ap8min.asc",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v3/ap8min.asc",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/radbeltdata/ap8min.asc"
+      ],
+      "sha256": "e381b3aaa88a120e6ee9e8cc0645d0205ca947924d2bf32e86a105044749ebf8",
+      "size": 102318
+    },
+    {
+      "model": "radbelt",
+      "version": "radbelt-1988",
+      "path": "radbeltdata/ae8max.asc",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v3/ae8max.asc",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/radbeltdata/ae8max.asc"
+      ],
+      "sha256": "73cf3ad873c8adea48c27eb7628621a03937d9f6c17b55805d32692e636815e8",
+      "size": 83596
+    },
+    {
+      "model": "radbelt",
+      "version": "radbelt-1988",
+      "path": "radbeltdata/ae8min.asc",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v3/ae8min.asc",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/radbeltdata/ae8min.asc"
+      ],
+      "sha256": "4cea68a560a98e3efab4ec3b02a78a026c077453f179606a9a598698cfa34734",
+      "size": 81254
+    },
+    {
+      "model": "shieldose",
+      "version": "shieldose-1980",
+      "path": "shieldosedata/shieldose.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v1/shieldose.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/shieldosedata/shieldose.dat"
+      ],
+      "sha256": "7cc219e80b4a51e3cf07cc9d55155652e23db960c5336f54db53cbf4f37d2ed0",
+      "size": 160262
     }
   ]
 }
