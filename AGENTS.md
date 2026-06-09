@@ -257,6 +257,62 @@ UpperAtmPy/
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 
+## CI, Release, and Native Model Pitfalls
+
+Use this checklist before tagging a release or adding a native model. These items cover failures previously seen in tag-triggered GitHub Actions releases, source/wheel packaging, Git LFS data handling, and Fortran initialization.
+
+### Release Tags and GitHub Actions
+
+- The release workflow is triggered by pushed tags matching `v*`; `git push` only pushes the branch. Push the release tag explicitly with `git push origin vX.Y.Z` or use `git push --follow-tags` after creating an annotated tag.
+- Before pushing a release tag, make sure `pyproject.toml` `version` matches the tag without the leading `v`. The workflow checks this and fails when they differ.
+- Do not force-move a published release tag casually. If a tag already ran and failed after publication, prefer bumping the patch version and creating a new tag.
+- To distinguish "not triggered" from "triggered then failed", check both the remote tag and Actions runs:
+
+```bash
+git ls-remote origin refs/tags/vX.Y.Z refs/tags/vX.Y.Z^{}
+gh run list --repo qisumi/Py-Upper-Atm --limit 10
+```
+
+- Useful CI-debug commands:
+
+```bash
+gh auth status
+gh run view <run-id> --json status,conclusion,jobs
+gh run watch <run-id> --exit-status
+gh run view <run-id> --log-failed
+gh api /repos/qisumi/Py-Upper-Atm/actions/jobs/<job-id>/logs
+```
+
+### Packaging Checks for New Native Models
+
+- When adding a native model, update `.github/workflows/release.yml` wherever the workflow validates package contents.
+- The source distribution check must expect the new module's `CMakeLists.txt` and required source files.
+- The wheel content check must include the native library path for both platforms, for example `model/pyfoo/foo.dll` on Windows and `model/pyfoo/libfoo.so` on Linux.
+- If the model uses external data, update the release data packaging step and `src/utils/model_data_manifest.json` so the packaged data, file sizes, and hashes match the committed/downloaded files.
+- Before tagging, run local packaging checks where practical:
+
+```bash
+python -m build --wheel --sdist
+python -m pytest
+```
+
+### Git LFS and Model Data
+
+- `data/**` is tracked through Git LFS. Verify `git-lfs` is installed and active before adding data files, otherwise Actions checkout may warn that files "should have been pointers, but weren't".
+- Do not rewrite or strip fixed-width Fortran `.DAT` files unless the model has been verified after the change; trailing spaces may be significant for legacy readers.
+- When changing data files, update every consumer: package data list, manifest hashes, documentation, and tests that load from a non-repo working directory.
+
+### Fortran and ctypes Stability
+
+- Do not rely on uninitialized Fortran local variables, implicit `SAVE` behavior, or compiler-dependent persistence. Windows and Linux builds can behave differently.
+- Initialize coefficient, work, and COMMON-backed arrays deterministically before use, especially when a DLL can switch between model versions in one Python process.
+- Recompute derived constants each call if they are local values used after a first-call guard.
+- Avoid initialization checks based on possibly uninitialized array contents.
+- Treat COMMON block size mismatch compiler warnings as real bugs; fix dimensions to match across declarations.
+- Tests for native wrappers should include finite-value assertions with `math.isfinite()` or `np.isfinite()`, not only type and shape checks.
+- For models supporting multiple versions through one DLL, test multiple versions in the same Python process and in isolated subprocesses.
+- When embedding paths in `python -c` tests, use `repr(str(path))` or `Path.as_posix()` so Windows backslashes are not interpreted as escapes.
+
 ## New Model Integration Tutorial
 
 The steps below assume the TODO directory already contains Fortran source code and a C ABI shim (`*_cshim.F90`). The example integrates `TODO/FooModel` as `model.Foo`.
