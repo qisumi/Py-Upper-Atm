@@ -22,6 +22,7 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.SHIELDOSE`
 - `model.SOFIP`
 - `model.CutoffRigidity`
+- `model.GSFC`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -199,6 +200,11 @@ CutoffRigidity result dictionaries contain (scan mode):
 - `asymptotic_latitude_deg` / `asymptotic_longitude_deg` / `path_length_re`
 - `n_trajectories_computed` / `rigidity_gv` (ndarray) / `trajectory_results` (ndarray)
 
+GSFC result dictionaries contain:
+- `year`, `lat_deg`, `lon_deg`, `alt_km` — broadcast inputs
+- `X_nT`, `Y_nT`, `Z_nT`, `F_nT`, `H_nT` — field components in nT
+- `inclination_deg`, `declination_deg` — derived angles
+
 ## Project Structure
 
 ```text
@@ -223,7 +229,8 @@ UpperAtmPy/
 │   │   ├── pyradbelt/
 │   │   ├── pyshieldose/
 │   │   ├── pysofip/
-│   │   └── pycutoff/
+│   │   ├── pycutoff/
+│   │   └── pygsfc/
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -246,7 +253,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 

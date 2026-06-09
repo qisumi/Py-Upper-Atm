@@ -61,6 +61,39 @@
       "size": 1500
     },
     {
+      "model": "gsfc",
+      "version": "gsfc-80",
+      "path": "gsfcdata/GSFC80.DAT",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v1/GSFC80.DAT",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/gsfcdata/GSFC80.DAT"
+      ],
+      "sha256": "25ea30f3626212bca1238ad6bd8f193be414c9831f208dc3a9d6c933dca73aa3",
+      "size": 9799
+    },
+    {
+      "model": "gsfc",
+      "version": "gsfc-83",
+      "path": "gsfcdata/GSFC83.DAT",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v1/GSFC83.DAT",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/gsfcdata/GSFC83.DAT"
+      ],
+      "sha256": "7342a13f9954a7754f708c43c68c4b31de1109eaa275435ac9f0f8c2b005989f",
+      "size": 8748
+    },
+    {
+      "model": "gsfc",
+      "version": "gsfc-87",
+      "path": "gsfcdata/GSFC87.DAT",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v1/GSFC87.DAT",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/gsfcdata/GSFC87.DAT"
+      ],
+      "sha256": "adbd416ef33ce6d8f87394e77da181e99a8377ad599242953d065cb28c5d6172",
+      "size": 8748
+    },
+    {
       "model": "igrf13",
       "version": "igrf-13",
       "path": "igrf13data/dgrf1945.dat",

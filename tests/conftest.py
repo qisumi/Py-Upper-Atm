@@ -105,6 +105,36 @@ def igrf13_model():
 
 
 @pytest.fixture
+def gsfc_model():
+    try:
+        from model import GSFC
+
+        return GSFC(gsfc_version=87, data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"GSFC DLL not available: {exc}")
+
+
+@pytest.fixture
+def gsfc83_model():
+    try:
+        from model import GSFC
+
+        return GSFC(gsfc_version=83, data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"GSFC-83 DLL not available: {exc}")
+
+
+@pytest.fixture
+def gsfc80_model():
+    try:
+        from model import GSFC
+
+        return GSFC(gsfc_version=80, data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"GSFC-80 DLL not available: {exc}")
+
+
+@pytest.fixture
 def cira86_model():
     try:
         from model import CIRA86

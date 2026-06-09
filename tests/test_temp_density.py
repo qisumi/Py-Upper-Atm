@@ -40,6 +40,7 @@ class TestModelPackage:
             "SHIELDOSE",
             "SOFIP",
             "CutoffRigidity",
+            "GSFC",
         ]
         assert "model.pymsis2" not in sys.modules
         assert "model.pymsis00" not in sys.modules
@@ -52,6 +53,7 @@ class TestModelPackage:
         assert "model.pymsise90" not in sys.modules
         assert "model.pyradbelt" not in sys.modules
         assert "model.pyshieldose" not in sys.modules
+        assert "model.pygsfc" not in sys.modules
         assert "utils.model_data" not in sys.modules
 
     def test_old_top_level_exports_are_removed(self):

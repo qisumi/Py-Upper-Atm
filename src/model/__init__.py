@@ -20,6 +20,7 @@ Only concrete model classes are exported:
 - SHIELDOSE
 - SOFIP
 - CutoffRigidity
+- GSFC
 
 Exports are lazy so `import model` does not load any model DLL.
 """
@@ -48,6 +49,7 @@ _LAZY_EXPORTS = {
     "SHIELDOSE": ("model.pyshieldose", "Model"),
     "SOFIP": ("model.pysofip", "Model"),
     "CutoffRigidity": ("model.pycutoff", "Model"),
+    "GSFC": ("model.pygsfc", "Model"),
 }
 
 __all__ = list(_LAZY_EXPORTS)

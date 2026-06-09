@@ -28,11 +28,12 @@ Supported models:
 - **SHIELDOSE**: Radiation dose behind aluminum shielding — trapped, solar proton, and electron environments
 - **SOFIP**: Short Orbital Flux Integration Program — mission-averaged fluxes along spacecraft trajectories using AP8/AE8
 - **CutoffRigidity**: Geomagnetic cutoff rigidity — cosmic ray trajectory prediction (Smart & Shea, IGRF-95)
+- **GSFC**: GSFC geomagnetic field models (80, 83, 87) — spherical harmonic field components at any location
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -212,6 +213,7 @@ Top-level `model` exports only:
 - `SHIELDOSE`
 - `SOFIP`
 - `CutoffRigidity`
+- `GSFC`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -243,6 +245,7 @@ Each model directory under `src/model/` contains its own `README.md` with detail
 - [SHIELDOSE](src/model/pyshieldose/README.md)
 - [SOFIP](src/model/pysofip/README.md)
 - [CutoffRigidity](src/model/pycutoff/README.md)
+- [GSFC](src/model/pygsfc/README.md)
 
 ### Optional utility modules
 
@@ -292,7 +295,7 @@ Convert output dictionaries to xarray datasets.
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
@@ -310,7 +313,8 @@ UpperAtmPy/
 │   │   ├── pyradbelt/       # RADBELT AP-8/AE-8 trapped radiation wrapper
 │   │   ├── pyshieldose/     # SHIELDOSE radiation dose behind shielding wrapper
 │   │   ├── pysofip/          # SOFIP Short Orbital Flux Integration Program wrapper
-│   │   └── pycutoff/         # Geomagnetic Cutoff Rigidity (Smart & Shea, IGRF-95)
+│   │   ├── pycutoff/         # Geomagnetic Cutoff Rigidity (Smart & Shea, IGRF-95)
+│   │   └── pygsfc/           # GSFC geomagnetic field models (80, 83, 87)
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
