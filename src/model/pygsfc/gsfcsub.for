@@ -380,7 +380,23 @@ C
       COMMON /FLDCOM/ ST,CT,SPH,CPH,R,NMAX,BT,BP,BR,B,ABAR,E1,E2,E3,
      .     NEXT,Q(31,31)
       DATA NCORE/14/
-      IF (P(1,1).EQ.1.0) GO TO 3
+C  Do not depend on persisted local-array state across compilers/runners.
+      DO 40 I=1,31
+      SP(I)=0.0
+      CP(I)=0.0
+      FN(I)=0.0
+      FM(I)=0.0
+      DO 40 J=1,31
+      P(I,J)=0.0
+      DP(I,J)=0.0
+      CONST(I,J)=0.0
+      DXDQ(I,J)=0.0
+      DXDS(I,J)=0.0
+      DYDQ(I,J)=0.0
+      DYDS(I,J)=0.0
+      DZDQ(I,J)=0.0
+      DZDS(I,J)=0.0
+   40 CONTINUE
 1     P(1,1)=1.
       DP(1,1)=0.
       SP(1)=0.
