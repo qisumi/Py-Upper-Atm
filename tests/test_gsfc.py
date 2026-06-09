@@ -137,11 +137,13 @@ class TestGSFC80:
 
 def _run_gsfc_subprocess(version, year):
     """Run a single GSFC calculation in a subprocess to isolate DLL state."""
-    root = str(Path(__file__).resolve().parents[1])
+    root = Path(__file__).resolve().parents[1]
+    src_path = repr(str(root / "src"))
+    data_path = repr(str(root / "data"))
     code = (
-        f"import sys; sys.path.insert(0, '{root}/src')\n"
+        f"import sys; sys.path.insert(0, {src_path})\n"
         f"from model import GSFC\n"
-        f"m = GSFC(gsfc_version={version}, data_dir='{root}/data', auto_download=False)\n"
+        f"m = GSFC(gsfc_version={version}, data_dir={data_path}, auto_download=False)\n"
         f"r = m.calculate(year={year}, lat_deg=39.9, lon_deg=116.4, alt_km=0.0)\n"
         f"print(f'{{r[\"F_nT\"]:.6f}}')"
     )

@@ -197,6 +197,20 @@ C
       READ(IU,103) (AID(I),I=14,33)
 103   FORMAT(20A4)
       L=0
+C  Reloading different GSFC versions in one process requires deterministic
+C  coefficient work arrays; uninitialized entries can propagate NaNs.
+      DO 35 II=1,31
+      DO 35 JJ2=1,31
+      G(II,JJ2)=0.0
+      GT(II,JJ2)=0.0
+      GTT(II,JJ2)=0.0
+      SHMIT(II,JJ2)=0.0
+      Q(II,JJ2)=0.0
+   35 CONTINUE
+      DO 36 II=1,8
+      DO 36 JJ2=1,8
+      GTTT(II,JJ2)=0.0
+   36 CONTINUE
       MAXN=0
       TEMP=0.
  5    READ (IU,6) N,M,GNM,HNM,GTNM,HTNM,GTTNM,HTTNM
@@ -223,10 +237,6 @@ C         M=ML + 1
       GTTT(M-1,N)=HTTTNM
       GO TO 106
 107   CONTINUE
-C  Zero external field array to prevent stale data from previous model
-      DO 34 KK=1,5
-      DO 34 LL2=1,5
-   34 Q(KK,LL2)=0.0
 C                              READ EXTERNAL FIELD
       IF(MODEXT.NE.0) THEN
  30     READ(IU,6) N,M,QNM,SNM
