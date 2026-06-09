@@ -8,6 +8,7 @@ process. Cross-version validation tests use subprocess isolation.
 
 import subprocess
 import sys
+import math
 from pathlib import Path
 
 import pytest
@@ -180,6 +181,7 @@ class TestGSFCValidation:
             )
             values.append(round(result["F_nT"], 3))
 
+        assert all(math.isfinite(value) for value in values)
         assert len(set(values)) == 3
 
     def test_gsfc87_at_different_times(self):

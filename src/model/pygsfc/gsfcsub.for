@@ -188,7 +188,21 @@ C
       B2=(AE*FLAT)**2
       A2B2=A2*(1.-FLAT**2)
       A4B4=A4*(1.-FLAT**4)
-  110 IF (L) 19,1,2
+  110 AE=6378.16
+      FLAT=1. -1./298.25
+      E1=0.
+      E2=0.
+      E3=0.
+          ALFA1=0.
+          ALFA2=0.
+          ALFA3=0.
+          ALFA4=0.
+      A2=AE**2
+      A4=AE**4
+      B2=(AE*FLAT)**2
+      A2B2=A2*(1.-FLAT**2)
+      A4B4=A4*(1.-FLAT**4)
+      IF (L) 19,1,2
 1     IF (TM-TLAST) 17,19,17
 2     READ (IU,3) NMAX,NMAXT,NMAXTT,NMXTTT,MODEXT,K,TZERO,ABAR,MODIND,
      &(AID(I),I=1,13)
