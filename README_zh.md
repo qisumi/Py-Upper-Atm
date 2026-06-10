@@ -27,11 +27,12 @@
 - **SOFIP**：短轨道通量积分程序 — 使用 AP8/AE8 计算沿航天器轨迹的任务平均通量
 - **CutoffRigidity**：地磁截止刚度 — 宇宙线轨迹预测（Smart & Shea，IGRF-95）
 - **GSFC**：GSFC 地磁场模型（80、83、87）— 球谐展开任意位置磁场分量
+- **JensenCain**：Jensen & Cain (1962) 地磁场模型 — 球谐展开，epoch 1960.0，6 阶
 
 ## 特性
 
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`、`JensenCain`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。

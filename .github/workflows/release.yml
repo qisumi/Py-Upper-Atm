@@ -146,6 +146,7 @@ jobs:
                   "model/pyigrf/igrf.dll",
                   "model/pymsis86/build/msis86.dll",
                   "model/pygsfc/gsfc.dll",
+                  "model/pyjensen/jensen.dll",
               }
           else:
               expected = {
@@ -156,6 +157,7 @@ jobs:
                   "model/pyigrf/libigrf.so",
                   "model/pymsis86/build/libmsis86.so",
                   "model/pygsfc/libgsfc.so",
+                  "model/pyjensen/libjensen.so",
               }
 
           expected.add("utils/model_data_manifest.json")
@@ -232,6 +234,7 @@ jobs:
               f"{root}/src/model/pyhwm93/CMakeLists.txt",
               f"{root}/src/model/pyigrf/CMakeLists.txt",
               f"{root}/src/model/pygsfc/CMakeLists.txt",
+              f"{root}/src/model/pyjensen/CMakeLists.txt",
           }
           missing = expected - names
           data_files = [name for name in names if name.startswith(f"{root}/data/")]
@@ -267,6 +270,9 @@ jobs:
           )
           expected.extend(
               sorted(path.relative_to(data_root) for path in (data_root / "gsfcdata").glob("*") if path.is_file())
+          )
+          expected.extend(
+              sorted(path.relative_to(data_root) for path in (data_root / "jensen" / "cain").glob("*") if path.is_file())
           )
 
           missing = [str(path) for path in expected if not (data_root / path).is_file()]

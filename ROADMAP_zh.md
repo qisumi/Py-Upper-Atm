@@ -27,6 +27,7 @@
 | SOFIP | `SOFIP` | 短轨道通量积分程序 — 沿航天器轨迹计算任务平均通量，使用 AP8/AE8 | 已完成 |
 | 地磁截止刚度 | `CutoffRigidity` | 宇宙线截止刚度阈值 — 带电粒子轨迹预测（IGRF-95） | 已完成 |
 | GSFC 地磁场 | `GSFC` | GSFC 地磁场模型（80、83、87）— 球谐展开任意位置磁场分量 | 已完成 |
+| Jensen & Cain (1962) | `JensenCain` | 早期球谐地磁场模型（6 阶，epoch 1960.0） | 已完成 |
 
 ## 计划移植模型
 
@@ -48,7 +49,6 @@ _本阶段无剩余模型。_
 
 | 模型 | 目录 | 说明 | 原始语言 | 外部数据 |
 |------|------|------|----------|----------|
-| Jensen & Cain (1962) | `TODO/Jensen-Cain-Model-Coefficients` | 早期球谐地磁场模型（12 阶，约 1962 历元） | Fortran 77 | `jensen_cain_62.dat`（二进制） |
 | MGST 系数 | `TODO/MGST-Model-Coefficients-All` | MGST 地磁场模型系数（1980、1981 历元） | 纯数据 | 2 个二进制 `.dat` 文件 |
 | Heppner-Maynard-Rich | `TODO/Heppner-Maynard-Rich_Electric-Field-Model` | 高纬电离层电势模型 — 球谐拟合，焦耳加热 | Fortran 77 | `hmcoef.dat`（二进制） |
 | ISR 离子漂移 | `TODO/ISR-Ion-Drift-Model` | 非相干散射雷达离子漂移模型 — 静日 E×B 漂移（300 km） | Fortran 77 | 无（硬编码系数） |

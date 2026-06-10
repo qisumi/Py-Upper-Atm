@@ -23,6 +23,7 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.SOFIP`
 - `model.CutoffRigidity`
 - `model.GSFC`
+- `model.JensenCain`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -55,6 +56,7 @@ python example/test_radbelt.py
 python example/test_shieldose.py
 python example/test_sofip.py
 python example/test_cutoff.py
+python example/test_jensen.py
 ```
 
 ## Public API Pattern
@@ -205,6 +207,11 @@ GSFC result dictionaries contain:
 - `X_nT`, `Y_nT`, `Z_nT`, `F_nT`, `H_nT` — field components in nT
 - `inclination_deg`, `declination_deg` — derived angles
 
+JensenCain result dictionaries contain:
+- `year`, `lat_deg`, `lon_deg`, `alt_km` — broadcast inputs
+- `X_nT`, `Y_nT`, `Z_nT`, `F_nT`, `H_nT` — field components in nT
+- `inclination_deg`, `declination_deg` — derived angles
+
 ## Project Structure
 
 ```text
@@ -230,7 +237,8 @@ UpperAtmPy/
 │   │   ├── pyshieldose/
 │   │   ├── pysofip/
 │   │   ├── pycutoff/
-│   │   └── pygsfc/
+│   │   ├── pygsfc/
+│   │   └── pyjensen/
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -253,7 +261,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC", "JensenCain"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 

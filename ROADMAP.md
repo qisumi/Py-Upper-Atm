@@ -27,6 +27,7 @@ The following models have been fully ported and are available in the `src/model/
 | SOFIP | `SOFIP` | Short Orbital Flux Integration Program — mission-averaged fluxes along spacecraft trajectories using AP8/AE8 | Done |
 | Geomagnetic Cutoff Rigidity | `CutoffRigidity` | Cosmic ray cutoff rigidity thresholds — charged particle trajectory prediction (IGRF-95) | Done |
 | GSFC Geomagnetic Field | `GSFC` | GSFC geomagnetic field models (80, 83, 87) — spherical harmonic field components at any location | Done |
+| Jensen & Cain (1962) | `JensenCain` | Early spherical harmonic geomagnetic field model (degree 6, epoch 1960.0) | Done |
 
 ## Planned Models
 
@@ -48,7 +49,6 @@ Spherical harmonic geomagnetic field models and high-latitude ionospheric electr
 
 | Model | Directory | Description | Language | External Data |
 |-------|-----------|-------------|----------|---------------|
-| Jensen & Cain (1962) | `TODO/Jensen-Cain-Model-Coefficients` | Early spherical harmonic geomagnetic field model (degree 12, epoch ~1962) | Fortran 77 | `jensen_cain_62.dat` (binary) |
 | MGST Coefficients | `TODO/MGST-Model-Coefficients-All` | MGST geomagnetic field model coefficients for epochs 1980 and 1981 | Data only | 2 binary `.dat` files |
 | Heppner-Maynard-Rich | `TODO/Heppner-Maynard-Rich_Electric-Field-Model` | High-latitude ionospheric electric potential — spherical harmonic fits, Joule heating | Fortran 77 | `hmcoef.dat` (binary) |
 | ISR Ion Drift | `TODO/ISR-Ion-Drift-Model` | Incoherent Scatter Radar ion drift model — quiet-day E×B drifts at 300 km | Fortran 77 | None (hard-coded) |

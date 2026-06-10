@@ -29,11 +29,12 @@ Supported models:
 - **SOFIP**: Short Orbital Flux Integration Program — mission-averaged fluxes along spacecraft trajectories using AP8/AE8
 - **CutoffRigidity**: Geomagnetic cutoff rigidity — cosmic ray trajectory prediction (Smart & Shea, IGRF-95)
 - **GSFC**: GSFC geomagnetic field models (80, 83, 87) — spherical harmonic field components at any location
+- **JensenCain**: Jensen & Cain (1962) geomagnetic field — spherical harmonic model, epoch 1960.0, degree 6
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`, `JensenCain`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.

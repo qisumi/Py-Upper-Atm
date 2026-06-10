@@ -532,6 +532,17 @@
       ],
       "sha256": "7cc219e80b4a51e3cf07cc9d55155652e23db960c5336f54db53cbf4f37d2ed0",
       "size": 160262
+    },
+    {
+      "model": "jensen",
+      "version": "jensen-cain-1962",
+      "path": "jensen/cain/jensen_cain_62.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v3/jensen_cain_62.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/jensen/cain/jensen_cain_62.dat"
+      ],
+      "sha256": "1d89b0ec78c8100ebc2b05926e06cbbdc145a9e9f814770b71ad119118928068",
+      "size": 2059
     }
   ]
 }

@@ -314,6 +314,16 @@ def cutoff_model():
         pytest.skip(f"Cutoff Rigidity DLL not available: {exc}")
 
 
+@pytest.fixture
+def jensen_model():
+    try:
+        from model import JensenCain
+
+        return JensenCain(data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"Jensen-Cain DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
