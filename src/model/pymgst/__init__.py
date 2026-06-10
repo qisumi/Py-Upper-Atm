@@ -53,13 +53,6 @@ class _MGSTBase:
         data_dir: Optional[Union[str, Path]] = None,
         auto_download: bool = True,
     ) -> None:
-        data_root = ensure_model_data(
-            "mgst",
-            data_dir=data_dir,
-            auto_download=auto_download,
-        )
-        self._data_root = data_root / "mgst"
-
         base = Path(__file__).resolve().parent
         if dll_path is None:
             dll_name = "mgst.dll" if os.name == "nt" else "libmgst.so"
@@ -68,11 +61,17 @@ class _MGSTBase:
         self._dll_directory_handles = configure_dll_directories(self._dll_path)
 
         self._dll = C.cdll.LoadLibrary(str(self._dll_path))
-        self._set_data_root(self._data_root)
-
         self._mgst_eval = self._dll.mgst_eval
         self._mgst_eval.restype = None
         self._mgst_eval.argtypes = _MGST_ARGTYPES
+
+        data_root = ensure_model_data(
+            "mgst",
+            data_dir=data_dir,
+            auto_download=auto_download,
+        )
+        self._data_root = data_root / "mgst"
+        self._set_data_root(self._data_root)
 
     def _set_data_root(self, data_dir: Path) -> None:
         set_data_root = self._dll.mgst_set_data_root

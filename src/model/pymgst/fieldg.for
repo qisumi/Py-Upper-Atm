@@ -16,7 +16,7 @@
 1     IF (TM-TLAST) 17,19,17                                                 52
 2     READ (2,3) J,K,TZERO,(AID(I),I=1,11)
 3     FORMAT (2I1,1X,F6.1,10A6,A3)                                           54
-      WRITE (3,4) J,K,TZERO,(AID(I),I=1,11)
+CC    Diagnostic output disabled for library use.
 4     FORMAT (2I3,5X6HEPOCH=,F7.1,5X10A6,A3)                                 57
       MAXN=0                                                                 58
       TEMP=0.                                                                59
@@ -40,22 +40,22 @@
       GT(M-1,N)=HTNM                                                         69
       GTT(M-1,N)=HTTNM
       GO TO 5                                                                70
-7     WRITE(3,70)MAXN
+7     CONTINUE
 70    FORMAT(72X 5HMAXN=I2)
       IF(L.GT.1) GO TO 120
-      WRITE (3,8)
+CC    Diagnostic output disabled for library use.
 8     FORMAT (6H  N  M,6X1HG,10X1HH,11X2HGT,9X2HHT,8X3HGTT8X3HHTT//)
       DO 12 N=2,MAXN                                                         73
       DO 12 M=1,N                                                            74
       MI=M-1                                                                 75
       IF (M.EQ.1) GOTO10                                                     76
-      WRITE (3,9) N,M,G(N,M),G(MI,N),GT(N,M),GT(MI,N),GTT(N,M),GTT(MI,N)
+CC    Diagnostic output disabled for library use.
 9     FORMAT(2I3,2F11.1,2F11.2,2F11.3)
       GO TO 12                                                               79
-10    WRITE (3,11) N,M,G(N,M),GT(N,M),GTT(N,M)
+10    CONTINUE
 11    FORMAT (2I3,F11.1,11X,F11.2,11XF11.3)
 12    CONTINUE                                                               82
-120   WRITE (3,13)                                                           83
+120   CONTINUE
 13    FORMAT (1H0)
       L=0                                                                    55
       IF (TEMP.EQ.0.) L=-1                                                   85

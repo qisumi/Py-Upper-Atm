@@ -51,15 +51,6 @@ class Model:
         data_dir: Optional[Union[str, Path]] = None,
         auto_download: bool = True,
     ) -> None:
-        self._data_root = ensure_model_data(
-            "jensen",
-            data_dir=data_dir,
-            auto_download=auto_download,
-        )
-
-        # Jensen-Cain data files live in jensen/cain/ subdirectory
-        self._cain_data_dir = self._data_root / "jensen" / "cain"
-
         base = Path(__file__).resolve().parent
         if dll_path is None:
             dll_name = "jensen.dll" if os.name == "nt" else "libjensen.so"
@@ -68,11 +59,19 @@ class Model:
         self._dll_directory_handles = configure_dll_directories(self._dll_path)
 
         self._dll = C.cdll.LoadLibrary(str(self._dll_path))
-        self._set_data_root(self._cain_data_dir)
-
         self._jensen_eval = self._dll.jensen_eval
         self._jensen_eval.restype = None
         self._jensen_eval.argtypes = _JENSEN_ARGTYPES
+
+        self._data_root = ensure_model_data(
+            "jensen",
+            data_dir=data_dir,
+            auto_download=auto_download,
+        )
+
+        # Jensen-Cain data files live in jensen/cain/ subdirectory
+        self._cain_data_dir = self._data_root / "jensen" / "cain"
+        self._set_data_root(self._cain_data_dir)
 
     def _set_data_root(self, data_dir: Path) -> None:
         set_data_root = self._dll.jensen_set_data_root
