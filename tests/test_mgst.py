@@ -60,9 +60,9 @@ class TestMGST80Calculation:
         result = mgst80_model.calculate(
             year=1979.85, lat_deg=45.0, lon_deg=0.0, alt_km=0.0,
         )
-        # MGST data starts at n=2 (no dipole term), so field is smaller
-        # Non-dipole contributions are on the order of thousands nT
-        assert 100 < result["F_nT"] < 50000
+        # FIELDG stores degree 1 at internal index N=2; the public result
+        # should include the dipole term and be a full main-field magnitude.
+        assert 30000 < result["F_nT"] < 70000
 
     def test_not_nan(self, mgst80_model):
         result = mgst80_model.calculate(
@@ -160,8 +160,7 @@ class TestMGST81Calculation:
         result = mgst81_model.calculate(
             year=1980.0, lat_deg=45.0, lon_deg=0.0, alt_km=0.0,
         )
-        # MGST data starts at n=2 (no dipole term), so field is smaller
-        assert 100 < result["F_nT"] < 50000
+        assert 30000 < result["F_nT"] < 70000
 
     def test_secular_variation(self, mgst81_model):
         """MGST81 has secular variation terms; values should differ from epoch."""

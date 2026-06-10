@@ -71,14 +71,21 @@ class TestHMREpot:
         assert "electric_potential_kV" in result
 
     def test_model_a_valid(self, hmr_model):
-        """Test that Model A produces valid results.
-
-        Note: EPOT caches coefficients in COMMON blocks (Fortran global state).
-        The first model loaded stays cached for subsequent calls. This is a
-        known limitation of the original Fortran code.
-        """
+        """Test that Model A produces valid results."""
         result = hmr_model.calculate(lat_deg=70.0, lon_deg=180.0, model="A")
         assert math.isfinite(result["electric_potential_kV"])
+
+    def test_epot_model_switch_reloads_coefficients(self, hmr_model):
+        values = [
+            hmr_model.calculate(
+                lat_deg=70.0,
+                lon_deg=180.0,
+                model=model_name,
+            )["electric_potential_kV"]
+            for model_name in ["A", "BC", "DE", "A"]
+        ]
+        assert len({round(v, 6) for v in values[:3]}) == 3
+        assert values[0] == pytest.approx(values[3])
 
     def test_batch_shape(self, hmr_model):
         result = hmr_model.calculate(

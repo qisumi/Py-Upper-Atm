@@ -20,6 +20,13 @@
 4     FORMAT (2I3,5X6HEPOCH=,F7.1,5X10A6,A3)                                 57
       MAXN=0                                                                 58
       TEMP=0.                                                                59
+      DO 901 NN=1,18
+      DO 902 MM=1,18
+      G(NN,MM)=0.
+      GT(NN,MM)=0.
+      GTT(NN,MM)=0.
+  902 CONTINUE
+  901 CONTINUE
 5     READ (2,6) N,M,GNM,HNM,GTNM,HTNM,GTTNM,HTTNM
 6     FORMAT (2I3,6F11.4)                                                    61
       IF (N.LE.0) GOTO7                                                      62
@@ -107,6 +114,17 @@ C     TRANSFORMS FIELD TO GEODETIC DIRECTIONS                               133
       COMMON/FLDCOM/ST,CT,SPH,CPH,R,NMAX,BT,BP,BR,B                           3
       DIMENSION P(18,18),DP(18,18),CONST(18,18),SP(18),CP(18),FN(18),FM(      4
      118)                                                                     41
+      DO 901 N=1,18
+      SP(N)=0.
+      CP(N)=0.
+      FN(N)=0.
+      FM(N)=0.
+      DO 902 M=1,18
+      P(N,M)=0.
+      DP(N,M)=0.
+      CONST(N,M)=0.
+  902 CONTINUE
+  901 CONTINUE
       P(1,1)=1.                                                               6
       DP(1,1)=0.                                                              7
       SP(1)=0.                                                                8

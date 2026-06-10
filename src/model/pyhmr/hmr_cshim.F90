@@ -33,6 +33,15 @@ module hmr_cshim
   ! Expose the same storage through a module-level COMMON block.
   common /RUNCON/ hmr_PII, hmr_RAD, hmr_RE
 
+  ! EPOT caches spherical harmonic coefficients in /PCOM/ and only reloads
+  ! when COEF(1,1) is zero. Track that COMMON block here so the shim can
+  ! invalidate the cache when callers switch model or nmax.
+  real :: hmr_coef(18,18), hmr_p(18,18)
+  integer :: hmr_nmax
+  integer :: hmr_cached_epot_model = -999
+  integer :: hmr_cached_epot_nmax = -999
+  common /PCOM/ hmr_coef, hmr_p, hmr_nmax
+
 contains
 
   ! ------------------------------------------------------------------
@@ -41,12 +50,17 @@ contains
   subroutine hmr_set_data_root(path) bind(C, name="hmr_set_data_root")
     character(kind=c_char), intent(in) :: path(*)
     integer :: i
+    character(len=256) :: new_data_root
 
-    hmr_data_root = ''
-    do i = 1, len(hmr_data_root)
+    new_data_root = ''
+    do i = 1, len(new_data_root)
       if (path(i) == c_null_char) exit
-      hmr_data_root(i:i) = achar(iachar(path(i)))
+      new_data_root(i:i) = achar(iachar(path(i)))
     enddo
+    if (trim(new_data_root) /= trim(hmr_data_root)) then
+      hmr_data_root = new_data_root
+      call hmr_reset_epot_cache()
+    endif
   end subroutine
 
   ! ------------------------------------------------------------------
@@ -59,6 +73,17 @@ contains
       hmr_RE = 6.49E6
       hmr_initialized = .true.
     endif
+  end subroutine
+
+  ! ------------------------------------------------------------------
+  ! Clear EPOT /PCOM/ so the legacy cache reloads coefficients.
+  ! ------------------------------------------------------------------
+  subroutine hmr_reset_epot_cache()
+    hmr_coef = 0.0
+    hmr_p = 0.0
+    hmr_nmax = 0
+    hmr_cached_epot_model = -999
+    hmr_cached_epot_nmax = -999
   end subroutine
 
   ! ------------------------------------------------------------------
@@ -87,6 +112,13 @@ contains
     end interface
 
     call hmr_init_common()
+    if (model /= hmr_cached_epot_model .or. nmax /= hmr_cached_epot_nmax) then
+      hmr_coef = 0.0
+      hmr_p = 0.0
+      hmr_nmax = 0
+      hmr_cached_epot_model = model
+      hmr_cached_epot_nmax = nmax
+    endif
 
     coeff_file = trim(hmr_data_root) // '/hmcoef.dat'
 
@@ -245,6 +277,13 @@ contains
     end interface
 
     call hmr_init_common()
+    if (model /= hmr_cached_epot_model .or. nmax /= hmr_cached_epot_nmax) then
+      hmr_coef = 0.0
+      hmr_p = 0.0
+      hmr_nmax = 0
+      hmr_cached_epot_model = model
+      hmr_cached_epot_nmax = nmax
+    endif
 
     NMLT = 24
     JMLT = NMLT + 1

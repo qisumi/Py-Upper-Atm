@@ -58,8 +58,11 @@ contains
     real(c_float),         intent(out) :: x, y, z, f
 
     character(len=512) :: coeff_file
+    character(len=512) :: line
+    character(len=512) :: stripped
     integer :: ios
     integer :: l_flag
+    integer :: src_unit
 
     interface
       subroutine FIELDG(DLAT, DLONG, ALT, TM, NMX, L, X, Y, Z, F)
@@ -77,8 +80,12 @@ contains
       coeff_file = trim(mgst_data_root) // '/mgst481.dat'
     endif
 
-    ! Open unit 2 for coefficient file (FIELDG reads from unit 2)
-    open(unit=2, file=trim(coeff_file), status='old', iostat=ios)
+    ! FIELDG expects a strict file layout: one header line followed directly
+    ! by fixed-width coefficient rows. Some archived MGST files include an
+    ! extra prose metadata line, so copy only FIELDG-readable lines to a
+    ! scratch unit and let the original routine read from unit 2.
+    src_unit = 20
+    open(unit=src_unit, file=trim(coeff_file), status='old', iostat=ios)
     if (ios /= 0) then
       x = 0.0
       y = 0.0
@@ -86,6 +93,40 @@ contains
       f = 0.0
       return
     endif
+    open(unit=2, status='scratch', action='readwrite', iostat=ios)
+    if (ios /= 0) then
+      close(unit=src_unit)
+      x = 0.0
+      y = 0.0
+      z = 0.0
+      f = 0.0
+      return
+    endif
+
+    read(src_unit, '(A)', iostat=ios) line
+    if (ios /= 0) then
+      close(unit=src_unit)
+      close(unit=2)
+      x = 0.0
+      y = 0.0
+      z = 0.0
+      f = 0.0
+      return
+    endif
+    write(2, '(A)') trim(line)
+
+    do
+      read(src_unit, '(A)', iostat=ios) line
+      if (ios /= 0) exit
+      stripped = adjustl(line)
+      if (len_trim(stripped) == 0) exit
+      if (stripped(1:1) >= '0' .and. stripped(1:1) <= '9') then
+        write(2, '(A)') trim(line)
+      endif
+    enddo
+    write(2, '(A)') ''
+    close(unit=src_unit)
+    rewind(unit=2)
 
     ! Open unit 3 for diagnostic output (FIELDG writes to unit 3)
     open(unit=3, status='scratch', iostat=ios)
