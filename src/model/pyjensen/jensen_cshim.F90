@@ -79,10 +79,6 @@ contains
       return
     endif
 
-    ! Open unit 3 for diagnostic output (FIELDG writes to unit 3).
-    ! A scratch file is portable across Linux and Windows CI.
-    open(unit=3, status='scratch', iostat=ios)
-
     ! L=1 tells FIELDG to read coefficients from unit 2
     l_flag = 1
 
@@ -91,7 +87,6 @@ contains
 
     ! Close units
     close(unit=2)
-    close(unit=3)
 
   end subroutine
 
