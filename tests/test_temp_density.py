@@ -42,6 +42,9 @@ class TestModelPackage:
             "CutoffRigidity",
             "GSFC",
             "JensenCain",
+            "MGST80",
+            "MGST81",
+            "HMR",
         ]
         assert "model.pymsis2" not in sys.modules
         assert "model.pymsis00" not in sys.modules
