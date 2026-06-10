@@ -22,6 +22,9 @@ Only concrete model classes are exported:
 - CutoffRigidity
 - GSFC
 - JensenCain
+- MGST80
+- MGST81
+- HMR
 
 Exports are lazy so `import model` does not load any model DLL.
 """
@@ -52,6 +55,9 @@ _LAZY_EXPORTS = {
     "CutoffRigidity": ("model.pycutoff", "Model"),
     "GSFC": ("model.pygsfc", "Model"),
     "JensenCain": ("model.pyjensen", "Model"),
+    "MGST80": ("model.pymgst", "MGST80"),
+    "MGST81": ("model.pymgst", "MGST81"),
+    "HMR": ("model.pyhmr", "Model"),
 }
 
 __all__ = list(_LAZY_EXPORTS)

@@ -1,0 +1,1572 @@
+C Heppner-Maynard-Rich Electric Field Model ---- SUBROUTINES --- 1/90
+c SETHM  allows user to change HM models for southward IMF
+c SETHEL allows user to change default parameters in HEELIS model
+c PBROT  rotate coordinates for HEELIS model toward midnight
+c CFACNET  calculate total current into and out of ionosphere
+c SIND(X), COSD(X)  sine, cosine of angle X in degrees
+c BDEPOT block data for subroutine EPOT
+c EPOT   calculate electric potential from HM spherical harmonics
+c PMODEL calculate electric potential using HEELIS model
+c PLATF, POWER, PTHROT, PLONGF, PMATCH, BDPMODL used for HEELIS model
+c SETLAT, SETANG, SETPOT, SETPWR set parameters for HEELIS model 
+c CONDSUN calculate conductivity based on solar and galactic EUV flux
+c CONDUCT calculate condictivity based on AFGL model
+c------------------------------------------------------------------------
+c
+  
+      SUBROUTINE SETHM(MODLE,ACHG,BCHG,DXCHG,DYCHG,
+     X                       AHM, BHM, DXHM, DYHM,  CHGV)
+C.......................................................................
+C                                                                      .
+C  SUBROUTINE SETHM  - INTERFACE TO ALLOW USER TO CHANGE THE HEPPNER-  .
+C                      MAYNARD MODELS. (ONLY IMF SOUTHWARD MODELS AT   .
+C                      THIS TIME.)                                     .
+C                                                                      .
+C  INPUT - CALLING SEQUENCE                                            .
+C     MODLE  - INDEX FOR HEPPNER-MAYNARD MODELS                        .
+C              (1 = A, 2 = BC, 3 = DE)                                 .
+C                                                                      .
+C  OUTPUT - CALLING SEQUENCE                                           .
+C     ACHG,BCHG   - SEMI-MAJOR,MINOR AXIS OF NEW COORD. SYSTEM FOR H-M MODEL
+C     DXCHG,DYCHG - DISPLACEMENT OF CENTER OF ELIPSE FROM POLE FOR NEW SYSTEM
+C     AHM,BHM     - SEMI-MAJOR,MINOR AXIS OF OLD COORD. SYSTEM FOR H-M MODEL
+C     DYHM,DYHM   - DISPLACEMENT OF CENTER OF ELIPSE FROM POLE FOR OLD SYSTEM
+C     CHGV   -  PERCENT CHANGE IN POTENTIAL LEVELS                     .
+C                                                                      .
+C.......................................................................
+      DIMENSION A(3), B(3), DX(3), DY(3)
+      CHARACTER*1 ANS
+      REAL KP
+      DATA A /17.88, 14.35, 15.96/
+      DATA B /15.28, 14.15, 15.09/
+      DATA DX/-3.27, -3.83, -2.50/
+      DATA DY/ 0.57, -0.19,  0.76/
+C
+C  CHECK TO MAKE SURE THAT A VALID MODEL HAS BEEN CHOSEN.
+1     CONTINUE
+      IF( MODLE.LT.1 .OR. MODLE.GT.3 ) THEN
+       WRITE(*,*) ' MODEL = ',MODLE,' NOT A VARIABLE HEPPNER-MAYNARD PAT
+     XTERN'
+       WRITE(*,*) ' CHOOSE A NEW MODEL: 1 = MODEL A, 2 = BC, 3 = DE, -1
+     X= QUIT'
+       READ(*,*,END=10000) MODLE
+10000  IF( MODLE.LT.0 ) STOP
+       GO TO 1
+      ENDIF
+C
+C  VALID MODEL - SET STANDARD VALUES.
+      AHM = A(MODLE)
+      BHM = B(MODLE)
+      DXHM = DX(MODLE)
+      DYHM = DY(MODLE)
+5     WRITE(*,10)
+10    FORMAT(' CHOOSE A METHOD FOR CHANGING HEPPNER-MAYNARD PATTERN',/,
+     X       '  1 = USE THE GEOMAGNETIC ACTIVITY INDEX',/,
+     X       '  2 = INPUT EACH VALUE MANUALLY')
+      IN = 0
+      READ(*,*,END=10001) IN
+10001 IF( IN.EQ.1 ) THEN
+15     WRITE(*,*) ' INPUT THE VALUE OF THE KP INDEX TO BE USED: (RANGE
+     X0.0 TO 7.0)'
+       KP = 3.5
+       READ(*,*,END=10002) KP
+10002  IF( KP .LT. 0. .OR. KP .GT. 7. ) GO TO 15
+       ACHG = AHM * (0.721 + 0.087 * KP)
+       BCHG = BHM * (0.735 + 0.082 * KP)
+       CHGV = 0.223 + 0.222 * KP
+       DXCHG = DXHM
+       DYCHG = DYHM
+      ELSE
+       IF( IN.EQ.2 ) THEN
+       ACHG = AHM
+       BCHG = BHM
+       CHGV = 1.0
+       DXCHG = DXHM
+       DYCHG = DYHM
+       WRITE(*,*) ' NEW VALUE OF SUNWARD AXIS OF ELLIPSE: (DEFAULT =',
+     X            ACHG,')'
+       READ(*,*,END=10003) AHM
+10003  WRITE(*,*) ' NEW VALUE OF DUSKNWARD AXIS OF ELLIPSE: (DEFAULT =',
+     X            BCHG,')'
+       READ(*,*,END=10004) BCHG
+10004  WRITE(*,*) ' NEW VALUE OF FACTOR TO CHANGE POTENTIAL:(DEFAULT =',
+     X           CHGV,')'
+       READ(*,*,END=10005) CHGV
+10005  WRITE(*,*) ' CENTER OF ELLIPSE IN SUNWARD DIRECTION: (DEFAULT =',
+     X            DXCHG,')'
+       READ(*,*,END=10006) DXCHG
+10006  WRITE(*,*) ' CENTER OF ELLIPSE IN DUSKWARD DIRECTION:(DEFAULT =',
+     X            DYCHG,')'
+       READ(*,*,END=10007) DYCHG
+10007  CONTINUE
+       ELSE
+        GO TO 5
+       ENDIF
+      ENDIF
+      WRITE(*,*) ' ACHG,BCHG,CHGV,DXCHG,DYCHG =',
+     X             ACHG,BCHG,CHGV,DXCHG,DYCHG
+      WRITE(*,*) 'INPUT NOTHING'
+      READ(*,*) NOTHING
+      RETURN
+      END
+      SUBROUTINE SETHEL
+C.......................................................................
+C                                                                      .
+C   SUBROUTINE SETHEL  - AN INTERACTIVE INTERFACE TO ALLOW THE USE TO  .
+C                        CHANGE THE DEFAULT PARAMETERS IN THE HEELIS   .
+C                        CONVECTION MODEL CODE                         .
+C ......................................................................
+      CHARACTER*1 ANS
+      CHARACTER*6 SPWR(4),SPOT(3), SANG(6)
+      DIMENSION SPWRIN(4),SPOTIN(3), SANGIN(6)
+      DATA SPOT /'PCAP', 'DPOT', 'EPOT'/
+      DATA SPWR /'BLIM', 'ELLIM', 'BHLIM', 'EHLIM'/
+      DATA SANG /'DAY0', 'NITE0', 'DDAYM','DDAYP','DNITM', 'DNITP'/
+C ......................................................................
+      PRINT 101
+101   FORMAT(' DO YOU WISH TO CHANGE ANY DEFAULT PARAMETERS IN HEELIS MO
+     XDEL? (Y/N)' )
+      READ(*,103) ANS
+ 103  FORMAT(A1)
+      IF( ANS .EQ. 'Y' ) THEN
+C
+C  ASK FOR FIRST SET OF CHANGES
+       PRINT 105
+ 105   FORMAT( ' SET POWER OF LAT DECAY RATES? (Y/N)')
+       READ(*,103) ANS
+       IF( ANS.EQ. 'Y' ) THEN
+        PRINT 107
+ 107    FORMAT( /,
+     X'   VARIABLE           DESCRIPTION                DEFAULT',/,
+     X' -------------------------------------------------------',/,
+     X ' ',/,
+     X'  BLLIM     LOW LATITUDE POTENTIAL DECAY RATE      -3.0 ',/,
+     X'  ELLIM     LOW LATITUDE INCREMENTAL DECAY              ',/,
+     X'                 IN DAYSIDE CONVERGENCE ZONE        0.0 ',/,
+     X'  BHLIM     HIGH LATITUDE POTENTIAL DECAY RATE      2.0 ',/,
+     X'  EHLIM     HIGH LATITUDE INCREMENTAL DECAY             ',/,
+     X'                 IN DAYSIDE CONVERGENCE ZONE        0.0 ',/)
+        DO 10 I=1,4
+        PRINT 109, SPWR(I)
+ 109    FORMAT(1X,A6,'=')
+        READ(*,*,END=10 ) SPWRIN(I)
+ 10     CONTINUE
+        CALL SETPWR(SPWRIN(1),SPWRIN(2),SPWRIN(3),SPWRIN(4))
+       ENDIF
+C
+C ASK FOR SECOND SET OF CHANGES
+       PRINT 115
+ 115   FORMAT( ' SET POTENTIALS AND RADIUS? (Y/N)')
+       READ(*,103) ANS
+       IF( ANS.EQ. 'Y' ) THEN
+        R1DIF = 3.
+        PRINT 117,R1DIF
+ 117    FORMAT( /,
+     X'VARIABLE       DESCRIPTION                 DEFAULT',/,
+     X'-----------------------------------------------------'
+     X,/,
+     X'PCAP     RADIUS OF CONVECTION REVERSAL',/,
+     X'           BOUNDARY                      14.0(DEG)',/,
+     X'         (EDGES OF REGION 1 CURRENT =PCAP+/-',F4.1,' DEG',/,
+     X'DPOT     DAWNSIDE BOUNDDARY ',/,
+     X'           POTENTIAL                      30.0(KV)',/,
+     X'EPOT     DUSKSIDE BOUNDARY  ',/,
+     X'          POTENTIAL                      -30.0(KV)',/)
+        DO 110 I=1,3
+        PRINT 109, SPOT(I)
+        READ(*,*,END=110 ) SPOTIN(I)
+110     CONTINUE
+        CALL SETPOT(SPOTIN(1),SPOTIN(2),SPOTIN(3))
+        POFF = 20.
+        R1MIN = SPOTIN(1) - R1DIF
+        R1MAX = SPOTIN(1) + R1DIF
+        CALL SETLAT(POFF,R1MIN,R1MAX)
+       ENDIF
+C
+C  ASK FOR THIRD SET OF CHANGES
+       PRINT 120
+ 120   FORMAT(' SET LOCATION AND WIDTH OF CONVERGENCE ZONES? (Y/N)')
+       READ(*,103) ANS
+       IF(ANS.EQ.'Y') THEN
+        PRINT 127
+ 127    FORMAT( /,
+     X ' VARIABLE  DESCRIPTION                  DEFAULT ',/,
+     X ' -----------------------------------------------',/,
+     X ' ',/,
+     X ' DAY0      LOCAL TIME OF DAYSIDE ZERO',/,
+     X '           POTENTIAL LINE               12.0(HRS)',/,
+     X ' ',/,
+     X ' NITE0     LOCAL TIME OF NIGHTSIDE ZERO',/,
+     X '           POTENTIAL LINE                0.0(HRS)',/,
+     X ' ',/,
+     X ' DDAYM     ANGULAR EXTENSION TOWARD DAWN',/,
+     X '           OF DAYSIDE CONVERGENCE ZONE  30.0(DEG)',/,
+     X ' DDAYP     ANGULAR EXTENSION TOWARD DUSK',/,
+     X '           OF DAYSIDE CONVERGENCE ZONE  30.0(DEG)',/,
+     X ' DNITM     ANGULAR EXTENSION TOWARD DUSK',/,
+     X '           OF NIGHTSIDE CONVERGENCE ZONE  60.0(DEG)',/,
+     X ' DNITP     ANGULAR EXTENSION TOWARD DAWN',/,
+     X '           OF NIGHTSIDE CONVERGENCE ZONE  60.0(DEG)')
+        DO 125 I=1,6
+        PRINT 109, SANG(I)
+        READ(*,*,END=125) SANGIN(I)
+ 125    CONTINUE
+        CALL SETANG( SANGIN(1), SANGIN(2), SANGIN(3), SANGIN(4),
+     X               SANGIN(5), SANGIN(6))
+        ENDIF
+C
+      ENDIF
+C
+C  OUTPUT TITLE
+       WRITE(1,1995) SPOTIN(2),SPOTIN(3),SPWRIN(1), SPOTIN(1)
+ 1995  FORMAT( 'HEELIS POTENTIAL (KV)', 4F6.1, 16X,'----------------')
+      RETURN
+      END
+
+C
+      SUBROUTINE PBROT( GMLAT1, GMLT1, ANGLE, DMLT, GMLAT2, GMLT2)
+C * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **
+C                                                                      *
+C   SUBROUTINE PBROT  - ROTATE COORDINATES FOR HEELIS CONVECTION MODEL *
+C                       TOWARD MIDNIGHT                                *
+C                                                                      *
+C   INPUTS - CALLING SEQUENCE                                          *
+C     GMLAT1 - GEOMAGNETIC LATITUDE TO BE USED FOR CALCULATIONS (DEGREE)
+C     GMLT1  - GEOMAGNETIC LOCAL TIME TO BE USED FOR CALCULATIONS (HRS)*
+C     ANGLE  - ANGLE OF ROTATION ABOUT THE DUSK-DAWN AXIS (DEGREES)    *
+C     DMLT   - ANGLE OF ROTATION ABOUT THE POLAR AXIS (HRS)            *
+C                                                                      *
+C   INPUT - COMMON                                                     *
+C    /RUNCON/                                                          *
+C     PI     - CONSTANT                                                *
+C                                                                      *
+C   OUTPUTS - CALLING SEQUENCE                                         *
+C     GMLAT2 - GEOMAGNETIC LATITUDE FOR CALLING HEELIS MODEL           *
+C     GMLT2  - GEOMAGNETIC LOCAL TIME FOR CALLING HEELIS MODEL         *
+C                                                                      *
+C * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **
+C
+      COMMON /RUNCON/ PI, RAD, RE
+      DATA IFIRST /0/
+C
+C   CALCULATION ROTATION PARAMETERS ONLY ON FIRST TRIP THRU
+      IF( IFIRST.EQ.0 ) THEN
+       COSA = COSD(ANGLE)
+       SINA = SIND(ANGLE)
+       IFIRST = 1
+      ENDIF
+C
+C  ROTATE UNIT VECTOR
+      X = COSA * COSD( (GMLT1-DMLT-12.)*15. ) * COSD (GMLAT1)
+     1    + SINA * SIND( GMLAT1 )
+      Y = SIND( (GMLT1-DMLT-12.)*15. ) * COSD( GMLAT1 )
+      Z = -SINA * COSD( (GMLT1-DMLT-12.)*15. ) * COSD(GMLAT1)
+     1    + COSA * SIND( GMLAT1 )
+C
+C  RETRIEVE COORDINATES
+      if( z.eq.1. ) then
+        gmlat2 = 90.
+      else
+       if( z.eq.-1. )then
+         gmlat2 = -90.
+       else
+      GMLAT2 = ASIN(Z)*180./PI
+      endif
+      endif
+      IF( X.EQ.0. .AND. Y.EQ.0. ) THEN
+       GMLT2 = 12.
+      ELSE
+       GMLT2  = 12. + ATAN2(Y,X) * 12./PI
+      ENDIF
+      RETURN
+      END
+C
+      SUBROUTINE CFACNET(C, ILAT, JMLT, FACPOS, FACNEG)
+C
+C   SUBROUTINE CFACNET - CALCULATE TOTAL CURRENT INTO AND OUT OF
+C                        IONOSPHERE
+C
+C   INPUTS - CALLING SEQUENCE
+C     C       - ARRAY OF FAC VALUES (MICRO-AMPS/M**2)
+C     ILAT    - NUMBER OF BINS BETWEEN POLE (CO-LAT = 0 DEG) AND
+C               LATITUDE 50 DEG (CO-LAT = 40 DEG)
+C     JMLT    - NUMBER OF LOCAL TIME BINS BETWEEN 12 HRS AND 12 HRS
+C               (FIRST AND LAST COLUMNS ARE RE-DUNDANT)
+C
+C   INPUTS - COMMON
+C     /RUNCON/
+C      RE      - RADIUS OF SPHERICAL SHELL FOR IONOSPHERE (M)
+C      PII     - CONSTANT
+C      RAD     - CONVERSION BETWEEN DEGREES AND RADIANS
+C
+C  OUTPUTS - CALLING SEQUENCE
+C    FACNEG  - TOTAL NEGATIVE CURRENT
+C    FACPOS  - TOTAL POSITIVE CURRENT
+C
+      DIMENSION C(ILAT,JMLT)
+      COMMON /RUNCON/ PII, RAD, RE
+C
+C   I   = 1    DEFINED AS CO-LAT =  0 DEG
+C   I   = ILAT DEFINED AS CO-LAT = 40 DEG
+C   J   = 1    DEFINED AS MAG LOCAL TIME = 12 HR
+C   J   = 1 + (JMLT-1)/2 DEFINED AS MAG LOCAL TIME = 0/24 HRS
+C   J   = JMLT DEFINED AS MAG LOCAL TIME = 12 HR
+C
+C   CALCULATE SIZE OF BOX
+      DLAT = (40./FLOAT(ILAT-1))/RAD
+      DMLT = (360./FLOAT(JMLT-1))/RAD
+C
+C   CALCULATE CURRENT INTO/OUT-OF BOX
+      IEND = ILAT - 1
+      JEND = JMLT - 1
+      FACNEG = 0.
+      FACPOS = 0.
+      DO 10 I=1,IEND
+      SCOLA1 = SIN( FLOAT(I-1)*DLAT )
+      SCOLA2 = SIN( FLOAT( I )*DLAT )
+      DO 10 J=1,JEND
+      CURRENT = RE*RE*DLAT*DMLT* ( ((C(I,J)+C(I,J+1))/2.) * SCOLA1 +
+     X          ((C(I+1,J)+C(I+1,J+1))/2.) *SCOLA2 ) /2.
+      IF( CURRENT.GE.0. ) THEN
+         FACPOS = FACPOS + CURRENT
+      ELSE
+         FACNEG = FACNEG + CURRENT
+      ENDIF
+  10  CONTINUE
+      RETURN
+      END
+C
+      FUNCTION SIND(X)
+C
+C  FUNCTION SIND - SINE OF ANGLE IN DEGREES
+C                  (SIMULATE CDC/CYBER FUNCTION)
+      COMMON/RUNCON/ PII,RAD,RE
+      SIND = SIN(X/RAD)
+      RETURN
+      END
+      FUNCTION COSD(X)
+      COMMON/RUNCON/ PII,RAD,RE
+      COSD = COS(X/RAD)
+      RETURN
+      END
+      BLOCK DATA BDEPOT
+C
+C   BLOCK DATA FOR SUBROUTINE EPOT - CALUCALTION OF ELECTRIC POTENTIALS
+C
+C   COMMON BLOCKS USED
+C     /PCOM/
+C       COEF - ARRAY OF COEFFICIENTS TO LEGENDRE POLYNOMIAL TO BE READ IN
+C       P    - ARRAY OF LEGENDRE POLYNOMIAL TO BE CALCULATED
+C       NMAX - MAXIMUM ORDER OF COEFFICIENTS
+C     /SCOM/
+C       CMIN - MINIMUM LATITUDE USED FOR FITTING
+C       CMAX - MAXIMUM LATITUDE USED FOR FITTING
+C
+      COMMON/PCOM/COEF(18,18),P(18,18),NMAX
+      COMMON/SCOM/CMIN,CMAX
+  
+      DATA CMIN/50./
+      DATA CMAX/90./
+      DATA COEF/324*0./
+      DATA P/324*0./
+      END 
+      SUBROUTINE EPOT(TLAT,TLON,VALUE,NTAPE,IABC,NNMAX,ACHG,BCHG,DXCHG,
+     X                DYCHG,AHM,BHM,DXHM,DYHM,ICHGHM)
+C
+C  SUBROUTINE EPOT - CALCULATE ELECTRIC POTENTIAL FROM SPHERICAL
+C                    HARMONIC FIT OF HEPPNER-MAYNARD MODEL
+C                    ( KP INDEX = 3+, 4- FOR MODELS A, BC AND DE)
+C
+C  INPUTS - CALLING SEQUENCE
+C     TLAT   - GEOMAGNETIC LATITUDE TO EVAULATE POTENTIAL
+C              (POLE = 90. DEG)
+C     TLON   - GEOMAGNETIC LOCAL TIME TO EVAULATE POTENTIAL 
+C              (LOCAL MIDNIGHT = 0. DEG)
+C     NTAPE  - UNIT NUMBER FOR DATA FILE OF COEFFICIENTS
+C     IABC   - MODEL INDEX
+C              IABC=1 IS FOR MODEL A   (IMF BZ < 0, BY < 0, NORTHERN HEMI.)
+C              IABC=2 IS FOR MODEL BC  (IMF BZ < 0, BY > 0, NORTHERN HEMI.)
+C              IABC=3 IS FOR MODEL DE  (IMF BZ < 0, BY < 0, NORTHERN HEMI.)
+C              IABC=4 IS FOR MODEL BCP (IMF BZ > 0, BY > 0, NORTHERN HEMI.)
+C              IABC=5 IS FOR MODEL BCPP(IMF BZ >>0, BY > 0, NORTHERN HEMI.)
+C              IABC=6 IS FOR MODEL DEP (IMF BZ > 0, BY < 0, NORTHERN HEMI.)
+C              IABC=7 IS FOR MODEL DEPP(IMF BZ >>0, BY < 0, NORTHERN HEMI.)
+C     NNMAX  - MAXIMUM ORDER OF POLYNOMIAL TO EVALUATE
+C     ACHG,BCHG   - SEMI-MAJOR,MINOR AXIS OF NEW COORD. SYSTEM FOR H-M MODEL
+C     DXCHG,DYCHG - DISPLACEMENT OF CENTER OF ELIPSE FROM POLE FOR NEW SYSTEM
+C     AHM,BHM     - SEMI-MAJOR,MINOR AXIS OF OLD COORD. SYSTEM FOR H-M MODEL
+C     DYHM,DYHM   - DISPLACEMENT OF CENTER OF ELIPSE FROM POLE FOR OLD SYSTEM
+C     ICHGHM  - FLAG TO INDICATE WHETHER TO USE DEFAULT H-M PATTERN (=0) OR
+C               TO USE MODIFIED PATTERN (=1) WITH ACHG,BCHG,DXCHG,DYCHG
+C
+C  INPUTS - COMMON/RUNCON/
+C     RAD   - DEGREES PER RADIAN (=57.28...)
+C
+C  INPUTS - DATA FILE
+C     NNN 
+C     MMM 
+C     I      - INDEX OF COEFFICIENT
+C     J      - INDEX OF COEFFICIENT
+C     CCF    - COEFFICIENT OF SPHERICAL HARMONIC EXPANSION
+C
+C  OUTPUTS - CALLING SEQUENCE 
+C    VALUE  - POTENTIAL AT (LAT, LON)  (KV)
+C
+C  SUBROUTINES CALLED
+C    NONE (EXCEPT INTRINSIC FORTRAN FUNCTIONS)
+C
+C * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+C
+      COMMON /RUNCON/ PII,RAD,RE
+C  COEFFICIENTS AND LIMITS FOR LEGENDRE POLYNOMIAL FIT TO H-M MODEL
+C  (PLACED IN COMMON TO PREVENT LOADER FROM ERASING ARRAY.) 
+      COMMON/PCOM/COEF(18,18),P(18,18),NMAX
+      COMMON/SCOM/CMIN,CMAX
+C
+      DIMENSION DP(18,18),CONST(18,18),SP(18), CP(18), FN(18), FM(18) 
+      DIMENSION XCO(18,18)
+      CHARACTER*10 MLBL(5)
+C
+C   CONSTANTS FOR LEGENDRE POLYNOMIAL
+      DATA CONST/324*0./
+      DATA (XCO( 1,J),J=1,18)/
+     X .282095E+00, .488603E+00, .109255E+01, .228523E+01,
+     X .468333E+01, .951188E+01, .192265E+02, .387523E+02,
+     X .779645E+02, .156658E+03, .314501E+03, .630964E+03,
+     X .126523E+04, .253611E+04, .508196E+04, .101809E+05,
+     X   .203918E+05,   .408366E+05/
+      DATA (XCO( 2,J),J=1,18)/
+     X .488603E+00, .488603E+00, .546274E+00, .144531E+01,
+     X .331161E+01, .719031E+01, .151999E+02, .316411E+02,
+     X .652298E+02, .133599E+03, .272366E+03, .553392E+03,
+     X .112151E+04, .226837E+04, .458082E+04, .923904E+04,
+     X   .186151E+05,   .374743E+05/
+      DATA (XCO( 3,J),J=1,18)/
+     X .946175E+00, .109255E+01, .546274E+00, .590044E+00,
+     X .177013E+01, .440314E+01, .101333E+02, .223736E+02,
+     X .481754E+02, .102038E+03, .213661E+03, .443701E+03,
+     X .915709E+03, .188083E+04, .384866E+04, .785168E+04,
+     X   .159791E+05,   .324537E+05/
+      DATA (XCO( 4,J),J=1,18)/
+     X .186588E+01, .228523E+01, .144531E+01, .590044E+00,
+     X .625836E+00, .207566E+01, .555021E+01, .134918E+02,
+     X .310971E+02, .693209E+02, .151081E+03, .324033E+03,
+     X .686782E+03, .144253E+04, .300864E+04, .623988E+04,
+     X   .128827E+05,   .264983E+05/
+      DATA (XCO( 5,J),J=1,18)/
+     X .370249E+01, .468333E+01, .331161E+01, .177013E+01,
+     X .625836E+00, .656382E+00, .236662E+01, .674590E+01,
+     X .172496E+02, .414272E+02, .955522E+02, .214328E+03,
+     X .471128E+03, .102002E+04, .218269E+04, .462762E+04,
+     X   .973844E+04,   .203694E+05/
+      DATA (XCO( 6,J),J=1,18)/
+     X .736787E+01, .951188E+01, .719031E+01, .440314E+01,
+     X .207566E+01, .656382E+00, .683184E+00, .264596E+01,
+     X .798499E+01, .213929E+02, .534153E+02, .127330E+03,
+     X .293800E+03, .661878E+03, .146420E+04, .319336E+04,
+     X   .688612E+04,   .147131E+05/
+      DATA (XCO( 7,J),J=1,18)/
+     X .146845E+02, .192265E+02, .151999E+02, .101333E+02,
+     X .555021E+01, .236662E+01, .683184E+00, .707163E+00,
+     X .291571E+01, .926339E+01, .259102E+02, .671087E+02,
+     X .165101E+03, .391572E+03, .903721E+03, .204248E+04,
+     X   .454057E+04,   .996084E+04/
+      DATA (XCO( 8,J),J=1,18)/
+     X .292940E+02, .387523E+02, .316411E+02, .223736E+02,
+     X .134918E+02, .674590E+01, .264596E+01, .707163E+00,
+     X .728927E+00, .317732E+01, .105778E+02, .307916E+02,
+     X .825507E+02, .209304E+03, .509767E+03, .120459E+04,
+     X   .278052E+04,   .629979E+04/
+      DATA (XCO( 9,J),J=1,18)/
+     X .584734E+02, .779645E+02, .652298E+02, .481754E+02,
+     X .310971E+02, .172496E+02, .798499E+01, .291571E+01,
+     X .728927E+00, .748901E+00, .343190E+01, .119255E+02,
+     X .360281E+02, .997819E+02, .260366E+03, .650553E+03,
+     X   .157290E+04,   .370647E+04/
+      DATA (XCO(10,J),J=1,18)/
+     X .116766E+03, .156658E+03, .133599E+03, .102038E+03,
+     X .693209E+02, .414272E+02, .213929E+02, .926339E+01,
+     X .317732E+01, .748901E+00, .767395E+00, .368030E+01,
+     X .133043E+02, .416119E+02, .118840E+03, .318704E+03,
+     X   .816138E+03,   .201755E+04/
+      DATA (XCO(11,J),J=1,18)/
+     X .233240E+03, .314501E+03, .272366E+03, .213661E+03,
+     X .151081E+03, .955522E+02, .534153E+02, .259102E+02,
+     X .105778E+02, .343190E+01, .767395E+00, .784642E+00,
+     X .392321E+01, .147120E+02, .475361E+02, .139761E+03,
+     X   .384731E+03,   .100877E+04/
+      DATA (XCO(12,J),J=1,18)/
+     X .465998E+03, .630964E+03, .553392E+03, .443701E+03,
+     X .324033E+03, .214328E+03, .127330E+03, .671087E+02,
+     X .307916E+02, .119255E+02, .368030E+01, .784642E+00,
+     X .800822E+00, .416119E+01, .161472E+02, .537941E+02,
+     X   .162579E+03,   .458849E+03/
+      DATA (XCO(13,J),J=1,18)/
+     X .931187E+03, .126523E+04, .112151E+04, .915709E+03,
+     X .686782E+03, .471128E+03, .293800E+03, .165101E+03,
+     X .825507E+02, .360281E+02, .133043E+02, .392321E+01,
+     X .800822E+00, .816077E+00, .439471E+01, .176082E+02,
+     X   .603802E+02,   .187325E+03/
+      DATA (XCO(14,J),J=1,18)/
+     X .186100E+04, .253611E+04, .226837E+04, .188083E+04,
+     X .144253E+04, .102002E+04, .661878E+03, .391572E+03,
+     X .209304E+03, .997819E+02, .416119E+02, .147120E+02,
+     X .416119E+01, .816077E+00, .830522E+00, .462415E+01,
+     X   .190939E+02,   .672889E+02/
+      DATA (XCO(15,J),J=1,18)/
+     X .371962E+04, .508196E+04, .458082E+04, .384866E+04,
+     X .300864E+04, .218269E+04, .146420E+04, .903721E+03,
+     X .509767E+03, .260366E+03, .118840E+03, .475361E+02,
+     X .161472E+02, .439471E+01, .830522E+00, .844251E+00,
+     X   .484985E+01,   .206029E+02/
+      DATA (XCO(16,J),J=1,18)/
+     X .743510E+04, .101809E+05, .923904E+04, .785168E+04,
+     X .623988E+04, .462762E+04, .319336E+04, .204248E+04,
+     X .120459E+04, .650553E+03, .318704E+03, .139761E+03,
+     X .537941E+02, .176082E+02, .462415E+01, .844251E+00,
+     X   .857341E+00,   .507210E+01/
+      DATA (XCO(17,J),J=1,18)/
+     X .148629E+05, .203918E+05, .186151E+05, .159791E+05,
+     X .128827E+05, .973844E+04, .688612E+04, .454057E+04,
+     X .278052E+04, .157290E+04, .816138E+03, .384731E+03,
+     X .162579E+03, .603802E+02, .190939E+02, .484985E+01,
+     X   .857341E+00,   .869857E+00/
+      DATA (XCO(18,J),J=1,18)/
+     X .297130E+05, .408366E+05, .374743E+05, .324537E+05,
+     X .264983E+05, .203694E+05, .147131E+05, .996084E+04,
+     X .629979E+04, .370647E+04, .201755E+04, .100877E+04,
+     X .458849E+03, .187325E+03, .672889E+02, .206029E+02,
+     X   .507210E+01,   .869857E+00/
+C
+C   INITIALIZE ARRAY OF COEFFICIENTS FOR FIT FROM UNIT NTAPE
+C
+C   IABC=1 IS FOR MODEL A
+C   IABC=2 IS FOR MODEL BC
+C   IABC=3 IS FOR MODEL DE
+C   IABC=4 IS FOR MODEL BCP
+C   IABC=5 IS FOR MODEL BCPP
+C   IABC=6 IS FOR MODEL DEP
+C   IABC=7 IS FOR MODEL DEPP
+C   IABC>7 IS FOR OTHER MODELS NOT SPECIFIED HERE 
+C
+      IF(COEF(1,1).NE.0.)GO TO 80
+       REWIND NTAPE 
+       DO 81 IA=1,IABC
+        READ(NTAPE,400,END=   82)MLBL
+  400   FORMAT(5A10)
+   82   READ(NTAPE,*,END=10000) NNN,MMM,I,J,CCF
+10000   IF(NNN.EQ.-1) GO TO 81
+        COEF(I,J)=CCF
+        GO TO 82
+   81  CONTINUE
+C
+        WRITE(*,*) MLBL
+        WRITE(*,*)'USING MODEL COEFFICIENTS UP TO NMAX=',NNMAX
+        NMAX=NNMAX
+        WRITE(*,*)'MODEL VALID FOR LATITUDES ',CMIN,'  TO  ',CMAX
+C
+   80 CONTINUE
+C              START HERE IS COEFF ARRAY IS ALREADY LOADED. 
+C
+C  CHECK FOR VALID LATITUDE.
+      VALUE=-1.E-9
+      IF(TLAT.GT.CMIN) GO TO 70
+       WRITE(*,*)'LATITUDE ',XLAT,' OUT OF MODEL RANGE'
+       RETURN
+C              LATITUDE IS VALID.
+   70 CONTINUE
+      XLAT = TLAT
+      XLON = TLON
+C  SHOULD COORDINATE SYSTEM BE CHANGED? 
+      IF( ICHGHM.EQ.1 ) THEN
+C                              YES.
+       TCOL = 90.-TLAT
+       TLONG = TLON - 180.
+       XX = DXHM+AHM*(TCOL*COSD(TLONG)-DXCHG)/ACHG
+       YY = DYHM+BHM*(TCOL*SIND(TLONG)-DYCHG)/BCHG
+       XCOL = SQRT(XX**2 + YY**2)
+       XLAT = AMAX1( 90.-XCOL, CMIN)
+       XLON = RAD*ATAN2(YY,XX) + 180.
+      ENDIF
+C  CONVERT LATITUDE,LONGITUDE TO DIMENSIONLESS PARAMETER FOR EVALUATION
+C  OF POLYNOMIAL
+      ALPHA=2./(CMAX-CMIN)
+      BETA=1.-ALPHA*CMAX
+      CT=XLAT*ALPHA+BETA
+      ST=SQRT(1.-CT*CT)
+      SPH=SIND(XLON)
+      CPH=COSD(XLON)
+C
+      IF (P(1,1).NE.0.) GO TO 3
+      P(1,1)=1.0
+      DP(1,1)=0.0
+      SP(1)=0.0
+      CP(1)=1.0
+      DO 2 N=2,18
+      FN(N)=N
+      DO 2 M=1,N
+      FM(M)=M-1
+    2 CONST(N,M)=FLOAT((N-2)**2-(M-1)**2)/
+     X   FLOAT((2*N-3)*(2*N-5))
+C
+    3 SP(2)=SPH
+      P(1,1)=1.
+      CP(2)=CPH
+      DO 4 M=3,NMAX 
+      SP(M)=SP(2)*CP(M-1)+CP(2)*SP(M-1) 
+    4 CP(M)=CP(2)*CP(M-1)-SP(2)*SP(M-1) 
+C
+      VALUE=COEF(1,1)
+C
+      DO 8 N=2,NMAX 
+      DO 8 M=1,N
+C
+      IF (N.NE.M) GOTO 6
+      P(N,N)=ST*P(N-1,N-1)
+C     DP(N,N)=ST*DP(N-1,N-1)+CT*P(N-1,N-1)
+      GOTO 8
+    6 IF (N.NE.2) P(N,M)=CT*P(N-1,M)-CONST(N,M)*P(N-2,M)
+      IF (N.EQ.2) P(N,M)=CT*P(N-1,M)
+C     DP(N,M)=CT*DP(N-1,M)-ST*P(N-1,M)- 
+C    X   CONST(N,M)*DP(N-2,M) 
+C
+C
+    8 CONTINUE
+C
+      P(1,1)=P(1,1)*XCO(1,1)
+C
+      VALUE=COEF(1,1)*P(1,1)
+      DO 10 N=2,NMAX
+      DO 10 M=1,N
+      IF (M.EQ.1) GOTO 11
+      POL=P(N,M)*XCO(N,M)
+      P(M-1,N)=CP(M)*POL
+      P(N,M)=SP(M)*POL
+      VALUE=VALUE+P(M-1,N)*COEF(M-1,N)+ 
+     X   P(N,M)*COEF(N,M)
+      GOTO 10
+   11 P(N,M)=P(N,M)*XCO(N,M)
+      VALUE=VALUE+P(N,M)*COEF(N,M)
+   10 CONTINUE
+C
+C
+      RETURN
+      END 
+      SUBROUTINE PMODEL(RLAT,RLT,POT,PLAT,PLT)
+C
+C    SUBROUTINE  PMODEL(RLAT,RLT,POT,PLAT,PLT)
+C         CALCULATION OF THE HIGH LATITUDE ELECTROSTATIC POTENTIAL
+C         USING HEELIS MODEL
+C
+C   INPUTS
+C     RLAT  -   LATITUDE AT WHICH POTENTIAL IS EVALUATED
+C               (REAL) (DEG)
+C     RLT   -   LOCAL TIME AT WHICH POTENTIAL IS EVALUATED
+C               (REAL) (HRS)
+C
+C   OUTPUTS
+C     POT   -    ELECTROSTATIC POTENTIAL (REAL) (KV)
+C     PLAT  -    LATITUDE POTENTIAL GRADIENT (KV/ RAD)  (REAL)
+C     PLT   -    LOCAL TIME POTENTIAL GRADIENT (KV/ RAD)  (REAL)
+C
+C   SUBROUTINES USED BY PMODEL
+C      BLOCK DATA  - INITILIZED PARAMETERS FOR HEELIS MODEL 
+C      PLATF
+C        POWER
+C      PLONGF
+C        PTHROT
+C      PMATCH
+C        PLATF
+C
+C   SUBROUTINES TO BE CALLED BY USER PROGRAM
+C      SETLAT
+C      SETANG
+C      SETPOT
+C      SETPWR
+C
+C   COMMON BLOCKS USED
+C      /PLOC/
+C      /PELIPS/
+C      /PLATS/
+C      /PFI/
+C      /PINDX/
+C      /PTLIM/
+C      /PPOT/
+C
+C   RESTRICTIONS AND COMMENTS 
+C     1.  MODEL IS BASED UPON PAPER "ANALYTICAL CONVECTION MODEL...", 
+C         HEELIS ET AL, J. GEOPHYS. RES., 1982
+C     2.  POTENTIAL GRADIENTS DO NOT INCLUDE THE '1/R' AND
+C         '1/(R*SIN(THETA)' FACTORS REQUIRED FOR EVALUATION OF THE
+C         ELECTRIC FIELD.
+C     3.  MODEL VARIABLES: 
+C         A.  ALL VARIABLES ARE INITIALIZED IN BLOCK DATA
+C         B.  ALL VARIABLES MAY BE CHANGED BY CALLS TO THE FOLLOWING
+C             SUBROUTINES: 
+C             SETLAT
+C             SETANG
+C             SETPOT
+C             SETPWR
+C
+C * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+C
+      COMMON/PLOC/THETA,FI
+      COMMON /PELIPS/RX1,RN1,RX2,RN2
+      THETA = 90.0-RLAT
+      FI = 180.0 - RLT*15.0
+      IF(FI.GT.360.0) FI = 360.0 - FI
+      IF(FI.LT.0.0)   FI = 360.0 + FI
+C      WRITE(5,503) THETA,FI
+  503 FORMAT(' PMODEL LOCATION',2E15.4) 
+      CALL PMATCH
+C      WRITE(5,500) RX1,RN1,RX2,RN2
+  500 FORMAT(' PMATCH',4E15.4)
+      CALL PLONGF(G,GP,GT)
+C      WRITE(5,501) G,GP,GT
+  501 FORMAT(' PLONGF',3E15.4)
+      CALL PLATF(X,XT,XP)
+C      WRITE(5,502) X,XT,XP
+  502 FORMAT(' PLATF',3E15.4) 
+      POT =  X*G
+      PLAT =  -(XT*G + X*GT)
+      PLT =  -(XP*G + X*GP)
+  600 FORMAT(' PMODEL',5E16.6)
+  601 FORMAT(' PSUBS',6E16.6) 
+      RETURN
+      END 
+C*************************************
+C*************************************
+      SUBROUTINE PLATF(X,XT,XP)
+      COMMON/PLOC/THETA,FI
+      COMMON/PLATS/THET0,THETC,REGMX,REGMN
+      COMMON/PELIPS/RX1,RN1,RX2,RN2
+      DETOR= 0.0174533
+      T=THET0*DETOR 
+      TP=0.0
+      A = RX1
+      RN = RN1
+      IF(THETA.LT.THET0) GO TO 1
+      A = RX2
+      RN = RN2
+    1 IF(THETA.GE.REGMX.OR.THETA.LE.REGMN) GO TO 2
+      F = (THETA-THET0)*DETOR 
+      X = SQRT(1.0-F*F/(A*A)) 
+      XT = -F/(A*A*X)
+      XP = RN*0.0
+  600 FORMAT(' ELIPS',2E16.6) 
+      GO TO 3
+    2 CALL POWER(F,FP)
+      ANGL = THETA*DETOR
+      IF(THETA.LE.REGMN) ANGL=ANGL+(THETC*DETOR)
+      CANG = COS(ANGL)
+      SANG = SIN(ANGL)
+      STO = SIN(T)
+      CTO = COS(T)
+      Y = SANG/STO
+      VAR=0.0
+      IF(THETA.LE.REGMN) VAR=SIN(THETC*DETOR)/STO 
+      IF(VAR.NE.0.0) VAR = VAR**F
+      X = RN*(Y**F - VAR)
+      XT = RN*F*(CANG/STO)*Y**(F-1.0)
+      IF(THETA.EQ.THET0) XT = 0.0
+      F1 = LOG(Y)*FP
+      F2 = F*STO/SANG
+      F3 = -(SANG*CTO*TP)/(STO*STO)
+      XP = RN*Y*(F1 + F2*F3)
+  601 FORMAT(' POWER',7E16.6) 
+    3 RETURN
+      END 
+C*****************************************
+C*****************************************
+      SUBROUTINE POWER(F,FP)
+      COMMON/PLOC/THETA,FI
+      COMMON/PLATS/THET0
+      COMMON/PFI/FID
+      COMMON/PINDX/X1,X2,Y1,Y2
+      COMMON/PTLIM/DPLIM,DMLIM,EPLIM,EMLIM
+      DETOR=0.0174533
+      IFLG=0
+      IF(THETA.LE.THET0) IFLG=1
+      PHI=FI
+      IF(FI.GT.180.0) PHI=FI-360.0
+      IF(PHI.GT.DPLIM.AND.PHI.LT.DMLIM) GO TO 1
+      PHID=FID
+      IF(FID.GT.180.0)PHID=FID-360.0
+      IF(PHI.GT.DMLIM.AND.PHI.LT.PHID) GO TO 2
+      IF(PHI.GT.PHID.AND.PHI.LT.DPLIM) GO TO 3
+    1 IF(IFLG.EQ.0) F=X1-X2
+      IF(IFLG.EQ.1) F=Y1-Y2
+      FP=0.0
+      RETURN
+    2 IF(IFLG.EQ.0)F=X1-(PHI-DMLIM)*X2/(PHID-DMLIM)
+      IF(IFLG.EQ.1)F=Y1-(PHI-DMLIM)*Y2/(PHID-DMLIM)
+      IF(IFLG.EQ.0)FP=-X2/((PHID-DMLIM)*DETOR)
+      IF(IFLG.EQ.1)FP=-Y2/((PHID-DMLIM)*DETOR)
+      RETURN
+    3 IF(IFLG.EQ.0)F=X1-(DPLIM-PHI)*X2/(PHID-DPLIM)
+      IF(IFLG.EQ.1)F=Y1-(DPLIM-PHI)*Y2/(PHID-DPLIM)
+      IF(IFLG.EQ.0)FP=X2/((PHID-DPLIM)*DETOR)
+      IF(IFLG.EQ.1)FP=Y2/((PHID-DPLIM)*DETOR)
+      RETURN
+      END 
+C********************************************
+C********************************************
+      SUBROUTINE PTHROT(INOUT,AFACT,AINC,DFP,DFM,PHI)
+      COMMON/PFI/FID,FIN,FIDP,FIDM,FINP,FINM
+      COMMON/PLOC/THETA,FI
+      COMMON/PLATS/THET0
+      COMMON/PTLIM/DPLIM,DMLIM,EPLIM,EMLIM
+C      WRITE(5,501) THETA,FI
+  501 FORMAT(' THROAT LOCATION',2E15.4) 
+      DETOR= 0.0174533
+      DIV=THET0
+      IF(THETA.GT.THET0)DIV=50.0-THET0
+      FUN=(THETA-THET0)/DIV
+      FUNC=FUN*FUN
+      DFUNCT=2.0*FUN/(DIV*DETOR)
+      DFUNCP=0.0
+C      WRITE(5,502) FUNC
+  502 FORMAT(' THROAT FUNC',E15.4)
+      IF(FUNC.GT.1.0) DFUNCT=0.0
+      IF(FUNC.GT.1.0) FUNC=1.0
+      FIIP=FIDP + FUNC*(90.0-FIDP)
+      FIIM=FIDM + FUNC*(90.0-FIDM)
+      FIAP=FINP + FUNC*(90.0-FINP)
+      FIAM=FINM + FUNC*(90.0-FINM)
+C      WRITE(5,503) FID,FIIP,FIIM,FIN,FIAP,FIAM
+  503 FORMAT(' DAY SPAN',3E15.4/'  NIGHT SPAN',3E15.4)
+      DPLIM=FID + FIIP
+      IF(DPLIM.LT.0.0)DPLIM = 360.0 + DPLIM
+      IF(DPLIM.GE.360.0) DPLIM = DPLIM - 360.0
+      DMLIM= FID - FIIM
+      IF(DMLIM.LT.0.0) DMLIM = 360.0 + DMLIM
+      IF(DMLIM.GE.360) DMLIM = DMLIM - 360.0
+      EPLIM=FIN + FIAP
+      IF(EPLIM.LT.0.0) EPLIM = 360.0 + EPLIM
+      IF(EPLIM.GE.360.0) EPLIM = EPLIM - 360.0
+      EMLIM=FIN - FIAM
+      IF(EMLIM.LT.0.0) EMLIM = 360.0 + EMLIM
+      IF(EMLIM.GE.360.0) EMLIM = EMLIM - 360.0
+C      WRITE(5,500)DPLIM,DMLIM,EPLIM,EMLIM
+      IF(DMLIM.GE.EPLIM) GO TO 1
+      IF(DMLIM.LE.180.0) GO TO 1
+      DMLIM=DMLIM +(EPLIM-DMLIM)*0.5
+      EPLIM=DMLIM
+    1 IF(DPLIM.LE.EMLIM) GO TO 2
+      DPLIM=DPLIM - (DPLIM-EMLIM)*0.5
+      EMLIM=DPLIM
+    2 CONTINUE
+  
+      IF(DMLIM.GT.180.0) DMLIM = DMLIM - 360.0
+      IF(DPLIM.GT.180.0) DPLIM = DPLIM - 360.0
+C      WRITE(5,500)DPLIM,DMLIM,EPLIM,EMLIM
+  500 FORMAT(' THROAT LIMS',4F10.4)
+      PHI = FI
+      IF(FI.GT.EMLIM.AND.FI.LT.EPLIM) GO TO 3
+      IF(FI.GT.180.0) PHI = FI - 360.0
+      IF(FI.LE.EMLIM) INOUT = -1
+      IF(PHI.LT.DPLIM.AND.PHI.GT.DMLIM) GO TO 4
+      IF(PHI.LE.DMLIM) INOUT = 0
+      RETURN
+    3 AFACT=FIAP+FIAM
+      AINC=FIN - FIAM
+      DFP=DFUNCT*(90.0-FINP)
+      DFM=DFUNCT*(90.0-FINM)
+      INOUT=1
+      RETURN
+  
+    4 AFACT=FIIP+FIIM
+      AINC=FID + FIIP
+      DFP=DFUNCT*(90.0-FIDP)
+      DFM=DFUNCT*(90.0-FIDM)
+      INOUT=2
+      RETURN
+      END 
+C******************************************
+C******************************************
+      SUBROUTINE PLONGF(G,GP,GT)
+      COMMON/PLOC/THETA,FI
+      COMMON/PPOT/PSIDWN,PSIDSK
+      DETOR=0.0174533
+      CALL PTHROT(INOUT,AFACT,AINC,DFP,DFM,PHI)
+C      WRITE(5,600) THETA,FI,AFACT,AINC,DFP,DFM,PHI,INOUT
+  600 FORMAT(' LONG SUB',3E15.4/4E15.4,I5)
+      IF(INOUT.EQ.0)G=PSIDSK
+      IF(INOUT.EQ.-1)G=PSIDWN 
+      GT=0.0
+      GP=0.0
+      IF(INOUT.LE.0) RETURN
+      RANG=180.0*(PHI-AINC)/AFACT
+      ANG = RANG*DETOR
+      DANGP=180.0/AFACT
+      FFACT=AFACT*DFP
+      IF(INOUT.EQ.2)FFACT=-AFACT*DFM
+      TDIF=FFACT-(PHI-AINC)*(DFP+DFM)
+      DANGT=180.0*DETOR*TDIF/(AFACT*AFACT)
+      AA=(PSIDWN+PSIDSK)*0.5
+      BB=(PSIDWN-PSIDSK)*0.5
+      G=AA + BB*COS(ANG)
+C      WRITE(5,601) RANG,AA,BB,G
+  601 FORMAT(' LONG FIN',3E15.4,2E15.4) 
+      GP=-BB*SIN(ANG)*DANGP
+      GT=-BB*SIN(ANG)*DANGT
+      RETURN
+      END 
+C******************************************
+C******************************************
+      SUBROUTINE PMATCH
+      COMMON/PLOC/THETA,FI
+      COMMON/PELIPS/RX1,RN1,RX2,RN2
+      COMMON/PLATS/THET0,THETC,REGMX,REGMN
+      DATA RLONGM,DETOR/500.0,0.0174533/
+      IF(FI.EQ.RLONGM) RETURN 
+      RLONGM=FI
+      RLATM=THETA
+      RN1 = 1.0
+      RN2 = 1.0
+      THETA = REGMN 
+      DF=(REGMN-THET0)*DETOR
+      CALL PLATF(X,XT,XP)
+      RX1 = SQRT(DF*DF-DF*X/XT)
+      RN1 = 1.0
+      IF(DF.NE.0.0) RN1 = SQRT(1.0-DF*DF/(RX1*RX1))/X
+      THETA = REGMX 
+      DF=(REGMX-THET0)*DETOR
+      CALL PLATF(X,XT,XP)
+      RX2 = SQRT(DF*DF-DF*X/XT)
+      RN2 = 1.0
+      IF(DF.NE.0.0) RN2 = SQRT(1.0-DF*DF/(RX2*RX2))/X
+  600 FORMAT(' MATCH',6E16.6) 
+      FI=RLONGM
+      THETA=RLATM
+      RETURN
+      END 
+C**************************************************
+C**************************************************
+      BLOCK DATA BDPMODL
+      COMMON/PLATS/THET0,THETC,REGMX,REGMN
+      COMMON/PFI/FID,FIN,FIDP,FIDM,FINP,FINM
+      COMMON/PINDX/X1,X2,Y1,Y2
+      COMMON/PPOT/PSIDWN,PSIDSK
+      DATA THET0,THETC,REGMX,REGMN/14.0,20.0,16.0,12.0/
+      DATA FID,FIN,FIDP,FIDM,FINP,FINM/0.0,180.0,25.0,25.0,60.0,60.0/ 
+      DATA X1,X2,Y1,Y2/-3.0,0.0,2.0,0.0/
+      DATA PSIDWN,PSIDSK/30.0,-30.0/
+      END 
+C*************************************************
+C*************************************************
+      SUBROUTINE SETLAT(POFF,R1MIN,R1MAX)
+C
+C      SUBROUTINE SETLAT(POFF,R1MIN,R1MAX)
+C
+C    VARIABLE   TYPE         DESCRIPTION                DEFAULT
+C-------------------------------------------------------------------------
+C      POFF     REAL    PHASE ANGLE FOR POLAR CAP      20.0(DEG)
+C      R1MIN    REAL    POLEWARD CO-LATITUDE OF
+C                         REGION 1 CURRENTS            12.0(DEG)
+C
+C      R1MAX    REAL    EQUATORWARD CO-LATITUDE OF
+C                         REGION 1 CURRENT             16.0(DEG)
+C
+C.............
+      COMMON/PLATS/THET0,THETC,REGMX,REGMN
+      THETC=POFF
+      REGMX=R1MAX
+      REGMN=R1MIN
+      RETURN
+      END 
+C************************************** 
+C************************************** 
+      SUBROUTINE SETANG(DTHRT,ETHRT,DPLS,DMNS,EPLS,EMNS)
+C
+C     SUBROUTINE SETANG(DTHRT,ETHRT,DPLS,DMNS,EPLS,EMNS)
+C
+C     VARIABLE    TYPE        DESCRIPTION                     DEFAULT 
+C----------------------------------------------------------------------------
+C
+C      DTHRT      REAL   LOCAL TIME OF DAYSIDE ZERO
+C                          POTENTIAL LINE                     12.0(HRS)
+C
+C      ETHRT      REAL   LOCAL TIME OF NIGHTSIDE ZERO
+C                            POTENTIAL LINE                    0.0(HRS)
+C
+C      DPLS       REAL    ANGULAR EXTENSION TOWARD DAWN
+C                           OF DAYSIDE CONVERGENCE ZONE        30.0(DEG)
+C      DMNS       REAL    ANGULAR EXTENSION TOWARD DUSK
+C                           OF DAYSIDE CONVERGENCE ZONE        30.0(DEG)
+C      EPLS       REAL    ANGULAR EXTENSION TOWARD DUSK
+C                          OF NIGHTSIDE CONVERGENCE ZONE       60.0(DEG)
+C      EMNS       REAL    ANGULAR EXTENSION TOWARD DAWN
+C                         OF NIGHTSIDE CONVERGENCE ZONE        60.0(DEG)
+C........................
+C
+      COMMON/PFI/FID,FIN,FIDP,FIDM,FINP,FINM
+      FID=180.0-DTHRT*15.0
+      FIN = 180.0-ETHRT*15.0
+      IF(FIN.LT.0.0) FIN=360.0+FIN
+      FIDP=DPLS
+      FIDM=DMNS
+      FINP=EPLS
+      FINM=EMNS
+      RETURN
+      END 
+C*******************************************
+C*******************************************
+      SUBROUTINE SETPOT(PCAP,DPOT,EPOT) 
+C
+C    SUBROUTINE SETPOT(PCAP,DPOT,EPOT)
+C
+C     VARIABLE      TYPE             DESCRIPTION                 DEFAULT
+C-----------------------------------------------------------------------
+C
+C     PCAP          REAL    RADIUS OF CONVECTION REVERSAL
+C                                  BOUNDARY                      14.0(DEG)
+C     DPOT          REAL    DAWNSIDE BOUNDDARY
+C                                 POTENTIAL                      30.0(KV)
+C     EPOT          REAL    DUSKSIDE BOUNDARY
+C                                 POTENTIAL                      -30.0(KV)
+C.................. 
+C
+      COMMON/PLATS/THET0
+      COMMON/PPOT/PSIDWN,PSIDSK
+      PSIDWN=DPOT
+      PSIDSK=EPOT
+      THET0=PCAP
+      RETURN
+      END 
+C*****************************************
+C*****************************************
+      SUBROUTINE SETPWR(BLLIM,ELLIM,BHLIM,EHLIM)
+C
+C     SUBROUTINE SETPWR(BLLIM,ELLIM,BHLIM,EHLIM)
+C
+C    VARIABLE     TYPE            DESCRIPTION                  DEFAULT
+C----------------------------------------------------------------------
+C
+C   BLLIM         REAL  LOW LATITUDE POTENTIAL DECAY RATE        -3.0 
+C   ELLIM         REAL  LOW LATITUDE INCREMENTAL DECAY
+C                            IN DAYSIDE CONVERGENCE ZONE          0.0 
+C   BHLIM         REAL  HIGH LATITUDE POTENTIAL DECAY RATE        2.0 
+C   EHLIM         REAL  HIGH LATITUDE INCREMENTAL DECAY
+C                            IN DAYSIDE CONVERGENCE ZONE          0.0 
+C.........................
+C
+C
+      COMMON/PINDX/X1,X2,Y1,Y2
+      X1=BLLIM
+      X2=ELLIM
+      Y1=BHLIM
+      Y2=EHLIM
+      RETURN
+      END 
+C*
+      SUBROUTINE CONDSUN(COLAT, GMLT, COLATS, GMLTS, F107, MODEL, CONS)
+C
+C  SUBROUTINE CONDSUN
+C    CALCULATE MODEL CONDUCTIVITY BASED ON SOLAR AND GALACTIC EUV FLUX
+C
+C  INPUTS
+C    COLAT  - CO-LATITUDE (GEOMAGNETIC) OF RESULT (RADIANS)
+C    GMLT   - GEOMAG LOCAL TIME OF RESULT (RADIANS - MIDNIGHT = 0.)
+C    COLATS - CO-LATITUDE (GEOMAGNETIC) OF SUB-SOLAR POINT
+C    GMLTS  - GEOMAG LOCAL TIME OF SUB-SOLAR POINT
+C    F107   - FLUX OF 10.7 CM FROM SUN
+C    MODEL  - MODEL TO BE USED, 1=HALL, 2=PEDERSON
+C
+C  OUTPUT
+C    CONS   - HEIGHT INTEGRADED CONDUCTIVITY (MHO)
+C
+C * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+C
+      CONS = 0.
+C
+C        CALCULATE COSINE OF SOLAR ZENITH ANGLE
+      SZ = SIN(COLAT)
+      CZ = COS(COLAT)
+      COSCHI = COS(GMLTS-GMLT)*SZ*SIN(COLATS) +
+     X            CZ*COS(COLATS)
+      FCOSX = 0.06 + EXP( 1.803*TANH(3.833*COSCHI) + 0.5*COSCHI -
+     X                   2.332)
+C
+C        HALL CONDUCTIVITY
+      IF( MODEL .NE. 1 ) GO TO 100
+      BB = SQRT( 1.0 - 0.01504*(1.-CZ) - .97986*SZ*SZ)
+     X     * (1.0+0.5*CZ*CZ)
+      CONS = 17.0 * SQRT(F107/180) * FCOSX/BB
+C
+C        PEDERSEN CONDUCTIVITY
+ 100  IF( MODEL .NE. 2 ) GO TO 200
+      BB = SQRT( 1.0 - 0.99524*SZ*SZ)
+     X     * (1.0+0.3*CZ*CZ)
+      CONS = 12.5 * SQRT(F107/180) * FCOSX/BB
+ 200  RETURN
+C** 
+      END
+C*
+      SUBROUTINE CONDUCT(ALAT,ANMLT,KP,DKP,CUTL,CUTH,MODEL,CON)
+C
+C  SUBROUTINE CONDUCT
+C    CALCULATE MODEL PEDERSON OR HALL CONDUCTIVITY BASED ON
+C    DMSP SSJ/4 DELECTRON DATA
+C
+C  INPUT PARAMETERS - CALLING SEQUENCE
+C     ALAT  = GEOMAG LATITUDE(50 TO 90 DEGREES)
+C     ANMLT = MAGNETIC LOCAL TIME IN HOURS
+C     KP    = INTEGER KP LEVEL FROM 0 TO 6
+C     DKP   = INTERPOLATOR BETWEEN KP AND KP+1
+C             I.E.,KP=1 AND DKP=.2 MEANS KP=1.2
+C     CUTL  = THE MINIMUM LEVEL SOUTH OF THE MAXIMUM
+C     CUTH  = THE MINIMUM LEVEL POLEWARD TO THE MAXIMUM
+C     MODEL = MODEL TO BE USED, 1=HALL, 2=PEDERSON
+C
+C  OUTPUT PARAMETER - CALLING SEQUENCE
+C     CON   = MODELLED CONDUCTIVITY (MHO)
+C
+C   THE INTERPOLATION METHOD GOES LIKE
+C     1-BRIDGE MLT BY FOURIER EXPANSION TO CALCULATE
+C       EPSTEIN COEFFICIENTS AT SPECIFIC MLT
+C     2-BRIDGE LATITUDE WITH EPSTEIN FUNCTIONS TO
+C       CALCULATE CONDUCTIVITY AT TWO ABUTTING KPS
+C     3-BRIDGE KP WITH LINEAR ESTIMATE
+C
+      DIMENSION CRD(20,7),CHAT(20,7),CS1(20,7),CS2(20,7)
+      DIMENSION CRDH(20,7),CHATH(20,7),CS1H(20,7),CS2H(20,7)
+      DIMENSION CRDP(20,7),CHATP(20,7),CS1P(20,7),CS2P(20,7)
+      DATA MOLD/0/
+C
+C  HALL CONDUCTIVITY MODEL
+       DATA NFTH/         6/
+      DATA (CRDH(I, 1),I=1,20) /
+     X  2.7583333    , -.56035262    ,  .52836060    ,  .70959066    ,
+     X -.10883538    ,  .60456431E-01, -.12766408    ,  .19423979    ,
+     X -.29124826    ,  .16556980    , -.36952704    ,  .79173058E-01,
+     X -.73564908E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATH(I, 1),I=1,20) /
+     X  70.927083    , -1.4479718    , -1.5744713    , -.79112633    ,
+     X -1.1907920    , -.17043302    ,  .16573244    ,  1.0007805    ,
+     X  .44627613    , -.40472381E-01, -.64426316    , -.97114853    ,
+     X -.98171918E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1H(I, 1),I=1,20) /
+     X  .54302083    , -.33347879    ,  .16729624    ,  .22232022    ,
+     X -.27648944E-01,  .20325201E-01, -.92570529E-01,  .38809513E-01,
+     X -.28533582E-01,  .10270421    ,  .83074444E-01, -.97690822E-01,
+     X -.66354112E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2H(I, 1),I=1,20) /
+     X -.67100833    ,  .25352359    ,  .21179939    , -.15693317    ,
+     X -.13262639    , -.51958354E-01,  .12713534    , -.10865714    ,
+     X  .28642291E-01,  .16965018E-01,  .18592496    ,  .64006081E-01,
+     X -.23631747E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDH(I, 2),I=1,20) /
+     X  4.8360417    ,  .84342155    ,  1.9244905    ,  .43547450    ,
+     X -.45906704    , -.27490588    , -.48604829E-01, -.14300138    ,
+     X  .53942195E-01,  .55342365E-01,  .65505879E-01,  .18528241    ,
+     X  .91702875E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATH(I, 2),I=1,20) /
+     X  69.625000    , -1.8818600    , -1.3952794    , -.29425357    ,
+     X -1.3282438    , -.40349633    , -.96897284E-01, -.21568414E-01,
+     X  .99172475E-01, -.11116281    , -.11042039    , -.10421019    ,
+     X  .27220062E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1H(I, 2),I=1,20) /
+     X  1.0627021    ,  .29520333    ,  .68408347    ,  .74833498E-01,
+     X  .11095650    , -.10296723    ,  .33502537E-01, -.10086708    ,
+     X  .76487200E-01, -.47724485E-01,  .11861396E-01,  .79580777E-01,
+     X  .10421233    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2H(I, 2),I=1,20) /
+     X -.95029375    , -.21779867    , -.18423647    ,  .16742457E-02,
+     X  .14271650    ,  .30314663    ,  .58418003E-01,  .21120454    ,
+     X -.10268604    , -.79380491E-01, -.37841480E-01, -.91866325E-01,
+     X -.29708812E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDH(I, 3),I=1,20) /
+     X  7.2189583    ,  2.2869975    ,  2.8989121    ,  .76580147    ,
+     X -.51016663    ,  .85878011E-01,  .54898236    , -.50495438E-01,
+     X  .62401070    , -.71529476E-01,  .68303485    ,  .32581985E-01,
+     X  .15966901    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATH(I, 3),I=1,20) /
+     X  69.218750    , -2.3106173    , -1.6590557    , -.66518521    ,
+     X -1.0118879    , -.34035011    , -.20620995    , -.31658337    ,
+     X -.17032696    , -.57897555    , -.97624203E-01,  .73687453E-01,
+     X  .30272303    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1H(I, 3),I=1,20) /
+     X  1.5508062    ,  .87292068    ,  .95428719    ,  .33136110    ,
+     X  .11218666    ,  .29917480    ,  .92801975E-01,  .63775402    ,
+     X  .28556072    ,  .30820709    ,  .53093469    , -.28949055E-01,
+     X  .26867354    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2H(I, 3),I=1,20) /
+     X -1.3937083    , -.38730889    , -.72299111    , -.32499364E-01,
+     X -.19862462    ,  .29084752    , -.19319534    ,  .18134139    ,
+     X -.41657690    ,  .51696907E-01, -.10054435    ,  .27373362E-01,
+     X -.14783926    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDH(I, 4),I=1,20) /
+     X  10.095625    ,  4.6945905    ,  3.6216916    , -.13689161    ,
+     X -.63998915    , -.16020423    ,  1.0016951    ,  .55401202    ,
+     X  .50154866    ,  .91690148    , -.54846191E-01,  .10559585    ,
+     X  .28950847    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATH(I, 4),I=1,20) /
+     X  68.568750    , -2.5171675    , -2.0819841    , -1.1420728    ,
+     X -1.0413881    , -.22899979    ,  .52616183    , -.17306187    ,
+     X -.22603804    , -.61099519    ,  .54908045    ,  .50795388    ,
+     X  .14903612    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1H(I, 4),I=1,20) /
+     X  2.3899479    ,  2.1987400    ,  1.3043800    ,  .86239405    ,
+     X  .60268337    ,  .69006426    ,  .51509613    ,  .58010133    ,
+     X  .29407465    ,  .38011424    ,  .62648781E-01,  .14773412    ,
+     X  .10973205    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2H(I, 4),I=1,20) /
+     X -1.8148187    , -.58085779    , -.98196894    ,  .30960042    ,
+     X -.16789223    ,  .37665199    , -.35218500    , -.89234695E-01,
+     X -.53318834E-01, -.12801605    , -.24138548E-02, -.11041867    ,
+     X -.88046699E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDH(I, 5),I=1,20) /
+     X  10.553958    ,  5.0368212    ,  3.7795599    , -1.4508298    ,
+     X -2.2036197    , -.33869778    , -.40388053    ,  .71454810    ,
+     X  .18771775    ,  1.0521712    ,  .38219183    ,  .31066661    ,
+     X  .72270876    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATH(I, 5),I=1,20) /
+     X  67.052083    , -1.4380474    , -.46956025    , -.99928336E-01,
+     X -1.4263343    , -.22568382    ,  1.0786975    ,  .78544918    ,
+     X -.34105625    , -.67543602    ,  .14413551    ,  .55041168    ,
+     X  .17322741    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1H(I, 5),I=1,20) /
+     X  2.4154562    ,  1.8651015    ,  .80355217    , -.12860103    ,
+     X -.61968485E-02,  .28972103    , -.38127783E-01,  .43421005    ,
+     X -.17861023    ,  .16430434    , -.28641735E-01, -.37726191E-01,
+     X  .34895987    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2H(I, 5),I=1,20) /
+     X -1.7039771    , -.79219744    , -1.0630104    ,  .18276484    ,
+     X  .74658667E-03,  .14553835    , -.13794794    , -.18257062    ,
+     X -.95543749E-01, -.17764388    , -.26985558    ,  .35102688E-01,
+     X -.20865547    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDH(I, 6),I=1,20) /
+     X  9.7808333    ,  4.0828747    ,  2.5820114    , -3.0447562    ,
+     X -2.1114761    , -1.3303617    , -.41431198    , -.29963404    ,
+     X  .23919301    ,  .57885352    ,  .50394287    ,  .27094879    ,
+     X -.13333686    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATH(I, 6),I=1,20) /
+     X  67.547917    , -.82522803    , -1.1411468    ,  .90379822    ,
+     X  .11832437E-01,  .57311579    ,  .22205435    ,  .23225533    ,
+     X -.30302285    , -.20933770    ,  .11819436E-02,  .55514829    ,
+     X -.26114428    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1H(I, 6),I=1,20) /
+     X  1.2953417    ,  .32058024    ,  .35280582    , -.73378929    ,
+     X -.44908333    , -.27077832    , -.16971681    ,  .92491296E-01,
+     X  .23913876    ,  .27108842E-01,  .19408579    , -.45944813E-01,
+     X -.80036809E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2H(I, 6),I=1,20) /
+     X -1.2377000    , -.46083748    , -.64039011    ,  .32737423    ,
+     X  .14141253    ,  .11194890    ,  .11054112E-01, -.33806776E-01,
+     X -.58340550E-01, -.55807131E-01, -.14835124    ,  .90110789E-01,
+     X -.75589974E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDH(I, 7),I=1,20) /
+     X  13.928958    ,  10.158817    ,  4.0465757    , -2.0789625    ,
+     X  .14799054    , -.46695894    ,  .41862533    ,  .90802070    ,
+     X -.13097432    ,  .44113821    ,  .12955917    ,  .91805637E-01,
+     X  .38586635    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATH(I, 7),I=1,20) /
+     X  65.018750    , -2.4207529    , -.82539956    , -1.5525052    ,
+     X -.24984509    ,  .32681334    ,  1.4356406    , -.22522800    ,
+     X -1.5516421    , -.58146909    ,  .95421212    ,  .64227998    ,
+     X -.44690923    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1H(I, 7),I=1,20) /
+     X  2.0588917    ,  1.4649824    ,  .93582341    , -.68655957    ,
+     X  .13952119    , -.56823320E-01, -.16961643    ,  .13976035    ,
+     X -.52552657E-01, -.22591402    ,  .23985250E-01, -.15963787    ,
+     X  .15243547    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2H(I, 7),I=1,20) /
+     X -2.1786729    , -.94978014    , -.64830121    ,  .55749232    ,
+     X -.87509177    , -.35841539    , -.50477293    , -.55121258E-01,
+     X  .27569265    ,  .26159560    , -.41233705    ,  .51124561E-01,
+     X -.22341622    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+C
+C  PEDERSEN CONDUCTIVITY MODEL
+       DATA NFTP/         6/
+      DATA (CRDP(I, 1),I=1,20) /
+     X  1.9752083    ,  .11309355    ,  .49955220    ,  .36191212    ,
+     X -.19023565    ,  .11486918    , -.95239742E-01,  .13348659    ,
+     X -.15361572    ,  .72864888E-01, -.14021753    ,  .20048726E-02,
+     X -.43937049E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATP(I, 1),I=1,20) /
+     X  71.770833    , -2.2547427    , -1.6743230    , -1.1885288    ,
+     X -.10582211    ,  .89678210    ,  .43734602E-01,  .95225043E-01,
+     X -.42509501    , -.47995902    ,  .54158272    ,  .55241239E-01,
+     X  .10421002    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1P(I, 1),I=1,20) /
+     X  .57171042    ,  .21751727    ,  .15373683    ,  .17598502    ,
+     X  .71620289E-01, -.32022890E-01, -.13731204E-01, -.74444206E-01,
+     X -.81460034E-01,  .14630317E-01, -.12385682    ,  .82821496E-01,
+     X -.17177927    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2P(I, 1),I=1,20) /
+     X -.25434167    , -.45374512E-01, -.12150957    , -.71038622E-01,
+     X  .38774557E-01, -.26561730E-01,  .30832324E-01, -.46290731E-01,
+     X -.29733730E-02, -.23733598E-02, -.17777300E-01,  .19003879E-01,
+     X -.31453243E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDP(I, 2),I=1,20) /
+     X  3.1712500    ,  1.0460200    ,  .80852472    ,  .13790866    ,
+     X -.40919955    , -.29942118E-01,  .10507769    , -.74965025E-01,
+     X -.23322054E-01, -.13664652E-02,  .28891438E-01,  .11065881    ,
+     X  .62728848E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATP(I, 2),I=1,20) /
+     X  70.750000    , -2.9196623    , -1.8355858    , -.71506096    ,
+     X -.57110441    ,  .37339587    , -.16934319    , -.28962306    ,
+     X -.34065393    , -.25927256    ,  .16910634    ,  .10888008    ,
+     X -.58618828E-09, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1P(I, 2),I=1,20) /
+     X  .71657292    ,  .43468297    ,  .27660837    ,  .46766429E-01,
+     X  .44698635E-01, -.91793256E-01,  .10060731    ,  .98491486E-02,
+     X  .85094725E-01,  .24282806E-01,  .32697228E-01,  .13908445E-01,
+     X  .43615884E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2P(I, 2),I=1,20) /
+     X -.44526042    , -.18152973    , -.59399779E-01,  .52955946E-02,
+     X  .12623505    ,  .78902898E-01,  .16567410E-01,  .80253023E-01,
+     X  .30637303E-01,  .63563772E-01, -.24239106E-01, -.43024610E-01,
+     X -.51795821E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDP(I, 3),I=1,20) /
+     X  4.3137500    ,  1.9275469    ,  1.0182152    ,  .96490960E-01,
+     X -.28109036    ,  .14770866    ,  .34873809    , -.10992205    ,
+     X  .14277228    , -.33236668E-01,  .20538873    ,  .95695790E-01,
+     X  .47852593E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATP(I, 3),I=1,20) /
+     X  70.145833    , -3.2625586    , -1.7175094    , -.27056744    ,
+     X -.72469313    ,  .95850802E-01, -.48775432    , -.62488493    ,
+     X -.25082078    , -.15565990    ,  .47466355E-01, -.16460307E-06,
+     X -.45099675E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1P(I, 3),I=1,20) /
+     X  .82099167    ,  .48920921    ,  .25474954    , -.43502049E-01,
+     X  .78840253E-01,  .10881444    ,  .80673906E-01,  .24652279    ,
+     X  .39554966E-01,  .15203156    ,  .14104665    ,  .95347253E-01,
+     X  .14867447    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2P(I, 3),I=1,20) /
+     X -.60396458    , -.21075615    , -.21527033    ,  .15907040E-01,
+     X  .27512444E-01,  .12748710    , -.13099354    ,  .93502428E-01,
+     X  .98113648E-02,  .34308961E-01,  .26041259E-01, -.57509205E-01,
+     X  .83320985E-02, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDP(I, 4),I=1,20) /
+     X  5.3681250    ,  2.8279962    ,  .91147095    , -.31878050    ,
+     X -.36680057    ,  .16403188    ,  .54161290    ,  .14009172    ,
+     X  .17969160    ,  .20067102    ,  .44216609E-01, -.46307418E-02,
+     X  .76224755E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATP(I, 4),I=1,20) /
+     X  69.600000    , -3.7821781    , -1.9005839    , -.40095892    ,
+     X -.45072859    , -.14296447    , -.32175045E-01, -.48820028    ,
+     X  .29322452    ,  .12414291    ,  .23365739    , -.24839639    ,
+     X -.66809343E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1P(I, 4),I=1,20) /
+     X  1.0638625    ,  .88344778    ,  .29322668    ,  .20999415    ,
+     X  .21278403    ,  .28411886    ,  .11450391    ,  .17196273    ,
+     X  .13497925E-02,  .86861843E-01,  .48136624E-02,  .62115912E-01,
+     X -.12083637E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2P(I, 4),I=1,20) /
+     X -.72382292    , -.13382799    , -.44540326E-01,  .13143918    ,
+     X  .83699812E-01,  .69448149E-01, -.22423153    , -.79590594E-01,
+     X -.52960213E-01, -.11672661    , -.16418446E-01,  .13709071    ,
+     X  .25079200E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDP(I, 5),I=1,20) /
+     X  5.5833333    ,  2.9881179    ,  1.0235213    , -.63957027    ,
+     X -1.0883883    ,  .40790433E-01,  .82119004E-01,  .22891973    ,
+     X  .14449000    ,  .15147915    ,  .19794884    ,  .18851197E-01,
+     X  .32374634    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATP(I, 5),I=1,20) /
+     X  68.770833    , -3.8715167    , -1.5562133    ,  .46921579    ,
+     X  .28232932    ,  .43484778    , -.58868840    , -.40891898    ,
+     X  .47468125    ,  .52609991    ,  .20690937    , -.28073994    ,
+     X -.25818994    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1P(I, 5),I=1,20) /
+     X  .86189167    ,  .58615674    ,  .28295197    , -.14407792    ,
+     X -.37138839E-01, -.49426913E-01, -.30318088E-01,  .32102178E-01,
+     X -.11670501    , -.30423373E-01, -.98708995E-02, -.94800526E-01,
+     X  .57931650E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2P(I, 5),I=1,20) /
+     X -.67308125    , -.13388580    , -.16864213    ,  .10796689    ,
+     X  .13602883    , -.46485494E-01, -.59638188E-02, -.20400680E-01,
+     X  .97082771E-02, -.10154193    , -.10028593    ,  .47477099E-01,
+     X -.45903704E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDP(I, 6),I=1,20) /
+     X  5.7097917    ,  2.7157215    ,  .84863144    , -1.5537595    ,
+     X -.47123516    , -.50650919    ,  .98685225E-03, -.15124889    ,
+     X  .16037515    ,  .26722167    ,  .91744056E-01,  .34347285E-01,
+     X -.14837257    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATP(I, 6),I=1,20) /
+     X  67.958333    , -2.1349113    , -.83943625    ,  .44183436    ,
+     X -.17617617    , -.17389274    ,  .11656204    , -.38090100    ,
+     X -.42403735    , -.15779349    , -.36133895    , -.34919074    ,
+     X -.70225010    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1P(I, 6),I=1,20) /
+     X  .64001042    ,  .28690278    ,  .15599900    , -.22906768    ,
+     X -.11654992    , -.52955945E-01, -.36322818E-01,  .90821411E-01,
+     X  .14857100    ,  .85474445E-01,  .92908671E-01,  .26278986E-01,
+     X  .59449423E-02, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2P(I, 6),I=1,20) /
+     X -.58912083    , -.18820905    , -.17081489    ,  .18268439    ,
+     X  .83899968E-01,  .80230925E-01, -.46892861E-01,  .30742615E-01,
+     X  .53800948E-02, -.82193337E-01,  .11608537E-01,  .75655620E-01,
+     X  .57007083E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CRDP(I, 7),I=1,20) /
+     X  7.4172917    ,  5.1378548    ,  1.3627671    , -1.1244043    ,
+     X -.48044011    , -.56803300E-01,  .24779928    ,  .72383435    ,
+     X -.53384236E-02,  .49505765    , -.99395695E-01,  .19604773    ,
+     X  .29291636    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CHATP(I, 7),I=1,20) /
+     X  66.472917    , -4.5011062    , -1.1403526    ,  .54212805E-01,
+     X  1.3588885    , -.32018606    , -.37887620    , -.79415422    ,
+     X -.28157351    , -.12985061    ,  .16214953    ,  .43759138E-01,
+     X -.90793439E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS1P(I, 7),I=1,20) /
+     X  .97032292    ,  .64654203    ,  .28858636    , -.37861137    ,
+     X  .97263676E-02, -.14293678    , -.96194985E-02,  .20950806    ,
+     X -.56577304E-01,  .14661383    , -.17997422E-01, -.68845234E-01,
+     X  .71222304E-01, 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+      DATA (CS2P(I, 7),I=1,20) /
+     X -.75169583    , -.39484500    , -.32269682    ,  .10439478    ,
+     X -.11028059    ,  .60387283E-01, -.14434338    , -.39484100E-01,
+     X  .19247034E-01, -.79931602E-01, -.41467661E-01,  .53864157E-01,
+     X -.10967904    , 0.            , 0.            , 0.            ,
+     X 0.            , 0.            , 0.            , 0.            /
+C
+C  PUT COEFFICIENTS FOR HALL OR PEDERSEN MODEL INTO WORKING ARRAY
+      IF(MODEL.EQ.MOLD) GO TO 10
+      IF(MODEL.LT.1 .OR. MODEL.GT.2 ) GO TO 778
+      TWOPI= 8.*ATAN(1.)
+      MOLD = MODEL
+      IF(MODEL.EQ.2) GO TO 770
+C
+C USE HALL CONDUCTIVITY MODEL
+      DO 777 I=1,20
+      DO 777 J=1,7
+      CRD(I,J) = CRDH(I,J)
+      CHAT(I,J) = CHATH(I,J)
+      CS1(I,J) = CS1H(I,J)
+      CS2(I,J) = CS2H(I,J)
+  777 CONTINUE
+      GO TO 10
+C
+C USE PEDERSON CONDUCTIVITY MODEL
+  770 CONTINUE
+      DO 772 I=1,20
+      DO 772 J=1,7
+      CRD(I,J) = CRDP(I,J)
+      CHAT(I,J) = CHATP(I,J)
+      CS1(I,J) = CS1P(I,J)
+      CS2(I,J) = CS2P(I,J)
+  772 CONTINUE
+      GO TO 10
+  778 PRINT 779,MODEL
+  779 FORMAT(///,22H UNKNOWN MODEL NUMBER  , I5)
+      STOP
+C
+   10 CONTINUE
+C
+C   FIND COEFFICIENTS FOR CHOSEN MLT
+C
+      K1=KP+1
+      IF(K1.GT.7)K1=7
+      K2=K1+1
+      IF(K2.GT.7)K2=7
+C
+      XARG=ANMLT*TWOPI/24.
+      RD1=CRD(1,K1)
+      RD2=CRD(1,K2)
+      HAT1=CHAT(1,K1)
+      HAT2=CHAT(1,K2)
+      S11=CS1(1,K1)
+      S12=CS1(1,K2)
+      S21=CS2(1,K1)
+      S22=CS2(1,K2)
+C
+      DO 12 I=1,6
+      XA=I*XARG
+      XA=AMOD(XA,TWOPI)
+      IP=2*I
+      CC=COS(XA)
+      SS=SIN(XA)
+C
+      RD1=RD1+CC*CRD(IP,K1)+SS*CRD(IP+1,K1)
+      RD2=RD2+CC*CRD(IP,K2)+SS*CRD(IP+1,K2)
+      HAT1=HAT1+CC*CHAT(IP,K1)+SS*CHAT(IP+1,K1)
+      HAT2=HAT2+CC*CHAT(IP,K2)+SS*CHAT(IP+1,K2)
+      S11=S11+CC*CS1(IP,K1)+SS*CS1(IP+1,K1)
+      S12=S12+CC*CS1(IP,K2)+SS*CS1(IP+1,K2)
+      S21=S21+CC*CS2(IP,K1)+SS*CS2(IP+1,K1)
+      S22=S22+CC*CS2(IP,K2)+SS*CS2(IP+1,K2)
+C
+   12 CONTINUE
+C
+C
+      F1=EPSTIN(ALAT,RD1,HAT1,S11,S21,CUTL,CUTH)
+      F2=EPSTIN(ALAT,RD2,HAT2,S12,S22,CUTL,CUTH)
+C
+      CON=F1+(F2-F1)*DKP
+C
+      RETURN
+C**
+      END
+C*
+      FUNCTION EPSTIN(CLAT,RD,HAT,S1,S2,XMIN,XMAX)
+C
+C EVALUATE EPSTEIN FUNCTION
+      D=CLAT-HAT
+      EX=EXP(D)
+      XL=(1.-S1/S2*EX)/(1.-S1/S2)
+      XL=ALOG(XL)
+      EP=RD+S1*D+(S2-S1)*XL
+C
+      IF (CLAT.LT.HAT.AND.EP.LT.XMIN) EP=XMIN-.000001
+      IF (CLAT.GT.HAT.AND.EP.LT.XMAX) EP=XMAX-.000001
+C
+      EPST=EP
+      RETURN
+C**
+      END

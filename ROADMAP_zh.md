@@ -28,6 +28,8 @@
 | 地磁截止刚度 | `CutoffRigidity` | 宇宙线截止刚度阈值 — 带电粒子轨迹预测（IGRF-95） | 已完成 |
 | GSFC 地磁场 | `GSFC` | GSFC 地磁场模型（80、83、87）— 球谐展开任意位置磁场分量 | 已完成 |
 | Jensen & Cain (1962) | `JensenCain` | 早期球谐地磁场模型（6 阶，epoch 1960.0） | 已完成 |
+| MGST 地磁场 | `MGST80`、`MGST81` | MGST 地磁场模型 — MAGSAT 数据，历元 1979.85 与 1980.0 | 已完成 |
+| Heppner-Maynard-Rich | `HMR` | 高纬电离层电势、电导率、焦耳加热和场向电流模型 | 已完成 |
 
 ## 计划移植模型
 
@@ -49,8 +51,6 @@ _本阶段无剩余模型。_
 
 | 模型 | 目录 | 说明 | 原始语言 | 外部数据 |
 |------|------|------|----------|----------|
-| MGST 系数 | `TODO/MGST-Model-Coefficients-All` | MGST 地磁场模型系数（1980、1981 历元） | 纯数据 | 2 个二进制 `.dat` 文件 |
-| Heppner-Maynard-Rich | `TODO/Heppner-Maynard-Rich_Electric-Field-Model` | 高纬电离层电势模型 — 球谐拟合，焦耳加热 | Fortran 77 | `hmcoef.dat`（二进制） |
 | ISR 离子漂移 | `TODO/ISR-Ion-Drift-Model` | 非相干散射雷达离子漂移模型 — 静日 E×B 漂移（300 km） | Fortran 77 | 无（硬编码系数） |
 | Xu-Li 中性片 | `TODO/Xu-Li-Neutral-Sheet-Model` | 磁尾赤道中性片位置模型（SEN, DEN, AEN 三种变体） | Fortran 77 | 无（硬编码系数） |
 

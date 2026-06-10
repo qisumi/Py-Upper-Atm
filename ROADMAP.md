@@ -28,6 +28,8 @@ The following models have been fully ported and are available in the `src/model/
 | Geomagnetic Cutoff Rigidity | `CutoffRigidity` | Cosmic ray cutoff rigidity thresholds — charged particle trajectory prediction (IGRF-95) | Done |
 | GSFC Geomagnetic Field | `GSFC` | GSFC geomagnetic field models (80, 83, 87) — spherical harmonic field components at any location | Done |
 | Jensen & Cain (1962) | `JensenCain` | Early spherical harmonic geomagnetic field model (degree 6, epoch 1960.0) | Done |
+| MGST Geomagnetic Field | `MGST80`, `MGST81` | MGST geomagnetic field models from MAGSAT data — epochs 1979.85 and 1980.0 | Done |
+| Heppner-Maynard-Rich | `HMR` | High-latitude ionospheric electric potential, conductivity, Joule heating, and field-aligned current | Done |
 
 ## Planned Models
 
@@ -49,8 +51,6 @@ Spherical harmonic geomagnetic field models and high-latitude ionospheric electr
 
 | Model | Directory | Description | Language | External Data |
 |-------|-----------|-------------|----------|---------------|
-| MGST Coefficients | `TODO/MGST-Model-Coefficients-All` | MGST geomagnetic field model coefficients for epochs 1980 and 1981 | Data only | 2 binary `.dat` files |
-| Heppner-Maynard-Rich | `TODO/Heppner-Maynard-Rich_Electric-Field-Model` | High-latitude ionospheric electric potential — spherical harmonic fits, Joule heating | Fortran 77 | `hmcoef.dat` (binary) |
 | ISR Ion Drift | `TODO/ISR-Ion-Drift-Model` | Incoherent Scatter Radar ion drift model — quiet-day E×B drifts at 300 km | Fortran 77 | None (hard-coded) |
 | Xu-Li Neutral Sheet | `TODO/Xu-Li-Neutral-Sheet-Model` | Magnetotail equatorial neutral sheet position (SEN, DEN, AEN variants) | Fortran 77 | None (hard-coded) |
 

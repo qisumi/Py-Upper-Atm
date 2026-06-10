@@ -24,6 +24,9 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.CutoffRigidity`
 - `model.GSFC`
 - `model.JensenCain`
+- `model.MGST80`
+- `model.MGST81`
+- `model.HMR`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -57,6 +60,8 @@ python example/test_shieldose.py
 python example/test_sofip.py
 python example/test_cutoff.py
 python example/test_jensen.py
+python example/test_mgst.py
+python example/test_hmr.py
 ```
 
 ## Public API Pattern
@@ -212,6 +217,23 @@ JensenCain result dictionaries contain:
 - `X_nT`, `Y_nT`, `Z_nT`, `F_nT`, `H_nT` — field components in nT
 - `inclination_deg`, `declination_deg` — derived angles
 
+MGST80/MGST81 result dictionaries contain:
+- `year`, `lat_deg`, `lon_deg`, `alt_km` — broadcast inputs
+- `X_nT`, `Y_nT`, `Z_nT`, `F_nT`, `H_nT` — field components in nT
+- `inclination_deg`, `declination_deg` — derived angles
+
+HMR result dictionaries contain (calculate — EPOT):
+- `lat_deg`, `lon_deg` — broadcast inputs
+- `electric_potential_kV` — electric potential in kV
+
+HMR result dictionaries contain (calculate_full — grid):
+- `electric_potential_kV` — electric potential (41×25 grid)
+- `e_field_lat_mV_m`, `e_field_lon_mV_m` — electric field components
+- `hall_conductivity_Mho`, `pedersen_conductivity_Mho` — conductivities
+- `joule_heating_mW_m2` — Joule heating rate
+- `fac_uA_m2` — field-aligned current
+- `lat_grid_deg`, `mlt_grid_hrs` — grid axes
+
 ## Project Structure
 
 ```text
@@ -238,7 +260,9 @@ UpperAtmPy/
 │   │   ├── pysofip/
 │   │   ├── pycutoff/
 │   │   ├── pygsfc/
-│   │   └── pyjensen/
+│   │   ├── pyjensen/
+│   │   ├── pymgst/
+│   │   └── pyhmr/
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -261,7 +285,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC", "JensenCain"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC", "JensenCain", "MGST80", "MGST81", "HMR"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 

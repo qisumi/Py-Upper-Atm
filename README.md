@@ -30,11 +30,14 @@ Supported models:
 - **CutoffRigidity**: Geomagnetic cutoff rigidity — cosmic ray trajectory prediction (Smart & Shea, IGRF-95)
 - **GSFC**: GSFC geomagnetic field models (80, 83, 87) — spherical harmonic field components at any location
 - **JensenCain**: Jensen & Cain (1962) geomagnetic field — spherical harmonic model, epoch 1960.0, degree 6
+- **MGST80**: MGST(6/80) geomagnetic field — MAGSAT scalar + fine attitude, epoch 1979.85, degree 13
+- **MGST81**: MGST(4/81) geomagnetic field — MAGSAT 15-day data with secular variation, epoch 1980.0
+- **HMR**: Heppner-Maynard-Rich electric field — high-latitude ionospheric potential, conductivity, Joule heating, FAC
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`, `JensenCain`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`, `JensenCain`, `MGST80`, `MGST81`, `HMR`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -215,6 +218,10 @@ Top-level `model` exports only:
 - `SOFIP`
 - `CutoffRigidity`
 - `GSFC`
+- `JensenCain`
+- `MGST80`
+- `MGST81`
+- `HMR`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -247,6 +254,9 @@ Each model directory under `src/model/` contains its own `README.md` with detail
 - [SOFIP](src/model/pysofip/README.md)
 - [CutoffRigidity](src/model/pycutoff/README.md)
 - [GSFC](src/model/pygsfc/README.md)
+- [JensenCain](src/model/pyjensen/README.md)
+- [MGST](src/model/pymgst/README.md)
+- [HMR](src/model/pyhmr/README.md)
 
 ### Optional utility modules
 
@@ -296,7 +306,7 @@ Convert output dictionaries to xarray datasets.
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC, JensenCain, MGST80, MGST81, HMR
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
@@ -315,7 +325,10 @@ UpperAtmPy/
 │   │   ├── pyshieldose/     # SHIELDOSE radiation dose behind shielding wrapper
 │   │   ├── pysofip/          # SOFIP Short Orbital Flux Integration Program wrapper
 │   │   ├── pycutoff/         # Geomagnetic Cutoff Rigidity (Smart & Shea, IGRF-95)
-│   │   └── pygsfc/           # GSFC geomagnetic field models (80, 83, 87)
+│   │   ├── pygsfc/           # GSFC geomagnetic field models (80, 83, 87)
+│   │   ├── pyjensen/         # Jensen & Cain (1962) geomagnetic field wrapper
+│   │   ├── pymgst/           # MGST80/MGST81 geomagnetic field wrappers
+│   │   └── pyhmr/            # Heppner-Maynard-Rich electric field wrapper
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -330,7 +343,9 @@ UpperAtmPy/
 │   ├── igrf14data/
 │   ├── cira86data/
 │   ├── msis2data/
-│   └── msis86data/
+│   ├── msis86data/
+│   ├── mgst/
+│   └── hmr/
 └── ROADMAP.md
 ```
 

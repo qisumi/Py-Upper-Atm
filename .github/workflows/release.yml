@@ -147,6 +147,8 @@ jobs:
                   "model/pymsis86/build/msis86.dll",
                   "model/pygsfc/gsfc.dll",
                   "model/pyjensen/jensen.dll",
+                  "model/pymgst/mgst.dll",
+                  "model/pyhmr/hmr.dll",
               }
           else:
               expected = {
@@ -158,6 +160,8 @@ jobs:
                   "model/pymsis86/build/libmsis86.so",
                   "model/pygsfc/libgsfc.so",
                   "model/pyjensen/libjensen.so",
+                  "model/pymgst/libmgst.so",
+                  "model/pyhmr/libhmr.so",
               }
 
           expected.add("utils/model_data_manifest.json")
@@ -235,6 +239,8 @@ jobs:
               f"{root}/src/model/pyigrf/CMakeLists.txt",
               f"{root}/src/model/pygsfc/CMakeLists.txt",
               f"{root}/src/model/pyjensen/CMakeLists.txt",
+              f"{root}/src/model/pymgst/CMakeLists.txt",
+              f"{root}/src/model/pyhmr/CMakeLists.txt",
           }
           missing = expected - names
           data_files = [name for name in names if name.startswith(f"{root}/data/")]
@@ -261,6 +267,9 @@ jobs:
               pathlib.Path("hwm14data/hwm123114.bin"),
               pathlib.Path("hwm14data/dwm07b104i.dat"),
               pathlib.Path("hwm14data/gd2qd.dat"),
+              pathlib.Path("mgst/mgst380.dat"),
+              pathlib.Path("mgst/mgst481.dat"),
+              pathlib.Path("hmr/hmcoef.dat"),
           ]
           expected.extend(
               sorted(path.relative_to(data_root) for path in (data_root / "igrf13data").glob("*") if path.is_file())

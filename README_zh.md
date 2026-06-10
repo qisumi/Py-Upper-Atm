@@ -28,11 +28,14 @@
 - **CutoffRigidity**：地磁截止刚度 — 宇宙线轨迹预测（Smart & Shea，IGRF-95）
 - **GSFC**：GSFC 地磁场模型（80、83、87）— 球谐展开任意位置磁场分量
 - **JensenCain**：Jensen & Cain (1962) 地磁场模型 — 球谐展开，epoch 1960.0，6 阶
+- **MGST80**：MGST(6/80) 地磁场模型 — MAGSAT 标量+精细姿态数据，epoch 1979.85，13 阶
+- **MGST81**：MGST(4/81) 地磁场模型 — MAGSAT 15天数据含长期变化，epoch 1980.0
+- **HMR**：Heppner-Maynard-Rich 电场模型 — 高纬电离层电势、电导率、焦耳加热、场向电流
 
 ## 特性
 
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`、`JensenCain`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`、`JensenCain`、`MGST80`、`MGST81`、`HMR`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
@@ -202,6 +205,10 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 - `SOFIP`
 - `CutoffRigidity`
 - `GSFC`
+- `JensenCain`
+- `MGST80`
+- `MGST81`
+- `HMR`
 
 每个类都提供 `calculate(...)`，返回普通字典。
 模型计算方法同时支持标量和可广播数组输入，输入标量返回标量结果，输入数组会按 numpy 广播返回对应形状。
@@ -234,6 +241,9 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 - [SOFIP](src/model/pysofip/README_zh.md)
 - [CutoffRigidity](src/model/pycutoff/README_zh.md)
 - [GSFC](src/model/pygsfc/README_zh.md)
+- [JensenCain](src/model/pyjensen/README_zh.md)
+- [MGST](src/model/pymgst/README_zh.md)
+- [HMR](src/model/pyhmr/README_zh.md)
 
 ### 可选工具模块
 
@@ -283,7 +293,7 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC
+│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC, JensenCain, MGST80, MGST81, HMR
 │   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
 │   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
 │   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
@@ -302,7 +312,10 @@ UpperAtmPy/
 │   │   ├── pyshieldose/     # SHIELDOSE 铝屏蔽后辐射剂量模型封装
 │   │   ├── pysofip/          # SOFIP 短轨道通量积分程序封装
 │   │   ├── pycutoff/         # 地磁截止刚度模型封装（Smart & Shea，IGRF-95）
-│   │   └── pygsfc/           # GSFC 地磁场模型封装（80、83、87）
+│   │   ├── pygsfc/           # GSFC 地磁场模型封装（80、83、87）
+│   │   ├── pyjensen/         # Jensen & Cain (1962) 地磁场模型封装
+│   │   ├── pymgst/           # MGST80/MGST81 地磁场模型封装
+│   │   └── pyhmr/            # Heppner-Maynard-Rich 电场模型封装
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -317,7 +330,9 @@ UpperAtmPy/
 │   ├── igrf14data/
 │   ├── cira86data/
 │   ├── msis2data/
-│   └── msis86data/
+│   ├── msis86data/
+│   ├── mgst/
+│   └── hmr/
 └── ROADMAP.md
 ```
 

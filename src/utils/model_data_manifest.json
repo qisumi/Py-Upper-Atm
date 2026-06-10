@@ -543,6 +543,39 @@
       ],
       "sha256": "1d89b0ec78c8100ebc2b05926e06cbbdc145a9e9f814770b71ad119118928068",
       "size": 2059
+    },
+    {
+      "model": "mgst",
+      "version": "mgst-6-80",
+      "path": "mgst/mgst380.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v3/mgst380.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/mgst/mgst380.dat"
+      ],
+      "sha256": "beedddf4cdef269d21abb49748cf30781c673d4ccf5891a41fa2b8b6a1c3b1c4",
+      "size": 8659
+    },
+    {
+      "model": "mgst",
+      "version": "mgst-4-81",
+      "path": "mgst/mgst481.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v3/mgst481.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/mgst/mgst481.dat"
+      ],
+      "sha256": "cb694df39296042dcb1c06d91ea56e301ec30d14d28de959cd64074c084f1fd7",
+      "size": 8659
+    },
+    {
+      "model": "hmr",
+      "version": "hmr-1990",
+      "path": "hmr/hmcoef.dat",
+      "url": "https://github.com/qisumi/Py-Upper-Atm/releases/download/model-data-v3/hmcoef.dat",
+      "fallback_urls": [
+        "https://github.com/qisumi/Py-Upper-Atm/raw/master/data/hmr/hmcoef.dat"
+      ],
+      "sha256": "fb10ee352e9555d818a3259658048eb34175686c7b484689bd10259bf53de456",
+      "size": 34882
     }
   ]
 }

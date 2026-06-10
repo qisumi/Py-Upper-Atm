@@ -324,6 +324,36 @@ def jensen_model():
         pytest.skip(f"Jensen-Cain DLL not available: {exc}")
 
 
+@pytest.fixture
+def mgst80_model():
+    try:
+        from model import MGST80
+
+        return MGST80(data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"MGST80 DLL not available: {exc}")
+
+
+@pytest.fixture
+def mgst81_model():
+    try:
+        from model import MGST81
+
+        return MGST81(data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"MGST81 DLL not available: {exc}")
+
+
+@pytest.fixture
+def hmr_model():
+    try:
+        from model import HMR
+
+        return HMR(data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"HMR DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
