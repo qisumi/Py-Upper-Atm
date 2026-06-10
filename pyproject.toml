@@ -1,6 +1,6 @@
 [project]
 name = "upperatmpy"
-version = "0.2.6"
+version = "0.2.7"
 description = "Python wrapper for upper atmospheric models (MSIS, HWM, IGRF, CIRA, and auroral oval)"
 readme = "README.md"
 license = {file = "LICENSE"}
