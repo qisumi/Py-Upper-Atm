@@ -25,6 +25,8 @@ Only concrete model classes are exported:
 - MGST80
 - MGST81
 - HMR
+- ISRDrift
+- XuLi
 
 Exports are lazy so `import model` does not load any model DLL.
 """
@@ -58,6 +60,8 @@ _LAZY_EXPORTS = {
     "MGST80": ("model.pymgst", "MGST80"),
     "MGST81": ("model.pymgst", "MGST81"),
     "HMR": ("model.pyhmr", "Model"),
+    "ISRDrift": ("model.pyisrdrift", "Model"),
+    "XuLi": ("model.pyxuli", "Model"),
 }
 
 __all__ = list(_LAZY_EXPORTS)

@@ -1,0 +1,316 @@
+c From:	NSFGW::"RICHMOND@HAO.UCAR.EDU" 15-MAR-1990 15:10:00.31
+c To:	ncf::bilitza
+c Subj:	ISR ion drift model
+
+ 
+      SUBROUTINE EFIELD(XMLAT,XMLON,DAYNO,UT,ISEASAV,IUTAV,POT,VU,VE)
+C  GIVES QUIET-DAY IONOSPHERIC ELECTROSTATIC PSEUDO-POTENTIAL AND E X B
+C  DRIFTS AT 300 KM FOR SOLAR MINIMUM CONDITIONS.  SEE RICHMOND ET AL. (JGR,
+C  1980, P. 4658) FOR DEFINITIONS OF MAGNETIC COORDINATES, PSEUDO-POTENTIAL,
+C  AND DRIFT COMPONENTS.
+C***********************************************************************
+C88/2/2 SUBROUTINE HAS BEEN MODIFIED BY DELETING SHORTCUTS THAT DEPEND
+C  ON THE INVALID ASSUMPTION THAT VARIABLES ARE SAVED BETWEEN
+C  SUCCESSIVE CALLS TO IT.  TO REACTIVATE THE SHORTCUTS IT WILL BE
+C  NECESSARY TO USE THE SAVE STATEMENT TO RETAIN ALL NEEDED VARIABLES.
+C***********************************************************************
+C
+C  INPUT PARAMETERS -
+C    XMLAT, XMLON ARE MAGNETIC LATITUDE AND EAST LONGITUDE IN DEGREES.
+C    DAYNO IS DAY NUMBER OF THE YEAR FROM 1. TO 365.24, WITH 1. BEING JAN. 1.
+C    UT IS UNIVERSAL TIME IN HOURS.
+C    ISEASAV IS 0 IF NO SEASONAL AVERAGING IS DESIRED.
+C            IS 1 FOR AVERAGE OVER NOV. - FEB.
+C            IS 2 FOR AVERAGE OVER MAY -AUG.
+C            IS 3 FOR AVERAGE OVER MAR., APR., SEPT., OCT.
+C            IS 4 FOR AVERAGE OVER ENTIRE YEAR.
+C      IF ISEASAV.NE.0, DAYNO IS IGNORED.
+C    IUTAV IS 0 IF NO UT AVERAGING IS DESIRED.
+C          IS 1 FOR AVERAGE OVER ALL UT AT THE FIXED LOCAL TIME GIVEN BY
+C            UT + (XMLON - 69.)/15.
+C
+C  OUTPUT PARAMETERS -
+C    POT IS THE ELECTROSTATIC PSEUDO-POTENTIAL IN VOLTS.
+C    VU IS THE DRIFT VELOCITY COMPONENT PERPENDICULAR TO THE GEOMAGNETIC FIELD
+C      IN THE UPWARD/POLEWARD DIRECTION IN THE MAGNETIC MERIDIAN PLANE, IN M/S.
+C    VE IS THE DRIFT VELOCITY COMPONENT IN THE MAGNETIC EASTWARD DIRECTION, IN
+C      M/S.
+C  THE OUTPUT VALUES ARE GEOPHYSICALLY MEANINGFUL ONLY FOR LATITUDES BETWEEN
+C    ABOUT -65 AND +65 DEGREES.  IF ISEASAV OR IUTAV IS OUT OF RANGE POT, VU,
+C    AND VE ARE SET TO -1/0.
+      DIMENSION KF(128),LF(128),MF(128),NF(128),JF(128),Q(5),RS(16),
+     1   FUT(5),RR(16),RSRS(16),P(16),VP(16),PA(5,9),VA(5,9),FS(3),
+     2  FT(3,3),SML(4),CML(4),              A(128),PB(9),VB(9)
+      DATA IFIRST/1/,ISVP/5/,A/
+     * -70.,-183.,  31.,-112.,  19., -39.,  -2.,   2., -33.,   2.,   2.,
+     *-111.,  46.,  -4.,  -5.,   7.,   9., -17.,   2.,   9., -10.,   2.,
+     *  -9.,  22., 145., -57., -42.,  -6.,   6.,  -5.,  -2.,  20.,  16.,
+     *  16., -77., -18.,  13.,  -8.,  16., -52., -10.,   7.,   2.,  11.,
+     * -28.,   2., -85., -82.,   3.,-281., -71., -25., -57., -50.,  21.,
+     * -10.,  10., -81.,  24.,   7.,   5.,  30.,  32.,   5.,  -5.,  11.,
+     * -31.,   8.,  10.,  20., -15., -42.,  32.,   7., -19.,   7.,  34.,
+     * -11., -15.,  26.,  21.,   1.,  22.,  12.,  -2., 275., 777.,-318.,
+     *-320.,-208.,  47., 429.,-523.,   8., -35.,-224.,-450., -66.,  -7.,
+     *  -8.,-231.,  55.,   6., -28., -51., -81.,  48.,   9.,   2., -10.,
+     *  54.,  16., 112.,  69., -33., 120., -47.,   5., -19., -17., -23.,
+     * -40., -22., -21.,  -7., -30.,  15.,   3./
+C***********************************************************************
+C88/2/2 DEACTIVATE SHORTCUT, SINCE IT WON'T NECESSARILY WORK RIGHT IF
+C  VARIABLES ARE NOT RETAINED WITH A SAVE STATEMENT.
+C     IF (IFIRST.EQ.0) GO TO 510
+      IFIRST = 0
+C***********************************************************************
+C  (THROUGH STATEMENT 510) SET UP CONSTANT PARAMETERS IN FIRST CALL TO
+C    SUBROUTINE.
+C  SET UP VALUES OF XMLATP, TUP, TLP, AND DAYNOP WHICH ARE NOT EQUAL TO XMLAT,
+C    UT, MAGNETIC LOCAL TIME, AND DAYNO, RESPECTIVELY.
+      XMLATP = -361.
+      IF (XMLATP.EQ.XMLAT) XMLATP = 0.
+      TUP = -25.
+      IF (TUP.EQ.UT) TUP = 0.
+      TL = UT + (XMLON - 69.)/15.
+      TLP = -25.
+      IF (TLP.EQ.TL) TLP = 0.
+      DAYNOP = -366.
+      IF (DAYNOP.EQ.DAYNO) DAYNOP = 0.
+C  (THROUGH STATEMENT 100) SELECT ONLY THOSE TERMS IN SERIES FOR WHICH
+C    COEFFICIENTS A ARE DEFINED TO BE NON-ZERO.
+      I = 0
+      DO 100 KP=1,3
+      LST = 4 - KP
+      LEND = 2 + KP
+      DO 100 LP = LST,LEND
+      L = LP - 3
+      IF (MOD(KP+LP,2) .NE.0) GO TO 100
+      DO 90 NP=2,8
+      N = NP - 1
+      IF (KP.NE.3.AND.N.GT.6) GO TO 90
+      IF (IABS(L).EQ.2.AND.N.GT.5) GO TO 90
+      DO 80 MP = 1,9
+      M = MP - 5
+      IF (IABS(M).GT.N) GO TO 80
+      IF (IABS(M).GT.3.AND.IABS(L).EQ.2) GO TO 80
+      IF (MOD(N-M,2).NE.0) GO TO 80
+      I = I + 1
+      KF(I) = KP
+      LF (I)= LP
+      NF(I) = NP
+      MF(I) = MP
+   80 CONTINUE
+   90 CONTINUE
+  100 CONTINUE
+      IMAX = I
+      FT(1,1) = .75*SQRT(6.E0)/3.1415926535898
+      FT(1,2) = 2.E0*FT(1,1)
+      FT(1,3) = 1.E0
+      FT(2,1) = FT(1,1)
+      FT(2,2) = -FT(1,2)
+      FT(2,3) = 1.E0
+      FT(3,1) = FT(2,2)
+      FT(3,2) = 0.
+      FT (3,3) = 1.E0
+      HRANG= 3.1415926535898/12.
+      DANG = 3.1415926535898/182.62
+      SQ2 = SQRT(2.E0)
+      RAD = 180./3.1415926535898
+      RB = -6.671E6*5.2E-5
+C RB IS -(EARTH RADIUS + 3.E5 M) TIMES DIPOLE MAGNETIC FIELD AT POLE AT 300 KM.
+      DO 400 I=1,IMAX
+      MM = IABS(MF(I) - 5)
+C  JF GIVES APPROPRIATE INDEX OF LEGENDRE POLYNOMIALS AS ORDERED BETWEEN
+C    STATEMENTS 530 AND 595.
+  400 JF(I) = (2*(NF(I) + 7*MM) - (MM - 1)**2 + 4)/4
+C  (THROUGH STATEMENT 500) COMPUTE RR (DEFINED AS R(N,M)*R(N-1,M)) AND RSRS
+C    (DEFINED AS R(N-1,M)**2 + R(N-2,M)**2) NEEDED FOR LEGENDRE POLYNOMIAL
+C    GENERATING RECURSION RELATIONS, WHERE R(N,M) IS DEFINED AS
+C    SQRT(N**2 - M**2)/SQRT(4*N**2 - 1).  ORDERING IS SAME AS FOR P(N,M).
+      J = 0
+      DO 500 MP=1,5
+      M = MP - 1
+      XM = M
+      IF (M.NE.0) Q(MP) = SQRT((2.*XM + 1.)/(2.*XM))
+      DO 500 NP = MP,8,2
+      N = NP - 1
+      XNS = N*N
+      XNMS = (N-1)**2
+      J = J + 1
+      RS(J) = (XNS - XM*XM)/(4.*XNS - 1.)
+      RSM    = (XNMS - XM*XM)/(4.*XNMS - 1.)
+      RR(J) = SQRT(RS(J)*RSM)
+      IF (NP.NE.MP) RSRS(J) = RSM    + RS(J - 1)
+  500 CONTINUE
+  510 CONTINUE
+      IF (IUTAV.LT.0.OR.IUTAV.GT.1) GO TO 988
+      IF (IABS(ISEASAV-2).GT.2) GO TO 988
+C  (THROUGH STATEMENT 530) IF SEASONAL HARMONIC AMPLITUDES ARE DIFFERENT FROM
+C    PREVIOUS CALL TO THIS SUBROUTINE, RECOMPUTE THEM.
+C***********************************************************************
+C88/2/2 DEACTIVATE SHORTCUT, SINCE IT WON'T NECESSARILY WORK RIGHT IF
+C  VARIABLES ARE NOT RETAINED WITH A SAVE STATEMENT.
+C     ICPT = 0
+C     IF (ISEASAV.EQ.ISVP) GO TO 524
+C***********************************************************************
+      ICPT = 1
+      ISVP = ISEASAV
+C  (THROUGH STATEMENT 530) FS(1), FS(2), FS(3) ARE FACTORS FOR AMPLITUDE OF
+C    SEMIANNUAL, ANNUAL, YEARLY AVERAGE COMPONENTS, RESPECTIVELY.
+C  IF ISEASAV = 0, COMPUTE FS FOR GIVEN DAY OF THE YEAR.
+      IF (ISEASAV.EQ.0)GO TO 525
+C  IF ISEASAV = 4, USE ONLY YEARLY AVERAGE COMPONENT.
+      IF (ISEASAV.EQ.4) GO TO 527
+C  IF ISEASAV = 1 - 3, COMPUTE FS FOR APPROPRIATE SEASONAL AVERAGE.
+      DO 521 K=1,3
+  521 FS(K) = FT(ISEASAV,K)
+      GO TO 530
+  524 CONTINUE
+      IF (ISEASAV.NE.0) GO TO 530
+C***********************************************************************
+C88/2/2 DEACTIVATE SHORTCUT, SINCE IT WON'T NECESSARILY WORK RIGHT IF
+C  VARIABLES ARE NOT RETAINED WITH A SAVE STATEMENT.
+C     IF (DAYNO.EQ.DAYNOP) GO TO 530
+C***********************************************************************
+  525 DAYNOP = DAYNO
+      ICPT = 1
+      ANG = (DAYNO + 9.)*DANG
+      FS(1) = SQ2*COS(2.*ANG)
+      FS(2) = SQ2*COS(ANG)
+      FS(3) = 1.
+      GO TO 530
+  527 FS(1) = 0.
+      FS(2) = 0.
+      FS(3) = 1.
+  530 CONTINUE
+C  IF MAGNETIC LATITUDE IS SAME AS IN PREVIOUS CALL TO THIS SUBROUTINE, SKIP TO
+C    STATEMENT 596.
+C***********************************************************************
+C88/2/2 DEACTIVATE SHORTCUT, SINCE IT WON'T NECESSARILY WORK RIGHT IF
+C  VARIABLES ARE NOT RETAINED WITH A SAVE STATEMENT.
+C     IF (XMLAT.EQ.XMLATP) GO TO 596
+C***********************************************************************
+      ICPT = 1
+      XMLATP = XMLAT
+      CT = SIN(XMLAT/RAD)
+      CTS = CT*CT
+      ST = SQRT(1. - CTS)
+      RBT = RB*SQRT(.25 + .75*CTS)
+C  (THROUGH STATEMENT 595) CALCULATE LEGENDRE POLYNOMIALS P(N,M) AS WELL AS VP,
+C    DEFINED AS (DP(N,M)/D(COLATITUDE))/(RB*CT).
+      J = 0
+      DO 595 MP = 1,5
+C  FOR MP=1, P=P(N,M).  FOR MP.GT.1, P=P(N,M)/ST.  THIS DIFFERENCE IS SO THAT
+C    PROGRAM NEVER DIVIDES BY ST.
+      J = J + 1
+      XM = MP - 1
+      MPP = MP + 2
+      IF (MP.GT.1) GO TO 550
+      X = 1.
+      P(1) = 1.E0
+      XZ = 2.*ST/RB
+      VP(1) = 0.
+      GO TO 560
+  550 P(J) = Q(MP)*X
+      X = P(J)*ST
+      VP(J) = XM*P(J)/RB
+      XZ = 2.*ST*ST/RB
+  560 DO 590 NP = MPP,8,2
+      J = J + 1
+      Z = 0.
+      ZP = 0.
+      IF (NP.EQ.MPP) GO TO 570
+      Z = RR(J-1)*P(J-2)
+      ZP = RR(J-1) *VP(J-2)
+  570 P(J) = ((CTS - RSRS(J))*P(J-1) - Z)/RR(J)
+  590 VP(J) = ((CTS - RSRS(J))*VP(J-1) - ZP - XZ*P(J-1))/RR(J)
+  595 CONTINUE
+  596 CONTINUE
+C  (THROUGH STATEMENT 600) CALCULATE ARRAYS OF FOURIER COEFFICIENTS, WITH LP
+C    INDICATING HARMONIC OF UT AND MPF INDICATING HARMONIC OF MAGNETIC LOCAL
+C    TIME.  IF ARRAYS ARE SAME AS IN PREVIOUS CALL TO THIS SUBROUTINE, SKIP TO
+C    STATEMENT 601.
+C***********************************************************************
+C88/2/2 DEACTIVATE SHORTCUT, SINCE IT WON'T NECESSARILY WORK RIGHT IF
+C  VARIABLES ARE NOT RETAINED WITH A SAVE STATEMENT.
+C     IF (ICPT.EQ.0) GO TO 601
+C***********************************************************************
+      DO 597 MPF = 1,9
+      DO 597 LP=1,5
+      PA(LP,MPF) = 0.
+  597 VA(LP,MPF) = 0.
+      DO 600 I=1,IMAX
+      LP = LF(I)
+      MPF = MF(I)
+      J = JF(I)
+      X = A(I)*FS(KF(I))
+      PA(LP,MPF) = PA(LP,MPF) + X*P(J)
+      VA(LP,MPF) = VA(LP,MPF) + X*VP(J)
+  600 CONTINUE
+  601 CONTINUE
+C  (THROUGH STATEMENT 607) CALCULATE FOURIER COEFFICIENTS PB AND VB AT GIVEN UT
+C    FOR HARMONICS OF TL.
+C  IF UT IS SAME AS IN PREVIOUS CALL TO THIS SUBROUTINE, SKIP TO STATEMENT 603.
+C***********************************************************************
+C88/2/2 DEACTIVATE SHORTCUT, SINCE IT WON'T NECESSARILY WORK RIGHT IF
+C  VARIABLES ARE NOT RETAINED WITH A SAVE STATEMENT.
+C     IF (UT.EQ.TUP) GO TO 603
+C***********************************************************************
+      TUP = UT
+      ICPT = 1
+      TUA = UT*HRANG
+      SL = SIN(TUA)
+      CL = COS(TUA)
+      FUT(3) = 1.
+      FUT(2) = SQ2*CL
+      FUT(4) = SQ2*SL
+      FUT(1) = CL*FUT(2) - SL*FUT(4)
+      FUT(5) = CL*FUT(4) + SL*FUT(2)
+  603 CONTINUE
+      IF (ICPT.EQ.0) GO TO 608
+      DO 607 MPF = 1,9
+      PB(MPF) = 0.
+      VB(MPF) = 0.
+      DO 605 LP=1,5
+      IF (IUTAV.NE.0.AND.LP.NE.3) GO TO 605
+      PB(MPF) = PB(MPF) + FUT(LP)*PA(LP,MPF)
+      VB(MPF) = VB(MPF) + FUT(LP)*VA(LP,MPF)
+  605 CONTINUE
+  607 CONTINUE
+C  TL IS MAGNETIC LOCAL TIME.
+  608 TL = UT + (XMLON - 69.)/15.
+C  IF TL IS SAME AS IN PREVIOUS CALL TO THIS SUBROUTINE, SKIP TO STATEMENT 630.
+C***********************************************************************
+C88/2/2 DEACTIVATE SHORTCUT, SINCE IT WON'T NECESSARILY WORK RIGHT IF
+C  VARIABLES ARE NOT RETAINED WITH A SAVE STATEMENT.
+C     IF (TL.EQ.TLP) GO TO 630
+C***********************************************************************
+      TLP = TL
+C  (THROUGH STATEMENT 610) CALCULATE SINES AND COSINES, TIMES SQ2, OF HARMONICS
+C    OF MAGNETIC LOCAL TIME.
+      TLA = TL*HRANG
+      SL = SIN(TLA)
+      CL = COS(TLA)
+      SML(1) = SQ2*SL
+      CML(1) = SQ2*CL
+      DO 610 M=2,4
+      SML(M) = CL*SML(M-1) + SL*CML(M-1)
+  610 CML(M) = CL*CML(M-1) - SL*SML(M-1)
+C  CALCULATE POT, VE, AND VU BY SUMMING FOURIER COEFFICIENTS MULTIPLIED BY
+C    APPROPRIATE SINES AND COSINES.
+  630 POT = 0.
+      VE = 0.
+      VU = 0.
+      DO 640 M=1,4
+      MPF = M+5
+      MMF = 5 - M
+      XM = M
+      POT = POT + PB(MPF)*SML(M) + PB(MMF)*CML(M)
+      VE = VE + VB(MPF)*SML(M) +   VB(MMF)*CML(M)
+  640 VU = VU + XM*(PB(MPF)*CML(M) - PB(MMF)*SML(M))
+      POT = POT*ST + PB(5)
+      VE = VE + VB(5)
+      VU = VU/RBT
+      GO TO 999
+  988 POT = -1/IFIRST
+      VU = -1/IFIRST
+      VE = -1/IFIRST
+  999 RETURN
+      END

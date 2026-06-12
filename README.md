@@ -33,11 +33,13 @@ Supported models:
 - **MGST80**: MGST(6/80) geomagnetic field — MAGSAT scalar + fine attitude, epoch 1979.85, degree 13
 - **MGST81**: MGST(4/81) geomagnetic field — MAGSAT 15-day data with secular variation, epoch 1980.0
 - **HMR**: Heppner-Maynard-Rich electric field — high-latitude ionospheric potential, conductivity, Joule heating, FAC
+- **ISRDrift**: Quiet-day ionospheric E x B drifts at 300 km (Richmond et al., 1980)
+- **XuLi**: Magnetotail neutral sheet position (SEN/DEN/AEN variants, Xu & Li)
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`, `JensenCain`, `MGST80`, `MGST81`, `HMR`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`, `JensenCain`, `MGST80`, `MGST81`, `HMR`, `ISRDrift`, `XuLi`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -222,6 +224,8 @@ Top-level `model` exports only:
 - `MGST80`
 - `MGST81`
 - `HMR`
+- `ISRDrift`
+- `XuLi`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -257,6 +261,8 @@ Each model directory under `src/model/` contains its own `README.md` with detail
 - [JensenCain](src/model/pyjensen/README.md)
 - [MGST](src/model/pymgst/README.md)
 - [HMR](src/model/pyhmr/README.md)
+- [ISRDrift](src/model/pyisrdrift/README.md)
+- [XuLi](src/model/pyxuli/README.md)
 
 ### Optional utility modules
 
@@ -306,7 +312,7 @@ Convert output dictionaries to xarray datasets.
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC, JensenCain, MGST80, MGST81, HMR
+│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC, JensenCain, MGST80, MGST81, HMR, ISRDrift, XuLi
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
@@ -328,7 +334,9 @@ UpperAtmPy/
 │   │   ├── pygsfc/           # GSFC geomagnetic field models (80, 83, 87)
 │   │   ├── pyjensen/         # Jensen & Cain (1962) geomagnetic field wrapper
 │   │   ├── pymgst/           # MGST80/MGST81 geomagnetic field wrappers
-│   │   └── pyhmr/            # Heppner-Maynard-Rich electric field wrapper
+│   │   ├── pyhmr/            # Heppner-Maynard-Rich electric field wrapper
+│   │   ├── pyisrdrift/       # ISR ion drift model wrapper (Richmond et al., 1980)
+│   │   └── pyxuli/           # Xu-Li neutral sheet model wrapper (SEN/DEN/AEN)
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py

@@ -30,6 +30,8 @@ The following models have been fully ported and are available in the `src/model/
 | Jensen & Cain (1962) | `JensenCain` | Early spherical harmonic geomagnetic field model (degree 6, epoch 1960.0) | Done |
 | MGST Geomagnetic Field | `MGST80`, `MGST81` | MGST geomagnetic field models from MAGSAT data — epochs 1979.85 and 1980.0 | Done |
 | Heppner-Maynard-Rich | `HMR` | High-latitude ionospheric electric potential, conductivity, Joule heating, and field-aligned current | Done |
+| ISR Ion Drift | `ISRDrift` | Quiet-day ionospheric E×B drifts at 300 km (Richmond et al., 1980) | Done |
+| Xu-Li Neutral Sheet | `XuLi` | Magnetotail equatorial neutral sheet position (SEN, DEN, AEN variants) | Done |
 
 ## Planned Models
 
@@ -49,10 +51,7 @@ _No remaining models in this phase._
 
 Spherical harmonic geomagnetic field models and high-latitude ionospheric electric field models.
 
-| Model | Directory | Description | Language | External Data |
-|-------|-----------|-------------|----------|---------------|
-| ISR Ion Drift | `TODO/ISR-Ion-Drift-Model` | Incoherent Scatter Radar ion drift model — quiet-day E×B drifts at 300 km | Fortran 77 | None (hard-coded) |
-| Xu-Li Neutral Sheet | `TODO/Xu-Li-Neutral-Sheet-Model` | Magnetotail equatorial neutral sheet position (SEN, DEN, AEN variants) | Fortran 77 | None (hard-coded) |
+_No remaining models in this phase._
 
 ### Phase 4 — Solar Irradiance & Planetary Models
 

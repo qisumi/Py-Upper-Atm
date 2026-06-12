@@ -27,6 +27,8 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.MGST80`
 - `model.MGST81`
 - `model.HMR`
+- `model.ISRDrift`
+- `model.XuLi`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -62,6 +64,8 @@ python example/test_cutoff.py
 python example/test_jensen.py
 python example/test_mgst.py
 python example/test_hmr.py
+python example/test_isr_drift.py
+python example/test_xuli.py
 ```
 
 ## Public API Pattern
@@ -234,6 +238,18 @@ HMR result dictionaries contain (calculate_full — grid):
 - `fac_uA_m2` — field-aligned current
 - `lat_grid_deg`, `mlt_grid_hrs` — grid axes
 
+ISRDrift result dictionaries contain:
+- `mlat_deg`, `mlon_deg`, `doy`, `ut_hours` — broadcast inputs
+- `potential_V` — electrostatic pseudo-potential (V)
+- `poleward_drift_ms` — upward/poleward E x B drift (m/s)
+- `eastward_drift_ms` — eastward E x B drift (m/s)
+
+XuLi result dictionaries contain:
+- 'x_re', 'y_re', 'tilt_angle_deg' -- broadcast inputs
+- 'zaen_re', 'zsen_re', 'zden_re' -- neutral sheet Z positions (Earth Radii)
+- 'rmp_re' -- magnetopause radius (Earth Radii)
+- 'ie_aen', 'ie_sen', 'ie_den' -- 1=inside, 2=outside magnetopause
+
 ## Project Structure
 
 ```text
@@ -262,7 +278,9 @@ UpperAtmPy/
 │   │   ├── pygsfc/
 │   │   ├── pyjensen/
 │   │   ├── pymgst/
-│   │   └── pyhmr/
+│   │   ├── pyhmr/
+│   │   ├── pyisrdrift/
+│   │   └── pyxuli/           # Xu-Li 中性片模型封装（SEN/DEN/AEN）
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -285,7 +303,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC", "JensenCain", "MGST80", "MGST81", "HMR"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC", "JensenCain", "MGST80", "MGST81", "HMR", "ISRDrift", "XuLi"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 

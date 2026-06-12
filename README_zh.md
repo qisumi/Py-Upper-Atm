@@ -31,11 +31,13 @@
 - **MGST80**：MGST(6/80) 地磁场模型 — MAGSAT 标量+精细姿态数据，epoch 1979.85，13 阶
 - **MGST81**：MGST(4/81) 地磁场模型 — MAGSAT 15天数据含长期变化，epoch 1980.0
 - **HMR**：Heppner-Maynard-Rich 电场模型 — 高纬电离层电势、电导率、焦耳加热、场向电流
+- **ISRDrift**：静日电离层 E x B 漂移模型 — 300 km 电伪势和漂移速度（Richmond et al., 1980）
+- **XuLi**：磁尾中性片位置模型（SEN/DEN/AEN 三种变体，Xu & Li）
 
 ## 特性
 
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`、`JensenCain`、`MGST80`、`MGST81`、`HMR`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`、`JensenCain`、`MGST80`、`MGST81`、`HMR`、`ISRDrift`、`XuLi`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
@@ -209,6 +211,8 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 - `MGST80`
 - `MGST81`
 - `HMR`
+- `ISRDrift`
+- `XuLi`
 
 每个类都提供 `calculate(...)`，返回普通字典。
 模型计算方法同时支持标量和可广播数组输入，输入标量返回标量结果，输入数组会按 numpy 广播返回对应形状。
@@ -244,6 +248,8 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 - [JensenCain](src/model/pyjensen/README_zh.md)
 - [MGST](src/model/pymgst/README_zh.md)
 - [HMR](src/model/pyhmr/README_zh.md)
+- [ISRDrift](src/model/pyisrdrift/README_zh.md)
+- [XuLi](src/model/pyxuli/README_zh.md)
 
 ### 可选工具模块
 
@@ -293,7 +299,7 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC, JensenCain, MGST80, MGST81, HMR
+│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC, JensenCain, MGST80, MGST81, HMR, ISRDrift, XuLi
 │   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
 │   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
 │   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
@@ -315,7 +321,9 @@ UpperAtmPy/
 │   │   ├── pygsfc/           # GSFC 地磁场模型封装（80、83、87）
 │   │   ├── pyjensen/         # Jensen & Cain (1962) 地磁场模型封装
 │   │   ├── pymgst/           # MGST80/MGST81 地磁场模型封装
-│   │   └── pyhmr/            # Heppner-Maynard-Rich 电场模型封装
+│   │   ├── pyhmr/            # Heppner-Maynard-Rich 电场模型封装
+│   │   ├── pyisrdrift/       # ISR 离子漂移模型封装（Richmond et al., 1980）
+│   │   └── pyxuli/           # Xu-Li 中性片模型封装（SEN/DEN/AEN）
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py

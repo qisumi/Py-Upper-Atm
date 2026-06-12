@@ -354,6 +354,26 @@ def hmr_model():
         pytest.skip(f"HMR DLL not available: {exc}")
 
 
+@pytest.fixture
+def isrdrift_model():
+    try:
+        from model import ISRDrift
+
+        return ISRDrift()
+    except Exception as exc:
+        pytest.skip(f"ISR Drift DLL not available: {exc}")
+
+
+@pytest.fixture
+def xuli_model():
+    try:
+        from model import XuLi
+
+        return XuLi()
+    except Exception as exc:
+        pytest.skip(f"XuLi DLL not available: {exc}")
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"

@@ -149,6 +149,8 @@ jobs:
                   "model/pyjensen/jensen.dll",
                   "model/pymgst/mgst.dll",
                   "model/pyhmr/hmr.dll",
+                  "model/pyisrdrift/isr_drift.dll",
+                  "model/pyxuli/xuli.dll",
               }
           else:
               expected = {
@@ -162,6 +164,8 @@ jobs:
                   "model/pyjensen/libjensen.so",
                   "model/pymgst/libmgst.so",
                   "model/pyhmr/libhmr.so",
+                  "model/pyisrdrift/libisr_drift.so",
+                  "model/pyxuli/libxuli.so",
               }
 
           expected.add("utils/model_data_manifest.json")
@@ -241,6 +245,8 @@ jobs:
               f"{root}/src/model/pyjensen/CMakeLists.txt",
               f"{root}/src/model/pymgst/CMakeLists.txt",
               f"{root}/src/model/pyhmr/CMakeLists.txt",
+              f"{root}/src/model/pyisrdrift/CMakeLists.txt",
+              f"{root}/src/model/pyxuli/CMakeLists.txt",
           }
           missing = expected - names
           data_files = [name for name in names if name.startswith(f"{root}/data/")]
