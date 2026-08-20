@@ -32,6 +32,13 @@ The following models have been fully ported and are available in the `src/model/
 | Heppner-Maynard-Rich | `HMR` | High-latitude ionospheric electric potential, conductivity, Joule heating, and field-aligned current | Done |
 | ISR Ion Drift | `ISRDrift` | Quiet-day ionospheric E×B drifts at 300 km (Richmond et al., 1980) | Done |
 | Xu-Li Neutral Sheet | `XuLi` | Magnetotail equatorial neutral sheet position (SEN, DEN, AEN variants) | Done |
+| AE-EUV Reference Spectra | `AEEUV` | Historical solar EUV reference spectra | Done |
+| Revised SERF2 EUV91 | `EUV91` | Date-driven 39-bin solar EUV flux | Done |
+| EUVAC | `EUVAC` | F10.7-driven 37-bin solar EUV flux | Done |
+| Photoelectron | `Photoelectron` | Richards ionospheric photoelectron spectrum | Done |
+| Pioneer Venus Ionosphere | `PVIonosphere` | Venus electron density and temperature | Done |
+| Pioneer Venus Thermosphere | `PVThermosphere` | Venus neutral density and temperature | Done |
+| Exospheric Hydrogen | `ExosphericH` | Hodges terrestrial exospheric H density | Done |
 
 ## Planned Models
 
@@ -57,13 +64,7 @@ _No remaining models in this phase._
 
 Solar EUV flux models and planetary atmosphere models.
 
-| Model | Directory | Description | Language | External Data |
-|-------|-----------|-------------|----------|---------------|
-| EUV (AE-EUV / EUV91 / EUVAC / SOLAR2000) | `TODO/EUV` | Solar EUV irradiance models (18–1050 Å) — thermospheric/ionospheric input | Fortran 77 | Coefficient files, proxy indices, reference spectra |
-| Photoelectron Code | `TODO/photoelectron_code` | Photoelectron flux model — 120–500 km, solar zenith angle driven | Fortran 77 | None (hard-coded) |
-| Pioneer Venus Ionosphere | `TODO/PV-Ionosphere-Mode` | Venus ionospheric electron density & temperature — solar zenith angle and altitude | Fortran 77 | `fsmod.dat`, `fsmodt.dat` (binary) |
-| Pioneer Venus Thermosphere | `TODO/PV-Thermosphere-Model` | Venus neutral atmosphere densities (CO2, O, CO, He, N, N2) — MSIS-like structure | Fortran 77 | None (hard-coded) |
-| Exospheric H Model | `TODO/Exospheric-H-Model` | Exospheric hydrogen density (40 radii × 4 solar conditions) — spherical harmonic expansion | Data only | `h_exos.dat` (binary) |
+_No remaining models in this phase._
 
 ### Not Planned for Porting
 
@@ -73,6 +74,7 @@ The following items are documentation-only, Java tools, or duplicates and are no
 |------|-----------|--------|
 | Archived Models Info Pages | `TODO/Archived-Models-InfoPages` | HTML documentation catalogue only — no source code |
 | Revised SERF2 Solar EUV Flux | `TODO/Revised-SERF2-Solar-EUV-Flux-Mode` | Duplicate of `TODO/EUV` — same content |
+| Solar2000 | `TODO/EUV/solar2000` | Only an external availability notice is archived; no redistributable source, coefficients, or reference output |
 | LWS / MineTool | `TODO/LWS` | Java-based data mining tool — not a Fortran/C model |
 | HWM93 (in TODO) | `TODO/HWM93` | Already ported as `model.HWM93` |
 

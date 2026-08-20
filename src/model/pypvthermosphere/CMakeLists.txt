@@ -1,0 +1,5 @@
+add_library(pvthermosphere SHARED pvatmos.for pvthermosphere_cshim.F90)
+upperatmpy_set_output(pvthermosphere "${CMAKE_CURRENT_SOURCE_DIR}")
+upperatmpy_use_gnu_legacy_fortran(pvatmos.for)
+upperatmpy_link_static_gnu_runtime(pvthermosphere)
+install(TARGETS pvthermosphere RUNTIME DESTINATION model/pypvthermosphere LIBRARY DESTINATION model/pypvthermosphere)

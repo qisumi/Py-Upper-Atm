@@ -32,6 +32,13 @@
 | Heppner-Maynard-Rich | `HMR` | 高纬电离层电势、电导率、焦耳加热和场向电流模型 | 已完成 |
 | ISR 离子漂移 | `ISRDrift` | 静日电离层 E×B 漂移模型 — 300 km 电伪势和漂移速度（Richmond et al., 1980） | 已完成 |
 | Xu-Li 中性片 | `XuLi` | 磁尾赤道中性片位置模型（SEN、DEN、AEN 三种变体） | 已完成 |
+| AE-EUV 参考谱 | `AEEUV` | 历史太阳 EUV 参考光谱 | 已完成 |
+| Revised SERF2 EUV91 | `EUV91` | 日期驱动的 39 波段太阳 EUV 通量 | 已完成 |
+| EUVAC | `EUVAC` | F10.7 驱动的 37 波段太阳 EUV 通量 | 已完成 |
+| 光电子模型 | `Photoelectron` | Richards 电离层光电子能谱 | 已完成 |
+| 金星电离层 | `PVIonosphere` | 金星电子密度与电子温度 | 已完成 |
+| 金星热层 | `PVThermosphere` | 金星中性成分密度与温度 | 已完成 |
+| 外逸层氢 | `ExosphericH` | Hodges 地球外逸层氢密度 | 已完成 |
 
 ## 计划移植模型
 
@@ -57,13 +64,7 @@ _本阶段无剩余模型。_
 
 太阳极紫外通量模型和行星大气模型。
 
-| 模型 | 目录 | 说明 | 原始语言 | 外部数据 |
-|------|------|------|----------|----------|
-| EUV（AE-EUV / EUV91 / EUVAC / SOLAR2000） | `TODO/EUV` | 太阳极紫外辐照度模型（18–1050 Å）— 热层/电离层输入 | Fortran 77 | 系数文件、代理指数、参考光谱 |
-| 光电子模型 | `TODO/photoelectron_code` | 光电子通量模型 — 120–500 km，太阳天顶角驱动 | Fortran 77 | 无（硬编码系数） |
-| 金星电离层 | `TODO/PV-Ionosphere-Mode` | 金星电离层电子密度与温度 — 太阳天顶角与高度 | Fortran 77 | `fsmod.dat`、`fsmodt.dat`（二进制） |
-| 金星热层 | `TODO/PV-Thermosphere-Model` | 金星中性大气密度（CO2, O, CO, He, N, N2）— 类 MSIS 结构 | Fortran 77 | 无（硬编码系数） |
-| 外逸层氢模型 | `TODO/Exospheric-H-Model` | 外逸层氢密度（40 个半径 × 4 种太阳条件）— 球谐展开 | 纯数据 | `h_exos.dat`（二进制） |
+_本阶段无剩余模型。_
 
 ### 不计划移植
 
@@ -73,6 +74,7 @@ _本阶段无剩余模型。_
 |------|------|------|
 | 归档模型信息页 | `TODO/Archived-Models-InfoPages` | 仅 HTML 文档目录 — 无源码 |
 | Revised SERF2 太阳 EUV 通量 | `TODO/Revised-SERF2-Solar-EUV-Flux-Mode` | 与 `TODO/EUV` 内容重复 |
+| Solar2000 | `TODO/EUV/solar2000` | 归档中只有外部获取说明，没有可再分发源码、系数或参考输出 |
 | LWS / MineTool | `TODO/LWS` | 基于 Java 的数据挖掘工具 — 非 Fortran/C 模型 |
 | HWM93（TODO 目录内） | `TODO/HWM93` | 已移植为 `model.HWM93` |
 

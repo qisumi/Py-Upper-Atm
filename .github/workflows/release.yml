@@ -151,6 +151,11 @@ jobs:
                   "model/pyhmr/hmr.dll",
                   "model/pyisrdrift/isr_drift.dll",
                   "model/pyxuli/xuli.dll",
+                  "model/pyeuvac/euvac.dll",
+                  "model/pyeuv91/euv91.dll",
+                  "model/pyphotoelectron/photoelectron.dll",
+                  "model/pypvionosphere/pvionosphere.dll",
+                  "model/pypvthermosphere/pvthermosphere.dll",
               }
           else:
               expected = {
@@ -166,6 +171,11 @@ jobs:
                   "model/pyhmr/libhmr.so",
                   "model/pyisrdrift/libisr_drift.so",
                   "model/pyxuli/libxuli.so",
+                  "model/pyeuvac/libeuvac.so",
+                  "model/pyeuv91/libeuv91.so",
+                  "model/pyphotoelectron/libphotoelectron.so",
+                  "model/pypvionosphere/libpvionosphere.so",
+                  "model/pypvthermosphere/libpvthermosphere.so",
               }
 
           expected.add("utils/model_data_manifest.json")
@@ -247,6 +257,18 @@ jobs:
               f"{root}/src/model/pyhmr/CMakeLists.txt",
               f"{root}/src/model/pyisrdrift/CMakeLists.txt",
               f"{root}/src/model/pyxuli/CMakeLists.txt",
+              f"{root}/src/model/pyeuvac/CMakeLists.txt",
+              f"{root}/src/model/pyeuvac/euvac_cshim.F90",
+              f"{root}/src/model/pyeuv91/CMakeLists.txt",
+              f"{root}/src/model/pyeuv91/euv91_cshim.F90",
+              f"{root}/src/model/pyphotoelectron/CMakeLists.txt",
+              f"{root}/src/model/pyphotoelectron/photoelectron.for",
+              f"{root}/src/model/pyphotoelectron/photoelectron_cshim.F90",
+              f"{root}/src/model/pypvionosphere/CMakeLists.txt",
+              f"{root}/src/model/pypvionosphere/pvionosphere_cshim.F90",
+              f"{root}/src/model/pypvthermosphere/CMakeLists.txt",
+              f"{root}/src/model/pypvthermosphere/pvatmos.for",
+              f"{root}/src/model/pypvthermosphere/pvthermosphere_cshim.F90",
           }
           missing = expected - names
           data_files = [name for name in names if name.startswith(f"{root}/data/")]
@@ -289,6 +311,10 @@ jobs:
           expected.extend(
               sorted(path.relative_to(data_root) for path in (data_root / "jensen" / "cain").glob("*") if path.is_file())
           )
+          for directory in ("aeeuvdata", "euv91data", "pvionospheredata", "exospherichdata"):
+              expected.extend(
+                  sorted(path.relative_to(data_root) for path in (data_root / directory).glob("*") if path.is_file())
+              )
 
           missing = [str(path) for path in expected if not (data_root / path).is_file()]
           if missing:

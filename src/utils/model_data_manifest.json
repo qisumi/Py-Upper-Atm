@@ -576,6 +576,78 @@
       ],
       "sha256": "fb10ee352e9555d818a3259658048eb34175686c7b484689bd10259bf53de456",
       "size": 34882
+    },
+    {
+      "model": "aeeuv",
+      "version": "modelweb-1995",
+      "path": "aeeuvdata/f74113.dat",
+      "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/aeeuvdata/f74113.dat"],
+      "sha256": "8cdd16ae537911e65f2284ba938e53deeb52f4b335ed4de6d4db38dd14046675",
+      "size": 50814
+    },
+    {
+      "model": "aeeuv",
+      "version": "modelweb-1995",
+      "path": "aeeuvdata/f76ref.dat",
+      "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/aeeuvdata/f76ref.dat"],
+      "sha256": "c00dc0e74f30f909b31a5af973126ce21c3c9f59f75c47d9d6ebe52a41a3770b",
+      "size": 76904
+    },
+    {
+      "model": "aeeuv",
+      "version": "modelweb-1995",
+      "path": "aeeuvdata/r74113.dat",
+      "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/aeeuvdata/r74113.dat"],
+      "sha256": "99245a2cabd45688d4f2017768447979aa1bc5ee0e747403742dd9006ce6e039",
+      "size": 48289
+    },
+    {
+      "model": "aeeuv",
+      "version": "modelweb-1995",
+      "path": "aeeuvdata/sc21refw.dat",
+      "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/aeeuvdata/sc21refw.dat"],
+      "sha256": "48241e48bf38ef661c231bc48d52404e83b8cba4b2017edbe86316b7af7fe016",
+      "size": 64170
+    },
+    {
+      "model": "euv91",
+      "version": "euv91-1991",
+      "path": "euv91data/euv91coe.txt",
+      "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/euv91data/euv91coe.txt"],
+      "sha256": "54e061dcf4368266c52b2e5cf1ee573d587d277a378f4e1ad13bb14328ed71d6",
+      "size": 4894
+    },
+    {
+      "model": "euv91",
+      "version": "euv91-1991",
+      "path": "euv91data/euv91ix2.dat",
+      "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/euv91data/euv91ix2.dat"],
+      "sha256": "3e898eb9acd0010d9fbf7a6dede00e2724589b70220b150e84f32413eaadec8e",
+      "size": 296330
+    },
+    {
+      "model": "pvionosphere",
+      "version": "pvo-1984",
+      "path": "pvionospheredata/fsmod.dat",
+      "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/pvionospheredata/fsmod.dat"],
+      "sha256": "ec03d3ec3d4f07281db1717669b1804c010aaaf1c82b13a310aa87bc96402048",
+      "size": 396
+    },
+    {
+      "model": "pvionosphere",
+      "version": "pvo-1984",
+      "path": "pvionospheredata/fsmodt.dat",
+      "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/pvionospheredata/fsmodt.dat"],
+      "sha256": "d78f34c7b929fb06c8f12744e6ba955c5970fd300d7e38f4b9091f54586a2cb9",
+      "size": 426
+    },
+    {
+      "model": "exospherich",
+      "version": "hodges-1994",
+      "path": "exospherichdata/h_exos.dat",
+      "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/exospherichdata/h_exos.dat"],
+      "sha256": "f4f90aba1c9cc12263061b82e7a2f79f19bf92a7be45bde547a313e42c5a115c",
+      "size": 36590
     }
   ]
 }

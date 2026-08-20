@@ -35,11 +35,18 @@ Supported models:
 - **HMR**: Heppner-Maynard-Rich electric field — high-latitude ionospheric potential, conductivity, Joule heating, FAC
 - **ISRDrift**: Quiet-day ionospheric E x B drifts at 300 km (Richmond et al., 1980)
 - **XuLi**: Magnetotail neutral sheet position (SEN/DEN/AEN variants, Xu & Li)
+- **AEEUV**: Atmosphere Explorer reference solar EUV spectra
+- **EUV91**: Revised SERF2 historical 39-band solar EUV irradiance
+- **EUVAC**: F10.7-driven Torr 37-band solar EUV photon flux
+- **Photoelectron**: Richards simplified ionospheric photoelectron flux
+- **PVIonosphere**: Pioneer Venus electron density and temperature
+- **PVThermosphere**: Pioneer Venus VTS3 neutral thermosphere
+- **ExosphericH**: Hodges third-order spherical-harmonic exospheric hydrogen
 
 ## Features
 
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`, `JensenCain`, `MGST80`, `MGST81`, `HMR`, `ISRDrift`, `XuLi`.
+- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`, `JensenCain`, `MGST80`, `MGST81`, `HMR`, `ISRDrift`, `XuLi`, `AEEUV`, `EUV91`, `EUVAC`, `Photoelectron`, `PVIonosphere`, `PVThermosphere`, `ExosphericH`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -153,13 +160,13 @@ arguments, `calculate(...)` signatures, inputs, outputs, and examples.
 
 ## Data Files
 
-MSIS2, HWM14, IGRF, CIRA86, and MSIS86 need external model data. By default UpperAtmPy resolves
+MSIS2, HWM14, IGRF, CIRA86, MSIS86, AEEUV, EUV91, PVIonosphere, and ExosphericH need external model data. By default UpperAtmPy resolves
 `.upperatmpy` under the current project directory and downloads missing files
 from the current package version's release tag (for example `v0.2.0`) on first
 model instantiation when a download manifest is available. CIRA86 currently
 uses the local `cira86data/` ASCII tables. For offline use, pass
 `data_dir=...` or set `UPPERATMPY_DATA_DIR` to a data root containing the legacy
-`msis2data/`, `hwm14data/`, `igrf13data/`, `igrf14data/`, and `cira86data/` subdirectories. In
+`msis2data/`, `hwm14data/`, `igrf13data/`, `igrf14data/`, `cira86data/`, `aeeuvdata/`, `euv91data/`, `pvionospheredata/`, and `exospherichdata/` subdirectories. In
 the source tree, that root is `data/`.
 
 `UPPERATMPY_DATA_TAG` can force a specific release tag for data download.
@@ -169,7 +176,7 @@ the source tree, that root is `data/`.
 If you cannot download data files at runtime, you can fetch them manually from
 `GitHub Releases`:
 
-1. Open the release page and download data assets (or a combined data archive) for `msis2data`, `hwm14data`, `igrf13data`, `igrf14data`, and, when published, `cira86data`.
+1. Open the release page and download the combined model-data archive (or the individual model data assets).
 2. Extract them so you get a data root directory containing the needed folders:
 
 ```bash
@@ -179,7 +186,11 @@ UPPERATMPY_DATA_DIR/
 ├── hwm14data/
 ├── igrf13data/
 ├── igrf14data/
-└── cira86data/
+├── cira86data/
+├── aeeuvdata/
+├── euv91data/
+├── pvionospheredata/
+└── exospherichdata/
 ```
 
 3. Configure the project to load from this local root.
@@ -226,6 +237,13 @@ Top-level `model` exports only:
 - `HMR`
 - `ISRDrift`
 - `XuLi`
+- `AEEUV`
+- `EUV91`
+- `EUVAC`
+- `Photoelectron`
+- `PVIonosphere`
+- `PVThermosphere`
+- `ExosphericH`
 
 Each class provides `calculate(...)` and returns a plain dictionary.
 The model methods accept scalar or broadcastable array inputs.
@@ -263,6 +281,13 @@ Each model directory under `src/model/` contains its own `README.md` with detail
 - [HMR](src/model/pyhmr/README.md)
 - [ISRDrift](src/model/pyisrdrift/README.md)
 - [XuLi](src/model/pyxuli/README.md)
+- [AEEUV](src/model/pyaeeuv/README.md)
+- [EUV91](src/model/pyeuv91/README.md)
+- [EUVAC](src/model/pyeuvac/README.md)
+- [Photoelectron](src/model/pyphotoelectron/README.md)
+- [PVIonosphere](src/model/pypvionosphere/README.md)
+- [PVThermosphere](src/model/pypvthermosphere/README.md)
+- [ExosphericH](src/model/pyexospherich/README.md)
 
 ### Optional utility modules
 
@@ -312,7 +337,7 @@ Convert output dictionaries to xarray datasets.
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # Lazy aliases: MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC, JensenCain, MGST80, MGST81, HMR, ISRDrift, XuLi
+│   │   ├── __init__.py      # Lazy aliases for all public model classes
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
@@ -336,7 +361,14 @@ UpperAtmPy/
 │   │   ├── pymgst/           # MGST80/MGST81 geomagnetic field wrappers
 │   │   ├── pyhmr/            # Heppner-Maynard-Rich electric field wrapper
 │   │   ├── pyisrdrift/       # ISR ion drift model wrapper (Richmond et al., 1980)
-│   │   └── pyxuli/           # Xu-Li neutral sheet model wrapper (SEN/DEN/AEN)
+│   │   ├── pyxuli/           # Xu-Li neutral sheet model wrapper (SEN/DEN/AEN)
+│   │   ├── pyaeeuv/          # Atmosphere Explorer EUV reference spectra
+│   │   ├── pyeuv91/          # Revised SERF2 EUV irradiance wrapper
+│   │   ├── pyeuvac/          # EUVAC 37-band solar flux wrapper
+│   │   ├── pyphotoelectron/  # Richards photoelectron model wrapper
+│   │   ├── pypvionosphere/   # Pioneer Venus ionosphere wrapper
+│   │   ├── pypvthermosphere/ # Pioneer Venus thermosphere wrapper
+│   │   └── pyexospherich/    # Hodges exospheric hydrogen model
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -352,6 +384,10 @@ UpperAtmPy/
 │   ├── cira86data/
 │   ├── msis2data/
 │   ├── msis86data/
+│   ├── aeeuvdata/
+│   ├── euv91data/
+│   ├── pvionospheredata/
+│   ├── exospherichdata/
 │   ├── mgst/
 │   └── hmr/
 └── ROADMAP.md

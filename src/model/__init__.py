@@ -27,6 +27,13 @@ Only concrete model classes are exported:
 - HMR
 - ISRDrift
 - XuLi
+- AEEUV
+- EUV91
+- EUVAC
+- Photoelectron
+- PVIonosphere
+- PVThermosphere
+- ExosphericH
 
 Exports are lazy so `import model` does not load any model DLL.
 """
@@ -62,6 +69,13 @@ _LAZY_EXPORTS = {
     "HMR": ("model.pyhmr", "Model"),
     "ISRDrift": ("model.pyisrdrift", "Model"),
     "XuLi": ("model.pyxuli", "Model"),
+    "AEEUV": ("model.pyaeeuv", "Model"),
+    "EUV91": ("model.pyeuv91", "Model"),
+    "EUVAC": ("model.pyeuvac", "Model"),
+    "Photoelectron": ("model.pyphotoelectron", "Model"),
+    "PVIonosphere": ("model.pypvionosphere", "Model"),
+    "PVThermosphere": ("model.pypvthermosphere", "Model"),
+    "ExosphericH": ("model.pyexospherich", "Model"),
 }
 
 __all__ = list(_LAZY_EXPORTS)

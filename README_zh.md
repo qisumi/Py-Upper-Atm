@@ -33,11 +33,18 @@
 - **HMR**：Heppner-Maynard-Rich 电场模型 — 高纬电离层电势、电导率、焦耳加热、场向电流
 - **ISRDrift**：静日电离层 E x B 漂移模型 — 300 km 电伪势和漂移速度（Richmond et al., 1980）
 - **XuLi**：磁尾中性片位置模型（SEN/DEN/AEN 三种变体，Xu & Li）
+- **AEEUV**：Atmosphere Explorer 太阳极紫外参考谱
+- **EUV91**：修订版 SERF2 历史 39 波段太阳极紫外辐照度
+- **EUVAC**：由 F10.7 驱动的 Torr 37 波段太阳极紫外光子通量
+- **Photoelectron**：Richards 简化电离层光电子通量模型
+- **PVIonosphere**：金星先驱号电子密度和电子温度模型
+- **PVThermosphere**：金星先驱号 VTS3 中性热层模型
+- **ExosphericH**：Hodges 三阶球谐外逸层氢模型
 
 ## 特性
 
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`、`JensenCain`、`MGST80`、`MGST81`、`HMR`、`ISRDrift`、`XuLi`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`、`JensenCain`、`MGST80`、`MGST81`、`HMR`、`ISRDrift`、`XuLi`、`AEEUV`、`EUV91`、`EUVAC`、`Photoelectron`、`PVIonosphere`、`PVThermosphere`、`ExosphericH`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
@@ -145,11 +152,11 @@ python -m pip install https://github.com/<OWNER>/<REPO>/releases/download/<TAG>/
 
 ## 数据文件
 
-MSIS2、HWM14、IGRF、CIRA86 和 MSIS86 需要外部模型数据。默认情况下，UpperAtmPy 会解析当前项目目录下的
+MSIS2、HWM14、IGRF、CIRA86、MSIS86、AEEUV、EUV91、PVIonosphere 和 ExosphericH 需要外部模型数据。默认情况下，UpperAtmPy 会解析当前项目目录下的
 `.upperatmpy`，并在存在下载清单时于首次实例化模型时按当前包版本的 release tag（如 `v0.2.0`）下载缺失文件。
 CIRA86 当前使用本地 `cira86data/` ASCII 表。离线使用时，
 可以传入 `data_dir=...`，或设置 `UPPERATMPY_DATA_DIR` 指向包含 `msis2data/`、
-`hwm14data/`、`igrf13data/`、`igrf14data/` 和 `cira86data/` 子目录的数据根目录。源码树中的统一数据根目录是 `data/`。
+`hwm14data/`、`igrf13data/`、`igrf14data/`、`cira86data/`、`aeeuvdata/`、`euv91data/`、`pvionospheredata/` 和 `exospherichdata/` 子目录的数据根目录。源码树中的统一数据根目录是 `data/`。
 
 可通过环境变量 `UPPERATMPY_DATA_TAG` 指定数据下载所用的 Release tag。
 
@@ -157,7 +164,7 @@ CIRA86 当前使用本地 `cira86data/` ASCII 表。离线使用时，
 
 如果不能在运行时联网自动下载模型数据，可直接从 `GitHub Releases` 手动下载：
 
-1. 打开 release 页面，下载 `msis2data`、`hwm14data`、`igrf13data`、`igrf14data` 以及发布后可用的 `cira86data` 资源文件（或一个合并压缩包）。
+1. 打开 release 页面，下载统一模型数据压缩包（或各模型的独立数据资源）。
 2. 解压后确保目录结构如下（数据根目录中包含所需子目录）：
 
 ```text
@@ -167,7 +174,11 @@ UPPERATMPY_DATA_DIR/
 ├── hwm14data/
 ├── igrf13data/
 ├── igrf14data/
-└── cira86data/
+├── cira86data/
+├── aeeuvdata/
+├── euv91data/
+├── pvionospheredata/
+└── exospherichdata/
 ```
 
 3. 设置环境变量或直接在构造模型时指定 `data_dir`。
@@ -213,6 +224,13 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 - `HMR`
 - `ISRDrift`
 - `XuLi`
+- `AEEUV`
+- `EUV91`
+- `EUVAC`
+- `Photoelectron`
+- `PVIonosphere`
+- `PVThermosphere`
+- `ExosphericH`
 
 每个类都提供 `calculate(...)`，返回普通字典。
 模型计算方法同时支持标量和可广播数组输入，输入标量返回标量结果，输入数组会按 numpy 广播返回对应形状。
@@ -250,6 +268,13 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 - [HMR](src/model/pyhmr/README_zh.md)
 - [ISRDrift](src/model/pyisrdrift/README_zh.md)
 - [XuLi](src/model/pyxuli/README_zh.md)
+- [AEEUV](src/model/pyaeeuv/README_zh.md)
+- [EUV91](src/model/pyeuv91/README_zh.md)
+- [EUVAC](src/model/pyeuvac/README_zh.md)
+- [Photoelectron](src/model/pyphotoelectron/README_zh.md)
+- [PVIonosphere](src/model/pypvionosphere/README_zh.md)
+- [PVThermosphere](src/model/pypvthermosphere/README_zh.md)
+- [ExosphericH](src/model/pyexospherich/README_zh.md)
 
 ### 可选工具模块
 
@@ -299,7 +324,7 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 UpperAtmPy/
 ├── src/
 │   ├── model/
-│   │   ├── __init__.py      # 懒加载别名：MSIS2, MSIS00, HWM14, HWM93, AuroraOval, IGRF, CIRA86, MSIS86, MSISE90, Jacchia77, MET, Chiu, Tsyganenko, SOLPRO, RADBELT, SHIELDOSE, SOFIP, CutoffRigidity, GSFC, JensenCain, MGST80, MGST81, HMR, ISRDrift, XuLi
+│   │   ├── __init__.py      # 所有公开模型类的懒加载别名
 │   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
 │   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
 │   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
@@ -323,7 +348,14 @@ UpperAtmPy/
 │   │   ├── pymgst/           # MGST80/MGST81 地磁场模型封装
 │   │   ├── pyhmr/            # Heppner-Maynard-Rich 电场模型封装
 │   │   ├── pyisrdrift/       # ISR 离子漂移模型封装（Richmond et al., 1980）
-│   │   └── pyxuli/           # Xu-Li 中性片模型封装（SEN/DEN/AEN）
+│   │   ├── pyxuli/           # Xu-Li 中性片模型封装（SEN/DEN/AEN）
+│   │   ├── pyaeeuv/          # Atmosphere Explorer 极紫外参考谱
+│   │   ├── pyeuv91/          # 修订版 SERF2 极紫外辐照度封装
+│   │   ├── pyeuvac/          # EUVAC 37 波段太阳通量封装
+│   │   ├── pyphotoelectron/  # Richards 光电子模型封装
+│   │   ├── pypvionosphere/   # 金星先驱号电离层封装
+│   │   ├── pypvthermosphere/ # 金星先驱号热层封装
+│   │   └── pyexospherich/    # Hodges 外逸层氢模型
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -339,6 +371,10 @@ UpperAtmPy/
 │   ├── cira86data/
 │   ├── msis2data/
 │   ├── msis86data/
+│   ├── aeeuvdata/
+│   ├── euv91data/
+│   ├── pvionospheredata/
+│   ├── exospherichdata/
 │   ├── mgst/
 │   └── hmr/
 └── ROADMAP.md

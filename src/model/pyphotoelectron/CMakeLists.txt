@@ -1,0 +1,5 @@
+add_library(photoelectron SHARED photoelectron.for photoelectron_cshim.F90)
+upperatmpy_set_output(photoelectron "${CMAKE_CURRENT_SOURCE_DIR}")
+upperatmpy_use_gnu_legacy_fortran(photoelectron.for)
+upperatmpy_link_static_gnu_runtime(photoelectron)
+install(TARGETS photoelectron RUNTIME DESTINATION model/pyphotoelectron LIBRARY DESTINATION model/pyphotoelectron)

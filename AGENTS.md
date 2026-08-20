@@ -29,6 +29,13 @@ UpperAtmPy is a Python wrapper library for upper atmospheric models. The project
 - `model.HMR`
 - `model.ISRDrift`
 - `model.XuLi`
+- `model.AEEUV`
+- `model.EUV91`
+- `model.EUVAC`
+- `model.Photoelectron`
+- `model.PVIonosphere`
+- `model.PVThermosphere`
+- `model.ExosphericH`
 
 Each class provides one public calculation method: `calculate(...)`. Do not reintroduce multi-model wrappers or old helper exports such as `NRLMSIS2`, `gtd7`, `hwm14_eval`, or `hwm93_eval`.
 
@@ -66,6 +73,13 @@ python example/test_mgst.py
 python example/test_hmr.py
 python example/test_isr_drift.py
 python example/test_xuli.py
+python example/test_aeeuv.py
+python example/test_euv91.py
+python example/test_euvac.py
+python example/test_photoelectron.py
+python example/test_pv_ionosphere.py
+python example/test_pv_thermosphere.py
+python example/test_exospheric_h.py
 ```
 
 ## Public API Pattern
@@ -250,6 +264,43 @@ XuLi result dictionaries contain:
 - 'rmp_re' -- magnetopause radius (Earth Radii)
 - 'ie_aen', 'ie_sen', 'ie_den' -- 1=inside, 2=outside magnetopause
 
+AEEUV result dictionaries contain:
+- `spectrum`
+- `wavelength_angstrom` / `photon_flux_m2_s`
+- `line_or_range` / `group_type` / `adjustment_factor`
+
+EUV91 result dictionaries contain:
+- `year` / `day_of_year`
+- `wavelength_start_angstrom` / `wavelength_end_angstrom`
+- `photon_flux_cm2_s` / `energy_flux_erg_cm2_s` (final dimension 39)
+
+EUVAC result dictionaries contain:
+- `f107` / `f107a`
+- `bin_index` (1–37)
+- `photon_flux_cm2_s` (final dimension 37)
+
+Photoelectron result dictionaries contain:
+- `energy_eV` (0.5–99.5 eV, shape `(100,)`)
+- `photoelectron_flux_per_eV_cm2_s`
+- `photoelectron_flux_per_eV_cm2_s_sr`
+- `attenuation_factor`
+
+PVIonosphere result dictionaries contain:
+- `alt_km` / `sza_deg`
+- `log10_electron_density_cm3` / `electron_density_cm3`
+- `log10_electron_temperature_K` / `electron_temperature_K`
+
+PVThermosphere result dictionaries contain:
+- `alt_km` / `lat_deg` / `local_time_hours` / `f107a` / `f107`
+- `total_density_g_cm3`
+- `CO2_cm3` / `O_cm3` / `CO_cm3` / `He_cm3` / `N_cm3` / `N2_cm3`
+- `T_exo_K` / `T_local_K`
+
+ExosphericH result dictionaries contain:
+- `radius_km` / `colatitude_deg` / `longitude_deg`
+- `season` / `f107`
+- `H_cm3`
+
 ## Project Structure
 
 ```text
@@ -280,7 +331,14 @@ UpperAtmPy/
 │   │   ├── pymgst/
 │   │   ├── pyhmr/
 │   │   ├── pyisrdrift/
-│   │   └── pyxuli/           # Xu-Li 中性片模型封装（SEN/DEN/AEN）
+│   │   ├── pyxuli/           # Xu-Li 中性片模型封装（SEN/DEN/AEN）
+│   │   ├── pyaeeuv/
+│   │   ├── pyeuv91/
+│   │   ├── pyeuvac/
+│   │   ├── pyphotoelectron/
+│   │   ├── pypvionosphere/
+│   │   ├── pypvthermosphere/
+│   │   └── pyexospherich/
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -303,7 +361,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC", "JensenCain", "MGST80", "MGST81", "HMR", "ISRDrift", "XuLi"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC", "JensenCain", "MGST80", "MGST81", "HMR", "ISRDrift", "XuLi", "AEEUV", "EUV91", "EUVAC", "Photoelectron", "PVIonosphere", "PVThermosphere", "ExosphericH"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 

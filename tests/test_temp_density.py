@@ -45,6 +45,15 @@ class TestModelPackage:
             "MGST80",
             "MGST81",
             "HMR",
+            "ISRDrift",
+            "XuLi",
+            "AEEUV",
+            "EUV91",
+            "EUVAC",
+            "Photoelectron",
+            "PVIonosphere",
+            "PVThermosphere",
+            "ExosphericH",
         ]
         assert "model.pymsis2" not in sys.modules
         assert "model.pymsis00" not in sys.modules
@@ -59,6 +68,13 @@ class TestModelPackage:
         assert "model.pyshieldose" not in sys.modules
         assert "model.pygsfc" not in sys.modules
         assert "model.pyjensen" not in sys.modules
+        assert "model.pyaeeuv" not in sys.modules
+        assert "model.pyeuv91" not in sys.modules
+        assert "model.pyeuvac" not in sys.modules
+        assert "model.pyphotoelectron" not in sys.modules
+        assert "model.pypvionosphere" not in sys.modules
+        assert "model.pypvthermosphere" not in sys.modules
+        assert "model.pyexospherich" not in sys.modules
         assert "utils.model_data" not in sys.modules
 
     def test_old_top_level_exports_are_removed(self):
