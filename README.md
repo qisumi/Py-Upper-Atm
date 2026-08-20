@@ -6,9 +6,96 @@
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT%20%2B%20third--party%20terms-blue)
 
-**UpperAtmPy** provides direct Python wrappers for upper atmospheric model DLLs and data tables. The project uses a `src/` layout and exposes one public class per model.
+**UpperAtmPy** is an AI-first upper-atmosphere analysis platform backed by a
+large collection of deterministic scientific models. It turns Chinese or
+English questions into validated analysis plans, executes the native models,
+compares their results, and produces evidence-grounded reports that remain
+fully reproducible from Python or the command line.
 
-Supported models:
+AI is deliberately separated from scientific computation: AI may select a
+workflow and explain calculated evidence, while every atmospheric or
+geomagnetic value still comes from the repository's established model code.
+
+## AI-First Atmospheric Analysis
+
+The primary UpperAtmPy workflow is intelligent, bilingual model analysis:
+
+- **Natural-language planning**: convert Chinese or English requests into a
+  strict, machine-checkable `AnalysisPlan`.
+- **Smart model comparison**: normalize compatible MSIS-family and internal
+  geomagnetic models, intersect validity domains, align exact coordinates, and
+  compare canonical physical quantities.
+- **Sensitivity analysis**: sweep one scientific input while holding the other
+  conditions fixed.
+- **Evidence-grounded interpretation**: explain only deterministic report
+  metrics, retain warnings and citations, and label numerical claims with
+  evidence keys.
+- **Reproducible delivery**: export Markdown, JSON, and executable Python code;
+  use the same engine through the API, CLI, or publishable Codex Skill.
+
+### Ask a bilingual analysis question
+
+The dependency-free rule planner is the default intelligent path:
+
+```bash
+upperatmpy-analysis ask --language en --query "Compare MSIS2 and MSIS00: year 2020, day of year 172, 12:00 UT, altitude 100 to 500 km, step 10 km, latitude 35, longitude 116, F10.7a=150, F10.7=150, local temperature."
+```
+
+For optional AI planning and narrative interpretation, install the separate AI
+dependency and explicitly select a provider model:
+
+```bash
+python -m pip install "upperatmpy[ai]"
+upperatmpy-analysis ask --provider openai --ai-model YOUR_MODEL --query "..."
+```
+
+Missing dates, locations, solar fluxes, and other scientific inputs are rejected
+rather than guessed. AI never calculates or alters model values.
+
+### Deterministic Python API
+
+```python
+from upperatmpy_analysis import AnalysisPlan, execute_plan
+
+plan = AnalysisPlan(
+    models=["MSIS2", "MSIS00"],
+    inputs={
+        "year": 2020,
+        "day_of_year": 172,
+        "utsec": 43200,
+        "alt_km": {"start": 100, "stop": 500, "step": 10, "num": None},
+        "lat_deg": 35,
+        "lon_deg": 116,
+        "f107a": 150,
+        "f107": 150,
+    },
+    quantities=["T_local_K", "O_cm3"],
+    baseline="MSIS2",
+    language="en",
+)
+report = execute_plan(plan)
+print(report.to_markdown())
+```
+
+The CLI exposes the same deterministic engine:
+
+```bash
+upperatmpy-analysis catalog --language en
+upperatmpy-analysis compare --plan plan.json --format markdown
+upperatmpy-analysis sensitivity --model MSIS2 --base-inputs base.json --parameter f107 --values 70,100,150,200
+```
+
+### Publishable bilingual Skill
+
+The repository includes the externally distributable Codex Skill at
+[`skills/upperatmpy-atmospheric-analysis/`](skills/upperatmpy-atmospheric-analysis/).
+It is maintained in version control and is not installed into a developer's
+local Skills directory. A normal tag release packages it automatically as
+`upperatmpy-atmospheric-analysis-<tag>.zip`.
+
+## Scientific Model Library
+
+The intelligent analysis layer is backed by these public model classes:
 
 - **MSIS2**: NRLMSIS-2.0 temperature and density
 - **MSIS00**: NRLMSISE-00 temperature and density
@@ -43,8 +130,13 @@ Supported models:
 - **PVThermosphere**: Pioneer Venus VTS3 neutral thermosphere
 - **ExosphericH**: Hodges third-order spherical-harmonic exospheric hydrogen
 
-## Features
+## Key Features
 
+- AI-first bilingual planning, comparison, sensitivity analysis, and
+  evidence-grounded reporting.
+- Strict separation between optional AI reasoning and deterministic scientific
+  calculations.
+- Publishable bilingual Codex Skill plus Python and CLI workflows.
 - One public interface per model: `Model.calculate(...)`.
 - Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`, `JensenCain`, `MGST80`, `MGST81`, `HMR`, `ISRDrift`, `XuLi`, `AEEUV`, `EUV91`, `EUVAC`, `Photoelectron`, `PVIonosphere`, `PVThermosphere`, `ExosphericH`.
 - Single-point and numpy-broadcast batch inputs through the same method.
@@ -369,12 +461,15 @@ UpperAtmPy/
 │   │   ├── pypvionosphere/   # Pioneer Venus ionosphere wrapper
 │   │   ├── pypvthermosphere/ # Pioneer Venus thermosphere wrapper
 │   │   └── pyexospherich/    # Hodges exospheric hydrogen model
+│   ├── upperatmpy_analysis/  # Deterministic comparison, sensitivity, CLI, optional AI
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
 │       ├── space_weather.py
 │       ├── time.py
 │       └── xarray_output.py
+├── skills/
+│   └── upperatmpy-atmospheric-analysis/ # Publishable bilingual Codex Skill
 ├── example/
 ├── tests/
 ├── data/

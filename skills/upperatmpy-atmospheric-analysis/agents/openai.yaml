@@ -1,0 +1,4 @@
+interface:
+  display_name: "UpperAtmPy Atmospheric Analysis"
+  short_description: "Bilingual upper-atmosphere model analysis and comparison"
+  default_prompt: "Use $upperatmpy-atmospheric-analysis to compare compatible atmospheric models and explain deterministic evidence in my language."

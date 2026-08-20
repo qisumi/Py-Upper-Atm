@@ -4,9 +4,87 @@
 ![Python](https://img.shields.io/badge/python-3.8%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT%20%2B%20third--party%20terms-blue)
 
-**UpperAtmPy** 为高层大气模型 DLL 和数据表提供 Python 直接调用封装。项目使用 `src/` 布局，每个模型只公开一个类接口。
+**UpperAtmPy** 是一个由大量确定性科学模型支撑的 AI 优先高层大气智能分析
+平台。它可以把中文或英文问题转换为经过验证的分析计划，执行原生科学模型，比较
+模型结果，并生成可由 Python 或命令行完整复现的证据化报告。
 
-支持模型：
+AI 与科学计算严格分离：AI 可以选择分析流程、解释已有证据，但所有大气和地磁
+数值仍由仓库中的科学模型确定性计算得到。
+
+## AI 优先的大气智能分析
+
+UpperAtmPy 的首要工作流是中英双语智能模型分析：
+
+- **自然语言规划**：把中文或英文需求转换为严格、可机器校验的 `AnalysisPlan`。
+- **智能模型对比**：统一兼容的 MSIS 家族和内部地磁场模型，求有效域交集，按
+  精确公共坐标对齐，并比较统一物理量。
+- **敏感性分析**：固定其他科学条件，只扫描一个输入参数。
+- **证据化解读**：只解释确定性报告中的指标，保留警告和引用，并为数值结论附加
+  证据键。
+- **可复现交付**：输出 Markdown、JSON 和可执行 Python 代码；API、CLI 与可发布
+  Codex Skill 共用同一个分析内核。
+
+### 用自然语言提出双语分析问题
+
+默认智能路径是不增加依赖的规则规划器：
+
+```bash
+upperatmpy-analysis ask --language zh --query "比较 MSIS2 和 MSIS00：年份 2020，第 172 天，12:00 UT，高度 100 到 500 km，步长 10 km，纬度 35，经度 116，F10.7a=150，F10.7=150，比较局地温度。"
+```
+
+如需可选的 AI 规划和叙述性解读，可单独安装 AI 依赖并明确指定提供方模型：
+
+```bash
+python -m pip install "upperatmpy[ai]"
+upperatmpy-analysis ask --provider openai --ai-model YOUR_MODEL --query "..."
+```
+
+日期、位置、太阳通量等必要科学输入缺失时会直接报错，不会被猜测补齐。AI 不计算
+也不修改模型数值。
+
+### 确定性 Python API
+
+```python
+from upperatmpy_analysis import AnalysisPlan, execute_plan
+
+plan = AnalysisPlan(
+    models=["MSIS2", "MSIS00"],
+    inputs={
+        "year": 2020,
+        "day_of_year": 172,
+        "utsec": 43200,
+        "alt_km": {"start": 100, "stop": 500, "step": 10, "num": None},
+        "lat_deg": 35,
+        "lon_deg": 116,
+        "f107a": 150,
+        "f107": 150,
+    },
+    quantities=["T_local_K", "O_cm3"],
+    baseline="MSIS2",
+    language="zh",
+)
+report = execute_plan(plan)
+print(report.to_markdown())
+```
+
+命令行入口与 Python API 使用同一个确定性分析内核：
+
+```bash
+upperatmpy-analysis catalog --language zh
+upperatmpy-analysis compare --plan plan.json --format markdown
+upperatmpy-analysis sensitivity --model MSIS2 --base-inputs base.json --parameter f107 --values 70,100,150,200
+```
+
+### 可对外发布的双语 Skill
+
+仓库内提供可对外分发的中英双语 Codex Skill：
+[`skills/upperatmpy-atmospheric-analysis/`](skills/upperatmpy-atmospheric-analysis/)。
+它在版本控制中维护，不会在仓库开发过程中安装到开发者本机 Skills 目录。正常的
+tag 发布流程会自动生成 `upperatmpy-atmospheric-analysis-<tag>.zip`。
+
+## 科学模型库
+
+智能分析层由以下公开模型类提供科学计算能力：
 
 - **MSIS2**：NRLMSIS-2.0 温度和密度
 - **MSIS00**：NRLMSISE-00 温度和密度
@@ -41,8 +119,11 @@
 - **PVThermosphere**：金星先驱号 VTS3 中性热层模型
 - **ExosphericH**：Hodges 三阶球谐外逸层氢模型
 
-## 特性
+## 主要特性
 
+- AI 优先的双语规划、模型对比、敏感性分析和证据化报告。
+- 可选 AI 推理与确定性科学计算严格分离。
+- 同时提供可发布双语 Codex Skill、Python API 和 CLI 工作流。
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
 - `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`、`JensenCain`、`MGST80`、`MGST81`、`HMR`、`ISRDrift`、`XuLi`、`AEEUV`、`EUV91`、`EUVAC`、`Photoelectron`、`PVIonosphere`、`PVThermosphere`、`ExosphericH`。
 - 单点和 numpy 广播批量输入共用同一个方法。
@@ -356,12 +437,15 @@ UpperAtmPy/
 │   │   ├── pypvionosphere/   # 金星先驱号电离层封装
 │   │   ├── pypvthermosphere/ # 金星先驱号热层封装
 │   │   └── pyexospherich/    # Hodges 外逸层氢模型
+│   ├── upperatmpy_analysis/  # 确定性对比、敏感性、CLI 与可选 AI
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
 │       ├── space_weather.py
 │       ├── time.py
 │       └── xarray_output.py
+├── skills/
+│   └── upperatmpy-atmospheric-analysis/ # 可发布的中英双语 Codex Skill
 ├── example/
 ├── tests/
 ├── data/

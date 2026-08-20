@@ -73,6 +73,7 @@ python example/test_mgst.py
 python example/test_hmr.py
 python example/test_isr_drift.py
 python example/test_xuli.py
+python -m pytest tests/test_analysis.py tests/test_analysis_ai.py
 python example/test_aeeuv.py
 python example/test_euv91.py
 python example/test_euvac.py
@@ -301,6 +302,17 @@ ExosphericH result dictionaries contain:
 - `season` / `f107`
 - `H_cm3`
 
+## Intelligent Analysis API
+
+- `upperatmpy_analysis.AnalysisPlan` is the strict, JSON-serializable execution plan.
+- `upperatmpy_analysis.execute_plan(...)` compares only models in one compatibility group.
+- `upperatmpy_analysis.analyze_sensitivity(...)` performs deterministic one-factor sweeps.
+- `upperatmpy-analysis` is the public CLI for catalogs, comparison, sensitivity, planning, and evidence explanation.
+- Scientific values must always come from model execution. Optional AI can only produce a validated plan or explain the report evidence.
+- Keep AI dependencies under the `ai` optional dependency group; importing `upperatmpy_analysis` must not import an AI SDK or load model DLLs.
+- The publishable bilingual Skill lives at `skills/upperatmpy-atmospheric-analysis/`. Validate it with the skill-creator `quick_validate.py`; do not install it into a local Skills directory during repository work.
+- The release workflow packages that directory as `upperatmpy-atmospheric-analysis-<tag>.zip`; keep its exact-content check synchronized with Skill resources.
+
 ## Project Structure
 
 ```text
@@ -339,6 +351,7 @@ UpperAtmPy/
 │   │   ├── pypvionosphere/
 │   │   ├── pypvthermosphere/
 │   │   └── pyexospherich/
+│   ├── upperatmpy_analysis/
 │   └── utils/
 │       ├── cache.py
 │       ├── parallel.py
@@ -347,6 +360,8 @@ UpperAtmPy/
 │       └── xarray_output.py
 ├── example/
 ├── tests/
+├── skills/
+│   └── upperatmpy-atmospheric-analysis/
 ├── data/
 │   ├── hwm14data/
 │   ├── igrf13data/
@@ -363,6 +378,7 @@ UpperAtmPy/
 - Keep each model module's `__all__` to `["Model"]`.
 - `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC", "JensenCain", "MGST80", "MGST81", "HMR", "ISRDrift", "XuLi", "AEEUV", "EUV91", "EUVAC", "Photoelectron", "PVIonosphere", "PVThermosphere", "ExosphericH"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
+- Cross-model analysis code belongs in `src/upperatmpy_analysis`, not `src/model` or `src/utils`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.
 
 ## CI, Release, and Native Model Pitfalls

@@ -179,6 +179,21 @@ jobs:
               }
 
           expected.add("utils/model_data_manifest.json")
+          expected.update({
+              "upperatmpy_analysis/__init__.py",
+              "upperatmpy_analysis/catalog.py",
+              "upperatmpy_analysis/cli.py",
+              "upperatmpy_analysis/compare.py",
+              "upperatmpy_analysis/normalize.py",
+              "upperatmpy_analysis/report.py",
+              "upperatmpy_analysis/schema.py",
+              "upperatmpy_analysis/sensitivity.py",
+              "upperatmpy_analysis/units.py",
+              "upperatmpy_analysis/ai/__init__.py",
+              "upperatmpy_analysis/ai/explainer.py",
+              "upperatmpy_analysis/ai/planner.py",
+              "upperatmpy_analysis/ai/providers.py",
+          })
           missing = expected - names
           data_files = [name for name in names if name.startswith("data/")]
           if missing:
@@ -269,6 +284,13 @@ jobs:
               f"{root}/src/model/pypvthermosphere/CMakeLists.txt",
               f"{root}/src/model/pypvthermosphere/pvatmos.for",
               f"{root}/src/model/pypvthermosphere/pvthermosphere_cshim.F90",
+              f"{root}/src/upperatmpy_analysis/__init__.py",
+              f"{root}/src/upperatmpy_analysis/cli.py",
+              f"{root}/src/upperatmpy_analysis/ai/providers.py",
+              f"{root}/skills/upperatmpy-atmospheric-analysis/SKILL.md",
+              f"{root}/skills/upperatmpy-atmospheric-analysis/agents/openai.yaml",
+              f"{root}/skills/upperatmpy-atmospheric-analysis/references/model-groups.md",
+              f"{root}/skills/upperatmpy-atmospheric-analysis/references/analysis-workflows.md",
           }
           missing = expected - names
           data_files = [name for name in names if name.startswith(f"{root}/data/")]
@@ -333,6 +355,52 @@ jobs:
 
           print(f"Packaged {archive}: {sorted(names)}")
 
+      - name: Package publishable atmospheric analysis Skill
+        shell: python
+        run: |
+          import os
+          import pathlib
+          import zipfile
+
+          tag = os.environ.get("GITHUB_REF_NAME") or "manual"
+          skill_name = "upperatmpy-atmospheric-analysis"
+          skill_root = pathlib.Path("skills") / skill_name
+          expected = {
+              pathlib.Path("SKILL.md"),
+              pathlib.Path("agents/openai.yaml"),
+              pathlib.Path("references/model-groups.md"),
+              pathlib.Path("references/analysis-workflows.md"),
+          }
+          actual = {
+              path.relative_to(skill_root)
+              for path in skill_root.rglob("*")
+              if path.is_file()
+          }
+          if actual != expected:
+              raise SystemExit(
+                  f"Unexpected Skill contents: expected={sorted(map(str, expected))}, "
+                  f"actual={sorted(map(str, actual))}"
+              )
+
+          archive = pathlib.Path("release-skill") / f"{skill_name}-{tag}.zip"
+          archive.parent.mkdir(parents=True, exist_ok=True)
+          with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+              for relative_path in sorted(expected):
+                  zf.write(
+                      skill_root / relative_path,
+                      (pathlib.Path(skill_name) / relative_path).as_posix(),
+                  )
+
+          with zipfile.ZipFile(archive) as zf:
+              names = set(zf.namelist())
+          expected_names = {
+              (pathlib.Path(skill_name) / relative_path).as_posix()
+              for relative_path in expected
+          }
+          if names != expected_names:
+              raise SystemExit(f"Unexpected Skill archive contents: {sorted(names)}")
+          print(f"Packaged {archive}: {sorted(names)}")
+
       - name: Upload source distribution
         uses: actions/upload-artifact@v4
         with:
@@ -345,6 +413,13 @@ jobs:
         with:
           name: model-data
           path: release-data/*.zip
+          if-no-files-found: error
+
+      - name: Upload atmospheric analysis Skill
+        uses: actions/upload-artifact@v4
+        with:
+          name: atmospheric-analysis-skill
+          path: release-skill/*.zip
           if-no-files-found: error
 
   create-release:
