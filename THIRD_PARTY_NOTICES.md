@@ -17,6 +17,19 @@ licensed for academic, non-commercial purposes only.
 Users must review and comply with the full upstream terms in
 `src/model/pymsis2/readme.txt` and the headers of the NRLMSIS 2.0 source files.
 
+## NASA Aura Microwave Limb Sounder H2O
+
+`data/msis2h2odata/` contains a derived monthly climatology built from NASA
+Aura MLS `ML3MBH2O` V005 Level-3 data for 2005–2024. The source product DOI is
+`10.5067/Aura/MLS/DATA/3538`. The fixed source-file identifiers, URLs, and
+SHA-256 values are recorded in `tools/msis2h2o_sources.json`; the reproducible
+builder is `tools/build_msis2h2o_climatology.py`.
+
+Please acknowledge NASA Aura MLS and cite the product DOI when using the H2O
+extension. NASA-led Earthdata products without an indicated restriction are
+made available under NASA's open-data policy; the derived climatology does not
+alter the provenance or attribution expectations of the source observations.
+
 ## CCMC ModelWeb Archive Materials
 
 The `TODO/` directory contains model source code, data files, and reference

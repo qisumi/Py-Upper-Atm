@@ -33,6 +33,7 @@ full = [
     "tqdm>=4.60.0",
 ]
 dev = [
+    "netCDF4>=1.6.0",
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
 ]
@@ -48,6 +49,7 @@ build-backend = "scikit_build_core.build"
 wheel.packages = ["src/model", "src/utils", "src/upperatmpy_analysis"]
 wheel.py-api = "py3"
 sdist.exclude = ["TODO/**", ".upperatmpy/**", "data/**"]
+sdist.include = ["tools/**", "skills/**"]
 cmake.args = ["-G", "Ninja"]
 cmake.build-type = "Release"
 

@@ -3,6 +3,7 @@ UpperAtmPy model package.
 
 Only concrete model classes are exported:
 - MSIS2
+- MSIS2H2O
 - MSIS00
 - HWM14
 - HWM93
@@ -45,6 +46,7 @@ from typing import Any, List
 
 _LAZY_EXPORTS = {
     "MSIS2": ("model.pymsis2", "Model"),
+    "MSIS2H2O": ("model.pymsis2h2o", "Model"),
     "MSIS00": ("model.pymsis00", "Model"),
     "HWM14": ("model.pyhwm14", "Model"),
     "HWM93": ("model.pyhwm93", "Model"),

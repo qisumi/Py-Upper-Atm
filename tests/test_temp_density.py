@@ -23,6 +23,7 @@ class TestModelPackage:
 
         assert model.__all__ == [
             "MSIS2",
+            "MSIS2H2O",
             "MSIS00",
             "HWM14",
             "HWM93",
@@ -56,6 +57,7 @@ class TestModelPackage:
             "ExosphericH",
         ]
         assert "model.pymsis2" not in sys.modules
+        assert "model.pymsis2h2o" not in sys.modules
         assert "model.pymsis00" not in sys.modules
         assert "model.pyhwm14" not in sys.modules
         assert "model.pyhwm93" not in sys.modules
@@ -89,10 +91,12 @@ class TestModelPackage:
 
     def test_model_modules_only_export_model(self):
         from model.pymsis2 import __all__ as msis2_exports
+        from model.pymsis2h2o import __all__ as msis2h2o_exports
         from model.pymsis00 import __all__ as msis00_exports
         from model.pycira86 import __all__ as cira86_exports
 
         assert msis2_exports == ["Model"]
+        assert msis2h2o_exports == ["Model"]
         assert msis00_exports == ["Model"]
         assert cira86_exports == ["Model"]
 

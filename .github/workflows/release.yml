@@ -180,6 +180,7 @@ jobs:
 
           expected.add("utils/model_data_manifest.json")
           expected.update({
+              "model/pymsis2h2o/__init__.py",
               "upperatmpy_analysis/__init__.py",
               "upperatmpy_analysis/catalog.py",
               "upperatmpy_analysis/cli.py",
@@ -262,6 +263,11 @@ jobs:
               f"{root}/CMakePresets.json",
               f"{root}/cmake/UpperAtmPyNative.cmake",
               f"{root}/src/model/pymsis2/CMakeLists.txt",
+              f"{root}/src/model/pymsis2h2o/__init__.py",
+              f"{root}/src/model/pymsis2h2o/README.md",
+              f"{root}/src/model/pymsis2h2o/README_zh.md",
+              f"{root}/tools/build_msis2h2o_climatology.py",
+              f"{root}/tools/msis2h2o_sources.json",
               f"{root}/src/model/pymsis00/CMakeLists.txt",
               f"{root}/src/model/pyhwm14/CMakeLists.txt",
               f"{root}/src/model/pyhwm93/CMakeLists.txt",
@@ -333,7 +339,7 @@ jobs:
           expected.extend(
               sorted(path.relative_to(data_root) for path in (data_root / "jensen" / "cain").glob("*") if path.is_file())
           )
-          for directory in ("aeeuvdata", "euv91data", "pvionospheredata", "exospherichdata"):
+          for directory in ("aeeuvdata", "euv91data", "pvionospheredata", "exospherichdata", "msis2h2odata"):
               expected.extend(
                   sorted(path.relative_to(data_root) for path in (data_root / directory).glob("*") if path.is_file())
               )

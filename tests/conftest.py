@@ -45,6 +45,16 @@ def msis2_model():
 
 
 @pytest.fixture
+def msis2h2o_model():
+    try:
+        from model import MSIS2H2O
+
+        return MSIS2H2O(precision="single", data_dir=MODEL_DATA, auto_download=False)
+    except Exception as exc:
+        pytest.skip(f"MSIS2H2O DLL/data not available: {exc}")
+
+
+@pytest.fixture
 def msis00_model():
     try:
         from model import MSIS00

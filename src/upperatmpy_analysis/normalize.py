@@ -12,7 +12,8 @@ from .units import convert_values
 
 
 _MSIS_SPECIES = {
-    "MSIS2": ("N2", "O2", "O", "He", "H", "Ar", "N", "AnomalousO", "NO", "NPlus"),
+    "MSIS2": ("TotalMass", "N2", "O2", "O", "He", "H", "Ar", "N", "AnomalousO", "NO"),
+    "MSIS2H2O": ("TotalMass", "N2", "O2", "O", "He", "H", "Ar", "N", "AnomalousO", "NO"),
     "MSIS00": ("He", "O", "N2", "O2", "Ar", "TotalMass", "H", "N", "AnomalousO"),
     "MSIS86": ("He", "O", "N2", "O2", "Ar", "TotalMass", "H", "N"),
     "MSISE90": ("He", "O", "N2", "O2", "Ar", "TotalMass", "H", "N"),
@@ -62,16 +63,28 @@ def normalize_output(
         for index, name in enumerate(species):
             values = densities[..., index]
             if name == "TotalMass":
-                # Native MSIS interfaces return total mass in g/cm^3.
-                quantities["total_mass_density_kg_m3"] = np.asarray(
-                    convert_values(values, "g/cm^3", "kg/m^3"), dtype=float
-                )
+                if model_name in ("MSIS2", "MSIS2H2O"):
+                    # NRLMSIS 2.0 is already SI.
+                    quantities["total_mass_density_kg_m3"] = np.asarray(values, dtype=float)
+                else:
+                    # Legacy MSIS interfaces return total mass in g/cm^3.
+                    quantities["total_mass_density_kg_m3"] = np.asarray(
+                        convert_values(values, "g/cm^3", "kg/m^3"), dtype=float
+                    )
             elif name in ("NO", "NPlus"):
                 # Kept out of the initial cross-version catalog because older
                 # MSIS versions do not expose these species.
                 continue
             else:
-                quantities[name + "_cm3"] = values
+                if model_name in ("MSIS2", "MSIS2H2O"):
+                    quantities[name + "_cm3"] = np.asarray(
+                        convert_values(values, "m^-3", "cm^-3"), dtype=float
+                    )
+                else:
+                    quantities[name + "_cm3"] = values
+        if model_name == "MSIS2H2O":
+            quantities["H2O_cm3"] = np.asarray(raw["H2O_number_density_cm3"], dtype=float)
+            quantities["H2O_vmr_ppmv"] = np.asarray(raw["H2O_vmr_ppmv"], dtype=float)
     elif spec.group == "geomagnetic_internal":
         key_map = {
             "B_north_nT": "B_north_nT" if "B_north_nT" in raw else "X_nT",

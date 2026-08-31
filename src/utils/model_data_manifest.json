@@ -648,6 +648,14 @@
       "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/exospherichdata/h_exos.dat"],
       "sha256": "f4f90aba1c9cc12263061b82e7a2f79f19bf92a7be45bde547a313e42c5a115c",
       "size": 36590
+    },
+    {
+      "model": "msis2h2o",
+      "version": "ml3mbh2o-v005-2005-2024",
+      "path": "msis2h2odata/mls_ml3mbh2o_v005_2005-2024_climatology.npz",
+      "fallback_urls": ["https://github.com/qisumi/Py-Upper-Atm/raw/master/data/msis2h2odata/mls_ml3mbh2o_v005_2005-2024_climatology.npz"],
+      "sha256": "17ecd8df10f5f2941b4f347d2ffc5f8c68732dd967e5676c7dba7487708d3eac",
+      "size": 11179664
     }
   ]
 }

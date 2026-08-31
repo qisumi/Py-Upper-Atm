@@ -5,7 +5,7 @@ Use only models in the same row for direct numerical differences.
 
 | Group | Models | Required canonical inputs | Default common quantities |
 |---|---|---|---|
-| `neutral_atmosphere` | `MSIS2`, `MSIS00`, `MSIS86`, `MSISE90` | `year`, `day_of_year`, `utsec`, `alt_km`, `lat_deg`, `lon_deg`, `f107a`, `f107` | `T_local_K`, `T_exo_K` |
+| `neutral_atmosphere` | `MSIS2`, `MSIS2H2O`, `MSIS00`, `MSIS86`, `MSISE90` | `year`, `day_of_year`, `utsec`, `alt_km`, `lat_deg`, `lon_deg`, `f107a`, `f107` | `T_local_K`, `T_exo_K` |
 | `geomagnetic_internal` | `IGRF`, `GSFC`, `JensenCain`, `MGST80`, `MGST81` | `year`, `alt_km`, `lat_deg`, `lon_deg` | `B_abs_nT` |
 
 Optional neutral-atmosphere inputs are `local_time_hours` and `ap7`. When local
@@ -17,14 +17,20 @@ longitude. `ap7` must be a finite length-7 vector or an `(N, 7)` array.
 - Temperatures: `T_local_K`, `T_exo_K` in K.
 - Neutral species: `He_cm3`, `O_cm3`, `N2_cm3`, `O2_cm3`, `Ar_cm3`, `H_cm3`,
   `N_cm3`, and when available `AnomalousO_cm3`, all in cm^-3.
-- Total mass density: `total_mass_density_kg_m3`. Native MSIS g/cm^3 values are
-  converted deterministically to kg/m^3.
+- Total mass density: `total_mass_density_kg_m3`. NRLMSIS 2.0 is already SI;
+  legacy MSIS g/cm^3 values are converted deterministically to kg/m^3.
+- MSIS2H2O: `H2O_cm3` and `H2O_vmr_ppmv`. These are available for single-model
+  sensitivity analysis, but cannot be requested in a comparison with a model
+  that does not expose H2O.
 - Magnetic components: `B_north_nT`, `B_east_nT`, `B_down_nT`, `B_abs_nT`, and
   `H_nT` in nT; `inclination_deg` and `declination_deg` in degrees.
 
 ## Important intersections / 重要有效域交集
 
 - Adding `MSIS86` restricts shared altitude to 85–1000 km.
+- Adding `MSIS2H2O` restricts shared altitude to 20–120 km. Its H2O field is a
+  2005–2024 monthly climatology, with constrained extrapolation above the MLS
+  0.00215 hPa ceiling.
 - Other catalogued MSIS models use 0–1000 km in this analysis layer.
 - Geomagnetic comparison uses 0–1000 km, latitude -90–90 degrees, and longitude
   -180–360 degrees. IGRF additionally enforces 1900–2030.

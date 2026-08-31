@@ -98,6 +98,7 @@ local Skills directory. A normal tag release packages it automatically as
 The intelligent analysis layer is backed by these public model classes:
 
 - **MSIS2**: NRLMSIS-2.0 temperature and density
+- **MSIS2H2O**: MSIS2 plus a 2005–2024 Aura MLS monthly H2O climatology for 20–120 km
 - **MSIS00**: NRLMSISE-00 temperature and density
 - **HWM14**: Horizontal Wind Model 2014
 - **HWM93**: Horizontal Wind Model 1993
@@ -138,7 +139,7 @@ The intelligent analysis layer is backed by these public model classes:
   calculations.
 - Publishable bilingual Codex Skill plus Python and CLI workflows.
 - One public interface per model: `Model.calculate(...)`.
-- Top-level lazy aliases: `MSIS2`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`, `JensenCain`, `MGST80`, `MGST81`, `HMR`, `ISRDrift`, `XuLi`, `AEEUV`, `EUV91`, `EUVAC`, `Photoelectron`, `PVIonosphere`, `PVThermosphere`, `ExosphericH`.
+- Top-level lazy aliases: `MSIS2`, `MSIS2H2O`, `MSIS00`, `HWM14`, `HWM93`, `AuroraOval`, `IGRF`, `CIRA86`, `MSIS86`, `MSISE90`, `Jacchia77`, `MET`, `Chiu`, `Tsyganenko`, `SOLPRO`, `RADBELT`, `SHIELDOSE`, `SOFIP`, `CutoffRigidity`, `GSFC`, `JensenCain`, `MGST80`, `MGST81`, `HMR`, `ISRDrift`, `XuLi`, `AEEUV`, `EUV91`, `EUVAC`, `Photoelectron`, `PVIonosphere`, `PVThermosphere`, `ExosphericH`.
 - Single-point and numpy-broadcast batch inputs through the same method.
 - Model outputs are plain dictionaries.
 - Utilities live under `utils`, not `model`.
@@ -252,13 +253,13 @@ arguments, `calculate(...)` signatures, inputs, outputs, and examples.
 
 ## Data Files
 
-MSIS2, HWM14, IGRF, CIRA86, MSIS86, AEEUV, EUV91, PVIonosphere, and ExosphericH need external model data. By default UpperAtmPy resolves
+MSIS2, MSIS2H2O, HWM14, IGRF, CIRA86, MSIS86, AEEUV, EUV91, PVIonosphere, and ExosphericH need external model data. By default UpperAtmPy resolves
 `.upperatmpy` under the current project directory and downloads missing files
 from the current package version's release tag (for example `v0.2.0`) on first
 model instantiation when a download manifest is available. CIRA86 currently
 uses the local `cira86data/` ASCII tables. For offline use, pass
 `data_dir=...` or set `UPPERATMPY_DATA_DIR` to a data root containing the legacy
-`msis2data/`, `hwm14data/`, `igrf13data/`, `igrf14data/`, `cira86data/`, `aeeuvdata/`, `euv91data/`, `pvionospheredata/`, and `exospherichdata/` subdirectories. In
+`msis2data/`, `msis2h2odata/`, `hwm14data/`, `igrf13data/`, `igrf14data/`, `cira86data/`, `aeeuvdata/`, `euv91data/`, `pvionospheredata/`, and `exospherichdata/` subdirectories. In
 the source tree, that root is `data/`.
 
 `UPPERATMPY_DATA_TAG` can force a specific release tag for data download.
@@ -274,6 +275,7 @@ If you cannot download data files at runtime, you can fetch them manually from
 ```bash
 UPPERATMPY_DATA_DIR/
 ├── msis2data/
+├── msis2h2odata/
 ├── msis86data/
 ├── hwm14data/
 ├── igrf13data/
@@ -305,6 +307,7 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 Top-level `model` exports only:
 
 - `MSIS2`
+- `MSIS2H2O`
 - `MSIS00`
 - `HWM14`
 - `HWM93`
@@ -350,6 +353,7 @@ The model methods accept scalar or broadcastable array inputs.
 Each model directory under `src/model/` contains its own `README.md` with detailed documentation covering model background, Fortran interface, constructor options, input/output parameters, and usage examples:
 
 - [NRLMSIS 2.0](src/model/pymsis2/README.md)
+- [MSIS2H2O](src/model/pymsis2h2o/README.md)
 - [NRLMSISE-00](src/model/pymsis00/README.md)
 - [HWM14](src/model/pyhwm14/README.md)
 - [HWM93](src/model/pyhwm93/README.md)
@@ -431,6 +435,7 @@ UpperAtmPy/
 │   ├── model/
 │   │   ├── __init__.py      # Lazy aliases for all public model classes
 │   │   ├── pymsis2/         # NRLMSIS-2.0 wrapper and Fortran sources
+│   │   ├── pymsis2h2o/      # MSIS2 plus Aura MLS H2O climatology
 │   │   ├── pymsis00/        # NRLMSISE-00 wrapper and Fortran sources
 │   │   ├── pyhwm14/         # HWM14 wrapper and Fortran sources
 │   │   ├── pyhwm93/         # HWM93 wrapper and Fortran sources
@@ -478,6 +483,7 @@ UpperAtmPy/
 │   ├── igrf14data/
 │   ├── cira86data/
 │   ├── msis2data/
+│   ├── msis2h2odata/
 │   ├── msis86data/
 │   ├── aeeuvdata/
 │   ├── euv91data/

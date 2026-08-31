@@ -87,6 +87,7 @@ tag 发布流程会自动生成 `upperatmpy-atmospheric-analysis-<tag>.zip`。
 智能分析层由以下公开模型类提供科学计算能力：
 
 - **MSIS2**：NRLMSIS-2.0 温度和密度
+- **MSIS2H2O**：MSIS2 与 Aura MLS 2005–2024 月度水汽气候态扩展（20–120 km）
 - **MSIS00**：NRLMSISE-00 温度和密度
 - **HWM14**：水平风场模型 2014
 - **HWM93**：水平风场模型 1993
@@ -125,7 +126,7 @@ tag 发布流程会自动生成 `upperatmpy-atmospheric-analysis-<tag>.zip`。
 - 可选 AI 推理与确定性科学计算严格分离。
 - 同时提供可发布双语 Codex Skill、Python API 和 CLI 工作流。
 - 每个模型只有一个公开接口：`Model.calculate(...)`。
-- `model` 顶层只懒加载导出：`MSIS2`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`、`JensenCain`、`MGST80`、`MGST81`、`HMR`、`ISRDrift`、`XuLi`、`AEEUV`、`EUV91`、`EUVAC`、`Photoelectron`、`PVIonosphere`、`PVThermosphere`、`ExosphericH`。
+- `model` 顶层只懒加载导出：`MSIS2`、`MSIS2H2O`、`MSIS00`、`HWM14`、`HWM93`、`AuroraOval`、`IGRF`、`CIRA86`、`MSIS86`、`MSISE90`、`Jacchia77`、`MET`、`Chiu`、`Tsyganenko`、`SOLPRO`、`RADBELT`、`SHIELDOSE`、`SOFIP`、`CutoffRigidity`、`GSFC`、`JensenCain`、`MGST80`、`MGST81`、`HMR`、`ISRDrift`、`XuLi`、`AEEUV`、`EUV91`、`EUVAC`、`Photoelectron`、`PVIonosphere`、`PVThermosphere`、`ExosphericH`。
 - 单点和 numpy 广播批量输入共用同一个方法。
 - 输出统一为普通 `dict`。
 - 缓存、并行、时间、xarray 等工具放在 `utils` 包。
@@ -233,10 +234,10 @@ python -m pip install https://github.com/<OWNER>/<REPO>/releases/download/<TAG>/
 
 ## 数据文件
 
-MSIS2、HWM14、IGRF、CIRA86、MSIS86、AEEUV、EUV91、PVIonosphere 和 ExosphericH 需要外部模型数据。默认情况下，UpperAtmPy 会解析当前项目目录下的
+MSIS2、MSIS2H2O、HWM14、IGRF、CIRA86、MSIS86、AEEUV、EUV91、PVIonosphere 和 ExosphericH 需要外部模型数据。默认情况下，UpperAtmPy 会解析当前项目目录下的
 `.upperatmpy`，并在存在下载清单时于首次实例化模型时按当前包版本的 release tag（如 `v0.2.0`）下载缺失文件。
 CIRA86 当前使用本地 `cira86data/` ASCII 表。离线使用时，
-可以传入 `data_dir=...`，或设置 `UPPERATMPY_DATA_DIR` 指向包含 `msis2data/`、
+可以传入 `data_dir=...`，或设置 `UPPERATMPY_DATA_DIR` 指向包含 `msis2data/`、`msis2h2odata/`、
 `hwm14data/`、`igrf13data/`、`igrf14data/`、`cira86data/`、`aeeuvdata/`、`euv91data/`、`pvionospheredata/` 和 `exospherichdata/` 子目录的数据根目录。源码树中的统一数据根目录是 `data/`。
 
 可通过环境变量 `UPPERATMPY_DATA_TAG` 指定数据下载所用的 Release tag。
@@ -251,6 +252,7 @@ CIRA86 当前使用本地 `cira86data/` ASCII 表。离线使用时，
 ```text
 UPPERATMPY_DATA_DIR/
 ├── msis2data/
+├── msis2h2odata/
 ├── msis86data/
 ├── hwm14data/
 ├── igrf13data/
@@ -281,6 +283,7 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 `model` 顶层只导出：
 
 - `MSIS2`
+- `MSIS2H2O`
 - `MSIS00`
 - `HWM14`
 - `HWM93`
@@ -326,6 +329,7 @@ $env:UPPERATMPY_DATA_DIR = "C:\path\to\UPPERATMPY_DATA_DIR"
 `src/model/` 下每个模型目录都包含各自的 `README_zh.md`，详细说明模型背景、Fortran 接口、构造参数、输入输出参数和用法示例：
 
 - [NRLMSIS 2.0](src/model/pymsis2/README_zh.md)
+- [MSIS2H2O](src/model/pymsis2h2o/README_zh.md)
 - [NRLMSISE-00](src/model/pymsis00/README_zh.md)
 - [HWM14](src/model/pyhwm14/README_zh.md)
 - [HWM93](src/model/pyhwm93/README_zh.md)
@@ -407,6 +411,7 @@ UpperAtmPy/
 │   ├── model/
 │   │   ├── __init__.py      # 所有公开模型类的懒加载别名
 │   │   ├── pymsis2/         # NRLMSIS-2.0 封装和 Fortran 源码
+│   │   ├── pymsis2h2o/      # MSIS2 与 Aura MLS 水汽气候态扩展
 │   │   ├── pymsis00/        # NRLMSISE-00 封装和 Fortran 源码
 │   │   ├── pyhwm14/         # HWM14 封装和 Fortran 源码
 │   │   ├── pyhwm93/         # HWM93 封装和 Fortran 源码
@@ -454,6 +459,7 @@ UpperAtmPy/
 │   ├── igrf14data/
 │   ├── cira86data/
 │   ├── msis2data/
+│   ├── msis2h2odata/
 │   ├── msis86data/
 │   ├── aeeuvdata/
 │   ├── euv91data/

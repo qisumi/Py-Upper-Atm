@@ -5,6 +5,7 @@
 UpperAtmPy is a Python wrapper library for upper atmospheric models. The project uses a `src/` layout and exposes one public class per model:
 
 - `model.MSIS2`
+- `model.MSIS2H2O`
 - `model.MSIS00`
 - `model.HWM14`
 - `model.HWM93`
@@ -51,6 +52,7 @@ cmake --build --preset native-release
 ```bash
 python -m pytest
 python example/test_msis20.py
+python example/test_msis2h2o.py
 python example/test_msis00.py
 python example/test_hwm14.py
 python example/test_hwm93.py
@@ -107,6 +109,13 @@ MSIS result dictionaries contain:
 - `T_local_K`
 - `T_exo_K`
 - `densities`
+
+MSIS2H2O result dictionaries preserve the four MSIS2 fields and also contain:
+
+- `total_number_density_m3` / `pressure_Pa`
+- `H2O_vmr_ppmv`
+- `H2O_number_density_m3` / `H2O_number_density_cm3`
+- `H2O_extrapolated` / `H2O_latitude_clamped` / `H2O_climatology_fallback`
 
 HWM result dictionaries contain:
 
@@ -321,6 +330,7 @@ UpperAtmPy/
 │   ├── model/
 │   │   ├── __init__.py
 │   │   ├── pymsis2/
+│   │   ├── pymsis2h2o/
 │   │   ├── pymsis00/
 │   │   ├── pyhwm14/
 │   │   ├── pyhwm93/
@@ -376,7 +386,7 @@ UpperAtmPy/
 - Keep user-facing docstrings and errors in Chinese where practical.
 - Prefer keyword-only arguments for model calculation methods.
 - Keep each model module's `__all__` to `["Model"]`.
-- `model.__all__` must stay `["MSIS2", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC", "JensenCain", "MGST80", "MGST81", "HMR", "ISRDrift", "XuLi", "AEEUV", "EUV91", "EUVAC", "Photoelectron", "PVIonosphere", "PVThermosphere", "ExosphericH"]`.
+- `model.__all__` must stay `["MSIS2", "MSIS2H2O", "MSIS00", "HWM14", "HWM93", "AuroraOval", "IGRF", "CIRA86", "MSIS86", "MSISE90", "Jacchia77", "MET", "Chiu", "Tsyganenko", "SOLPRO", "RADBELT", "SHIELDOSE", "SOFIP", "CutoffRigidity", "GSFC", "JensenCain", "MGST80", "MGST81", "HMR", "ISRDrift", "XuLi", "AEEUV", "EUV91", "EUVAC", "Photoelectron", "PVIonosphere", "PVThermosphere", "ExosphericH"]`.
 - Utility code belongs in `src/utils`, not `src/model`.
 - Cross-model analysis code belongs in `src/upperatmpy_analysis`, not `src/model` or `src/utils`.
 - `import model` must not load any model DLL; DLLs should load when a concrete model is instantiated.

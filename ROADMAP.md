@@ -9,6 +9,7 @@ The following models have been fully ported and are available in the `src/model/
 | Model | Class | Description | Status |
 |-------|-------|-------------|--------|
 | NRLMSIS-2.0 | `MSIS2` | Neutral atmosphere temperature & density | Done |
+| NRLMSIS-2.0 + Aura MLS H2O | `MSIS2H2O` | 20–120 km neutral atmosphere with monthly H2O climatology | Done |
 | NRLMSISE-00 | `MSIS00` | Neutral atmosphere temperature & density | Done |
 | HWM14 | `HWM14` | Horizontal neutral wind | Done |
 | HWM93 | `HWM93` | Horizontal neutral wind | Done |

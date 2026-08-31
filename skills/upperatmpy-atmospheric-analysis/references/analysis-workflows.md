@@ -57,6 +57,15 @@ Hold all other inputs scalar and vary one parameter:
 upperatmpy-analysis sensitivity --model MSIS2 --base-inputs base.json --parameter f107 --values 70,100,150,200 --quantities T_local_K,O_cm3
 ```
 
+H2O sensitivity is available from `MSIS2H2O` alone:
+
+```bash
+upperatmpy-analysis sensitivity --model MSIS2H2O --base-inputs base.json --parameter alt_km --values 20,40,60,80,100,120 --quantities H2O_cm3,H2O_vmr_ppmv
+```
+
+Do not request an H2O quantity in a comparison with another MSIS model because
+those models do not provide H2O.
+
 This reports the sampled outputs, minimum, maximum, range, endpoint absolute
 change, and endpoint percent change. It does not infer causal importance from a
 single-factor sweep.

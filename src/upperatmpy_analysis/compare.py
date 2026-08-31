@@ -168,7 +168,7 @@ def _validate_inputs(specs: Sequence[Any], inputs: Mapping[str, Any]) -> Dict[st
 
 
 def _model_kwargs(model_name: str, inputs: Mapping[str, Any]) -> Dict[str, Any]:
-    if model_name == "MSIS2":
+    if model_name in ("MSIS2", "MSIS2H2O"):
         result = {
             "day": inputs["day_of_year"],
             "utsec": inputs["utsec"],
@@ -201,7 +201,7 @@ def _model_kwargs(model_name: str, inputs: Mapping[str, Any]) -> Dict[str, Any]:
         result = {key: inputs[key] for key in ("year", "lat_deg", "lon_deg", "alt_km")}
     else:
         raise ValueError("没有模型输入适配器 / no input adapter for " + model_name)
-    if "ap7" in inputs and model_name in ("MSIS2", "MSIS00", "MSIS86", "MSISE90"):
+    if "ap7" in inputs and model_name in ("MSIS2", "MSIS2H2O", "MSIS00", "MSIS86", "MSISE90"):
         result["ap7"] = inputs["ap7"]
     return result
 

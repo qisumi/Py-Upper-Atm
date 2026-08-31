@@ -28,8 +28,9 @@ class FakeMSIS2:
         alt = np.asarray(kwargs["alt_km"], dtype=float)
         shape = alt.shape
         densities = np.zeros(shape + (10,), dtype=float)
-        densities[..., 0] = 2.0e10  # N2
-        densities[..., 2] = 3.0e9   # O
+        densities[..., 0] = 1.2e-9   # Total mass, kg/m3
+        densities[..., 1] = 2.0e16   # N2, m^-3
+        densities[..., 3] = 3.0e15   # O, m^-3
         return {
             "alt_km": alt,
             "T_local_K": alt + 500.0,
@@ -56,6 +57,15 @@ class FakeMSIS00:
             "T_exo_K": np.broadcast_to(930.0, shape),
             "densities": densities,
         }
+
+
+class FakeMSIS2H2O(FakeMSIS2):
+    def calculate(self, **kwargs):
+        result = super().calculate(**kwargs)
+        alt = np.asarray(kwargs["alt_km"], dtype=float)
+        result["H2O_vmr_ppmv"] = alt * 0.01 + 3.0
+        result["H2O_number_density_cm3"] = alt * 1.0e6 + 2.0e8
+        return result
 
 
 class FakeMSIS86(FakeMSIS00):
@@ -151,6 +161,8 @@ def test_execute_plan_normalizes_and_compares_msis_family():
     assert msis2.kwargs["day"] == 172
     assert np.asarray(msis00.kwargs["iyd"]).item() == 2020172
     assert np.asarray(msis00.kwargs["stl_hours"]).item() == 12.0
+    assert report.outputs["MSIS2"].quantities["total_mass_density_kg_m3"].tolist() == pytest.approx([1.2e-9] * 3)
+    assert report.outputs["MSIS2"].quantities["O_cm3"].tolist() == pytest.approx([3.0e9] * 3)
     assert report.outputs["MSIS00"].quantities["total_mass_density_kg_m3"].tolist() == pytest.approx([1.2e-9] * 3)
     assert report.comparisons["MSIS00"]["T_local_K"]["summary"]["mae"] == pytest.approx(10.0)
     assert report.comparisons["MSIS00"]["O_cm3"]["summary"]["mean_ratio"] == pytest.approx(1.1)
@@ -158,6 +170,49 @@ def test_execute_plan_normalizes_and_compares_msis_family():
     assert payload["provenance"]["ai_used_for_calculation"] is False
     assert "可复现代码" in report.to_markdown()
     compile(report.reproducible_code(), "<report>", "exec")
+
+
+def test_msis2h2o_compares_only_common_quantities():
+    plan = neutral_plan(models=["MSIS2", "MSIS2H2O"], quantities=["T_local_K", "O_cm3"])
+    plan.inputs["alt_km"] = {"start": 20.0, "stop": 120.0, "step": 50.0, "num": None}
+    report = execute_plan(
+        plan,
+        model_instances={"MSIS2": FakeMSIS2(), "MSIS2H2O": FakeMSIS2H2O()},
+    )
+    assert set(report.comparisons["MSIS2H2O"]) == {"T_local_K", "O_cm3"}
+    assert report.validity_intersection["alt_km"] == [20.0, 120.0]
+
+
+def test_msis2h2o_does_not_invent_h2o_for_other_msis_models():
+    plan = neutral_plan(models=["MSIS2", "MSIS2H2O"], quantities=["H2O_cm3"])
+    plan.inputs["alt_km"] = 100.0
+    with pytest.raises(ValueError, match="MSIS2"):
+        execute_plan(
+            plan,
+            model_instances={"MSIS2": FakeMSIS2(), "MSIS2H2O": FakeMSIS2H2O()},
+        )
+
+
+def test_msis2h2o_h2o_sensitivity_is_available():
+    report = analyze_sensitivity(
+        "MSIS2H2O",
+        base_inputs={
+            "year": 2020,
+            "day_of_year": 172,
+            "utsec": 43200,
+            "alt_km": 20,
+            "lat_deg": 0,
+            "lon_deg": 0,
+            "f107a": 150,
+            "f107": 150,
+        },
+        parameter="alt_km",
+        values=[20, 70, 120],
+        quantities=["H2O_cm3", "H2O_vmr_ppmv"],
+        model_instance=FakeMSIS2H2O(),
+    )
+    assert report.quantities["H2O_vmr_ppmv"].tolist() == [3.2, 3.7, 4.2]
+    assert report.quantities["H2O_cm3"].shape == (3,)
 
 
 def test_execute_plan_normalizes_geomagnetic_axes():

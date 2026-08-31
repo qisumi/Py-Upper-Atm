@@ -19,6 +19,16 @@ QUANTITIES: Dict[str, QuantitySpec] = {
     "total_mass_density_kg_m3": QuantitySpec(
         "total_mass_density_kg_m3", "kg/m^3", "总质量密度", "Total mass density"
     ),
+    "H2O_cm3": QuantitySpec(
+        "H2O_cm3", "cm^-3", "水分子数密度", "H2O number density",
+        "由 MLS H2O 体积混合比和 MSIS2 总空气数密度推导。",
+        "Derived from MLS H2O volume mixing ratio and MSIS2 total air number density.",
+    ),
+    "H2O_vmr_ppmv": QuantitySpec(
+        "H2O_vmr_ppmv", "ppmv", "水汽体积混合比", "H2O volume mixing ratio",
+        "固定多年逐月 MLS 气候态；低于顶部压力边界时为受约束外推。",
+        "Fixed multi-year monthly MLS climatology; constrained extrapolation above its pressure ceiling.",
+    ),
     "B_north_nT": QuantitySpec("B_north_nT", "nT", "北向磁场", "Northward magnetic field"),
     "B_east_nT": QuantitySpec("B_east_nT", "nT", "东向磁场", "Eastward magnetic field"),
     "B_down_nT": QuantitySpec("B_down_nT", "nT", "向下磁场", "Downward magnetic field"),
@@ -88,9 +98,24 @@ MODELS: Dict[str, ModelSpec] = {
         "MSIS2", "neutral_atmosphere", "NRLMSIS 2.0", "NRLMSIS 2.0",
         "现代经验中性大气模型。", "Modern empirical neutral-atmosphere model.",
         _NEUTRAL_INPUTS, _NEUTRAL_OPTIONAL,
-        _NEUTRAL_BASE_QUANTITIES + ("AnomalousO_cm3",),
+        _NEUTRAL_BASE_QUANTITIES + ("AnomalousO_cm3", "total_mass_density_kg_m3"),
         dict(_NEUTRAL_VALIDITY, alt_km=(0.0, 1000.0)),
         ("https://doi.org/10.1029/2020EA001321",),
+    ),
+    "MSIS2H2O": ModelSpec(
+        "MSIS2H2O", "neutral_atmosphere", "NRLMSIS 2.0 + MLS H2O", "NRLMSIS 2.0 + MLS H2O",
+        "MSIS2 干大气与 Aura MLS 2005--2024 月度水汽气候态的组合。",
+        "MSIS2 dry atmosphere combined with the 2005--2024 monthly Aura MLS H2O climatology.",
+        _NEUTRAL_INPUTS, _NEUTRAL_OPTIONAL,
+        _NEUTRAL_BASE_QUANTITIES + ("AnomalousO_cm3", "total_mass_density_kg_m3", "H2O_cm3", "H2O_vmr_ppmv"),
+        dict(_NEUTRAL_VALIDITY, alt_km=(20.0, 120.0)),
+        ("https://doi.org/10.1029/2020EA001321", "https://doi.org/10.5067/Aura/MLS/DATA/3538"),
+        (
+            "H2O 是固定多年逐月气候态，不是指定年份的逐日观测；MLS 顶部以上为受约束外推。",
+        ),
+        (
+            "H2O is a fixed multi-year monthly climatology, not daily weather for the requested year; values above the MLS ceiling are constrained extrapolations.",
+        ),
     ),
     "MSIS00": ModelSpec(
         "MSIS00", "neutral_atmosphere", "NRLMSISE-00", "NRLMSISE-00",
